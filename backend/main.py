@@ -1,0 +1,458 @@
+# main.py
+# This script creates a FastAPI application to expose API endpoints
+# for controlling the Music Player Daemon (MPD).
+import os
+import json # Added for JSON handling
+from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.responses import HTMLResponse
+from fastapi.responses import JSONResponse
+from typing import Optional, List # Added List
+from sqlalchemy.orm import Session
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+from datetime import timedelta
+from my_package.mpd_controller import MPDClientController
+from my_package.database import get_db
+from my_package.models import User, UserPlaylist # Added UserPlaylist
+from my_package.schemas import UserCreate, UserResponse, Token, UserPlaylistCreate, UserPlaylistResponse # Added UserPlaylistCreate, UserPlaylistResponse
+from my_package.auth import get_password_hash, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user
+import uvicorn
+from contextlib import asynccontextmanager
+from my_package.database import Base, engine
+# ----------------------------------------------
+music_folder = "/home/ubuntu/Music/"
+musictype= ["國語","台語","古典"]
+musicstyle = musictype[0]
+artist = "張學友"
+pi_playlist= []
+# pc_playlist = [] # Removed global pc_playlist
+pc_Indexmax = 2
+pi_Index = 0
+pi_Playing = None
+pi_Playmode = None
+pi_RadioNo = None
+pi_Volume = 1
+pi_Mute = False
+pi_Playrate = 1
+pi_Duration = 0
+cron_Status =  False
+cron_TimeHour = '00'
+cron_TimeMin = '00'
+cron_pi_Index = 1
+
+
+
+
+# Initialize the MPD client controller globally
+mpd_player = MPDClientController()
+
+MPD_PLAYMODE = ["repeat", "random", "single", "consume"]
+RADIO_STREAMS = {
+    "BBCWorldService": "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
+    "ClassicFM": "https://media-the.musicradio.com/ClassicFM",
+    "LBCLondon": "https://media-ssl.musicradio.com/LBCLondon",
+    "TimesRadio": "https://timesradio.wireless.radio/stream",
+    "url01":"https://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
+    "url02":"http://stream.live.vc.bbcmedia.co.uk/bbc_london",
+    "url03":"https://npr-ice.streamguys1.com/live.mp3",
+    "url04":"https://prod-18-232-88-129.wostreaming.net/foxnewsradio-foxnewsradioaac-imc?session-id=0f99acd44126cef33b40ce217c9ea1ad",
+    "url05":"http://stream.live.vc.bbcmedia.co.uk/bbc_radio_five_live",
+    "url06":"http://stream.live.vc.bbcmedia.co.uk/bbc_asian_network",
+    "url07":"http://stream.live.vc.bbcmedia.co.uk/bbc_radio_one",
+    "url08":"https://icrt.leanstream.co/ICRTFM-MP3?args=web",
+    "url09":"http://stream.live.vc.bbcmedia.co.uk/bbc_radio_two",
+    "url10":"http://localhost:8000/stream.ogg",
+    "url11":"http://onair.family977.com.tw:8000/live.mp3",
+    "url12":"https://n09.rcs.revma.com/aw9uqyxy2tzuv?rj-ttl=5&rj-tok=AAABhZollCEACdvxzVVN61ARVg",
+    "url13":"https://n10.rcs.revma.com/ndk05tyy2tzuv?rj-ttl=5&rj-tok=AAABhZouFPAAQudE3-49-1PFHQ",
+    "url14":"https://n09.rcs.revma.com/7mnq8rt7k5zuv?rj-ttl=5&rj-tok=AAABhZovh0cASZAucd0xcmxkvQ",
+    "url15":"https://n11a-eu.rcs.revma.com/em90w4aeewzuv?rj-tok=AAABhZoyef8AtFfbdaYYtKJnaw&rj-ttl=5",
+    "url16":"https://n07.rcs.revma.com/78fm9wyy2tzuv?rj-ttl=5&rj-tok=AAABhZozdbQAkV-tPDO6A5aHag",
+    "url17":"http://stream.live.vc.bbcmedia.co.uk/bbc_radio_three",
+    "url18":"http://stream.live.vc.bbcmedia.co.uk/bbc_radio_fourfm",
+    "url19":"http://stream.live.vc.bbcmedia.co.uk/bbc_6music",
+    "url30":"http://media-ice.musicradio.com:80/ClassicFMMP3"
+}
+
+
+def genFilelist(subdir):
+    global music_folder
+    global pc_Indexmax
+    songs = []; 
+    for path, subdirs, files in os.walk(music_folder + subdir, followlinks=True):
+       # for name in files:
+        path = path[(len(music_folder)-1):]
+        path = path+"/"
+        path = path[1:]
+        files = [path + file for file in files]
+        songs = songs + files; 
+    songsPc = [ f for f in songs if f[-4:] == '.mp3' or f[-4:] =='.MP3' or f[-5:] == '.flac' or f[-5:] == '.FLAC']
+    songsPc.sort()
+   # flac/ape format song  extend (for PI Vlc player, vlc support more types of formats)
+    songsPi = [ f for f in songs if f[-4:] == '.ape' or f[-4:] == '.APE']
+    songsPi = songsPi +songsPc
+    songsPi.sort()
+    return songsPc
+
+# --- FastAPI App  Setup ---
+# --- Application Lifespan Event Handler ---
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global music_folder
+    global p_playlist
+    # global pc_playlist # Removed global pc_playlist
+    """
+    Handles application startup and shutdown events.
+    This replaces the deprecated @app.on_event("startup") and @app.on_event("shutdown").
+    """
+    print("Application startup...")
+
+
+    # Create database tables
+    Base.metadata.create_all(bind=engine)
+    # Connect to the MPD server before the application starts
+    mpd_player.connect()
+    mpd_player.update()
+    mpd_player.clear_playlist()
+    mpd_player.add_music_from_folder(musicstyle+"/"+artist)
+    #laylist_name = "張學友全輯"
+    #mpd_player.save_playlist(playlist_name)
+    mpd_player.add_song(RADIO_STREAMS["BBCWorldService"])
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    pi_playlist= mpd_player.get_playlist()
+    print("pi_playlist:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print(pi_playlist)
+
+    # pc_playlist = genFilelist(musicstyle) # Removed global pc_playlist initialization
+    # print("pc_playlist:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    # print(pc_playlist)
+    try:
+        # The `yield` statement indicates that the application is ready to serve requests
+        yield
+    finally:
+        # Disconnect from the MPD server after the application shuts down
+        print("Application shutdown...")
+        mpd_player.disconnect()
+  
+# Initialize FastAPI application
+# Configure CORS (Cross-Origin Resource Sharing)
+# This allows the frontend (running on a different origin) to make requests to the backend.
+origins = [
+    "http://localhost:5173",  # The default address for a Vite dev server
+    "http://127.0.0.1:5173",
+]
+app = FastAPI(lifespan=lifespan,
+    title="MPD Player API",
+    description="A Player with Music Player Daemon (MPD).",
+    version="1.0.0"
+)
+app.mount("/static", StaticFiles(directory="../frontend/dist"))
+app.mount("/music", StaticFiles(directory="/home/ubuntu/Music"))
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Allows specified origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allows all headers
+)
+
+
+# --- API Endpoints ---
+@app.get("/", response_class=HTMLResponse)
+async def read_root():
+    # Dynamically find the hashed CSS and JS files
+    js_file = ""
+    css_file = ""
+    assets_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist", "assets")
+    for filename in os.listdir(assets_path):
+        if filename.startswith("index-") and filename.endswith(".js"):
+            js_file = filename
+        elif filename.startswith("index-") and filename.endswith(".css"):
+            css_file = filename
+
+    if not js_file or not css_file:
+        raise HTTPException(status_code=500, detail="Frontend assets not found. Please build the frontend.")
+
+    html_content = f"""
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/static/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Vue + TS</title>
+    <script type="module" crossorigin src="/static/assets/{js_file}"></script>
+    <link rel="stylesheet" crossorigin href="/static/assets/{css_file}">
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>
+"""
+    return HTMLResponse(content=html_content, status_code=200)
+
+@app.get("/status")
+async def get_player_status():
+    """
+    Returns the current status of the MPD player.
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    
+    status = mpd_player.get_status()
+    if status is None:
+        raise HTTPException(status_code=500, detail="Failed to retrieve status")
+    
+    return status
+
+@app.post('/')
+async def index_post():
+    global music_folder
+    global pc_playlist
+    global pi_playlist
+    global pi_Index
+    global pi_Playing
+    global pi_Playmode
+    global pi_RadioNo
+    global pi_Volume
+    global pi_Mute
+    global pi_Playrate
+    global pi_Duration
+    global cron_Status
+    global cron_TimeHour
+    global cron_TimeMin
+    global cron_pi_Index
+    return JSONResponse({
+        "fileListPc" : pc_playlist,
+        "fileListPi" : pi_playlist,
+        "indexPi" : pi_Index,
+        "musicPiPlaying" : pi_Playing,
+        "musicPiPlayMode" : pi_Playmode,
+        "radioPiPlayingNo" : pi_RadioNo,
+        "volumePi" : pi_Volume,
+        "volumePiMute" : pi_Mute,
+        "playRatePi" : pi_Playrate,
+        "musicPiDuration" : pi_Duration,
+        "cronStatus" : cron_Status,
+        "cronTimeHour" : cron_TimeHour,
+        "cronTimeMin" : cron_TimeMin,
+        "cronIndexPi" : cron_pi_Index
+         })
+
+@app.get("/pi_playlist")
+async def get_current_playlist():
+    global pi_playlist
+    return pi_playlist
+
+@app.post("/play")
+async def play_music():
+    """
+    Starts or resumes music playback.
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    
+    try:
+        mpd_player.play()
+        return {"message": "Playback started."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error playing music: {e}")
+
+@app.post("/pause")
+async def pause_music():
+    """
+    Pauses or unpauses music playback.
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    
+    try:
+        mpd_player.pause()
+        return {"message": "Playback paused/unpaused."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error pausing music: {e}")
+
+@app.post("/stop")
+async def stop_music():
+    """
+    Stops music playback.
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    
+    try:
+        mpd_player.stop()
+        return {"message": "Playback stopped."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error stopping music: {e}")
+
+@app.post("/next")
+async def next_song():
+    """
+    Skips to the next song in the playlist.
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    
+    try:
+        mpd_player.next_song()
+        return {"message": "Skipped to the next song."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error skipping to next song: {e}")
+
+@app.post("/previous")
+async def previous_song():
+    """
+    Goes back to the previous song in the playlist.
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    
+    try:
+        mpd_player.previous_song()
+        return {"message": "Skipped to the previous song."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error skipping to previous song: {e}")
+
+@app.put("/volume/{volume}")
+async def set_player_volume(volume: int):
+    """
+    Sets the volume of the MPD player.
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    
+    if not 0 <= volume <= 100:
+        raise HTTPException(status_code=400, detail="Volume must be an integer between 0 and 100.")
+    
+    try:
+        mpd_player.set_volume(volume)
+        return {"message": f"Volume set to {volume}."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error setting volume: {e}")
+
+@app.put("/playmode")
+async def set_playmode(repeat: Optional[bool] = None, random: Optional[bool] = None, single: Optional[bool] = None):
+    """
+    Sets the play mode of the MPD player (repeat, shuffle, single).
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    
+    try:
+        if repeat is not None:
+            mpd_player.client.repeat(1 if repeat else 0)
+        if random is not None:
+            mpd_player.client.random(1 if random else 0)
+        if single is not None:
+            mpd_player.client.single(1 if single else 0)
+        
+        return {"message": "Play mode updated."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error setting play mode: {e}")
+
+@app.post("/select/{song_id}")
+async def select_and_play_song(song_id: int):
+    """
+    Selects a song from the playlist and starts playing it.
+    The song_id is the position in the playlist (0-indexed).
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    
+    try:
+        playlist_length = len(mpd_player.get_playlist())
+        if not 0 <= song_id < playlist_length:
+            raise HTTPException(status_code=400, detail=f"Song ID must be between 0 and {playlist_length - 1}.")
+        
+        mpd_player.client.play(song_id)
+        return {"message": f"Playing song at position {song_id}."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error selecting and playing song: {e}")
+
+
+@app.get("/pc_playlist")
+async def get_pc_playlist(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    user_playlist = db.query(UserPlaylist).filter(
+        UserPlaylist.user_id == current_user.id,
+        UserPlaylist.playlist_name == "pc_playlist"
+    ).first()
+
+    if user_playlist:
+        return json.loads(user_playlist.playlist_data)
+    return []
+
+@app.post("/pc_playlist")
+async def save_pc_playlist(
+    playlist_data: List[str], # Expecting a list of strings (file paths)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    user_playlist = db.query(UserPlaylist).filter(
+        UserPlaylist.user_id == current_user.id,
+        UserPlaylist.playlist_name == "pc_playlist"
+    ).first()
+
+    if user_playlist:
+        user_playlist.playlist_data = json.dumps(playlist_data)
+    else:
+        new_playlist = UserPlaylist(
+            user_id=current_user.id,
+            playlist_name="pc_playlist",
+            playlist_data=json.dumps(playlist_data)
+        )
+        db.add(new_playlist)
+    db.commit()
+    db.refresh(user_playlist or new_playlist) # Refresh the object that was modified/created
+    return {"message": "PC playlist saved successfully"}
+
+
+@app.get("/master_playlist")
+async def get_master_playlist():
+    return genFilelist(musicstyle)
+
+@app.post("/register", response_model=UserResponse)
+def register_user(user: UserCreate, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.username == user.username).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Username already registered")
+    
+    hashed_password = get_password_hash(user.password)
+    db_user = User(username=user.username, hashed_password=hashed_password)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@app.post("/token", response_model=Token)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == form_data.username).first()
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/users/me/", response_model=UserResponse)
+async def read_users_me(current_user: User = Depends(get_current_user)):
+    return current_user
+
+# --- Main block for running the server ---
+if __name__ == "__main__":
+    # The --reload flag automatically reloads the server on code changes.
+    uvicorn.run(app, host="127.0.0.1", port=8001)
+
