@@ -1,74 +1,77 @@
 <template>
-  <div>
-    <Header />
-    <main>
-      <h2>PC Play</h2>
-      <p>This is the PC player.</p>
-
-      <section class="player-controls">
+ <Header />
+      <section>
         <h3>Player Controls</h3>
-        <div class="current-song">
-          <p><strong>Current Song:</strong> {{ currentSongTitle }}</p>
-          <p><strong>Status:</strong> {{ isPlaying ? 'Playing' : 'Paused' }}</p>
+        <div>
+          <p><strong>Current Song:</strong> {{ pc_Currenttitle }}</p>
+          <p><strong>Status:</strong> {{ pc_Playing? 'Playing' : 'Paused' }}</p>
         </div>
 
-        <div class="buttons">
-          <button @click="previousSongLocal">Previous</button>
-          <button @click="togglePlayPauseLocal">{{ isPlaying ? 'Pause' : 'Play' }}</button>
-          <button @click="stopPlaybackLocal">Stop</button>
-          <button @click="nextSongLocal">Next</button>
+        <div>
+          <button @click="pc_Prev">Previous</button>
+          <button @click="pc_Playpause">{{ pc_Playing? 'Pause' : 'Play' }}</button>
+          <button @click="pc_Stop">Stop</button>
+          <button @click="pc_Next">Next</button>
         </div>
 
-        <div class="volume-control">
+        <div>
           <label for="volume">Volume:</label>
-          <input type="range" id="volume" min="0" max="100" v-model="volume" @input="setVolumeLocal" />
-          <span>{{ volume }}%</span>
+          <input type="range" id="volume" min="0" max="100" v-model="pc_Volume" @input="set_pc_Volume" />
+          <span>{{ pc_Volume }}%</span>
         </div>
       </section>
 
-      <section class="playlist">
-        <h3>My Personal Playlist</h3>
-        <button @click="savePersonalPlaylist">Save My Playlist</button>
-        <ul>
-          <li v-for="(song, index) in playlist" :key="index" :class="{ 'is-playing': index === currentSongIndex }">
-            {{ song }}
-            <button @click="playSong(index)">Play</button>
-          </li>
-        </ul>
-      </section>
+      <div>
+        <section>
+          <h3>My Personal Playlist</h3>
+          <button @click="savePersonalPlaylist">Save My Playlist</button>
+          <ul>
+            <li v-for="(song, index) in pc_playlist" :key="index" :class="{ 'is-playing': index === pc_Index }">
+              {{ song }}
+              <button @click="pc_Playindex(index)">Play</button>
+            </li>
+          </ul>
+        </section>
 
-      <section class="master-playlist">
-        <h3>Available Songs</h3>
-        <ul>
-          <li v-for="(song, index) in masterPlaylist" :key="index">
-            {{ song }}
-            <button @click="addSongToPersonalPlaylist(song)">Add to My Playlist</button>
-          </li>
-        </ul>
-      </section>
+        <section>
+          <h3>Available Songs</h3>
+          <ul>
+            <li v-for="(song, index) in masterPlaylist" :key="index">
+              {{ song }}
+              <button @click="pc_Addsong(song)">Add to My Playlist</button>
+            </li>
+          </ul>
+        </section>
+      </div>
 
-      <audio ref="audioElement" @ended="nextSongLocal"></audio>
-    </main>
-  </div>
+      <audio ref="audioElement" @ended="pc_Next"></audio>
+
+<div style="display:none" ><audio id="radioPc"> <source src="https://stream.live.vc.bbcmedia.co.uk/bbc_world_service" type="audio/mpeg">    你的瀏覽器不支援 audio tag！ </audio></div>
+
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, inject } from 'vue';
 import Header from './Header.vue';
-
-const playlist = ref<string[]>([]); // User's personal playlist
-const masterPlaylist = ref<string[]>([]); // All available songs
 const audioElement = ref<HTMLAudioElement | null>(null);
-const currentSongIndex = ref(-1);
-const isPlaying = ref(false);
-const volume = ref(50); // Initial volume
+const pc_playlist = ref<string[]>([]); // User's personal playlist
+const masterPlaylist = ref<string[]>([]); // All available songs
+const pc_Index = ref(-1);
+const pc_Playing= ref(false);
+const pc_Playmode = ref(0);
+const pc_RadioNo = ref(0);
+const pc_Mute= ref(false);
+const pc_Playrate = ref(1);
+const pc_Sleeptime= ref(0);
+const pc_Albumstring= ref("");
+const pc_Volume = ref(50); // Initial pc_Volume
 
 // Inject the setGlobalError function
 const setGlobalError = inject('setGlobalError') as (message: string) => void;
 
-const currentSongTitle = computed(() => {
-  if (currentSongIndex.value !== -1 && playlist.value.length > currentSongIndex.value) {
-    return playlist.value[currentSongIndex.value];
+const pc_Currenttitle = computed(() => {
+  if (pc_Index.value !== -1 && pc_playlist.value.length > pc_Index.value) {
+    return pc_playlist.value[pc_Index.value];
   }
   return 'No song playing';
 });
@@ -84,7 +87,7 @@ const getAuthHeaders = () => {
   return headers;
 };
 
-const fetchPlaylist = async () => {
+const fetch_pc_Playlist = async () => {
   try {
     const response = await fetch('http://127.0.0.1:8001/pc_playlist', {
       headers: getAuthHeaders(),
@@ -93,13 +96,13 @@ const fetchPlaylist = async () => {
       throw new Error('Failed to fetch personal playlist');
     }
     const data = await response.json();
-    playlist.value = data;
+    pc_playlist.value = data;
   } catch (err: any) {
     setGlobalError(err.message);
   }
 };
 
-const fetchMasterPlaylist = async () => {
+const fetch_MasterPlaylist = async () => {
   try {
     const response = await fetch('http://127.0.0.1:8001/master_playlist', {
       headers: getAuthHeaders(),
@@ -114,58 +117,58 @@ const fetchMasterPlaylist = async () => {
   }
 };
 
-const playSong = (index: number) => {
-  if (audioElement.value && playlist.value[index]) {
-    audioElement.value.src = `http://127.0.0.1:8001/music/${playlist.value[index]}`;
+const pc_Playindex = (index: number) => {
+  if (audioElement.value && pc_playlist.value[index]) {
+    audioElement.value.src = `http://127.0.0.1:8001/music/${pc_playlist.value[index]}`;
     audioElement.value.play();
-    currentSongIndex.value = index;
-    isPlaying.value = true;
+    pc_Index.value = index;
+    pc_Playing.value = true;
   }
 };
 
-const togglePlayPauseLocal = () => {
+const pc_Playpause = () => {
   if (audioElement.value) {
-    if (isPlaying.value) {
+    if (pc_Playing.value) {
       audioElement.value.pause();
     } else {
       audioElement.value.play();
     }
-    isPlaying.value = !isPlaying.value;
+    pc_Playing.value = !pc_Playing.value;
   }
 };
 
-const stopPlaybackLocal = () => {
+const pc_Stop = () => {
   if (audioElement.value) {
     audioElement.value.pause();
     audioElement.value.currentTime = 0;
-    isPlaying.value = false;
-    currentSongIndex.value = -1; // Reset current song
+    pc_Playing.value = false;
+    pc_Index.value = -1; // Reset current song
   }
 };
 
-const nextSongLocal = () => {
-  if (playlist.value.length > 0) {
-    const nextIndex = (currentSongIndex.value + 1) % playlist.value.length;
-    playSong(nextIndex);
+const pc_Next = () => {
+  if (pc_playlist.value.length > 0) {
+    const nextIndex = (pc_Index.value + 1) % pc_playlist.value.length;
+    pc_Playindex(nextIndex);
   }
 };
 
-const previousSongLocal = () => {
-  if (playlist.value.length > 0) {
-    const prevIndex = (currentSongIndex.value - 1 + playlist.value.length) % playlist.value.length;
-    playSong(prevIndex);
+const pc_Prev = () => {
+  if (pc_playlist.value.length > 0) {
+    const prevIndex = (pc_Index.value - 1 + pc_playlist.value.length) % pc_playlist.value.length;
+    pc_Playindex(prevIndex);
   }
 };
 
-const setVolumeLocal = () => {
+const set_pc_Volume = () => {
   if (audioElement.value) {
-    audioElement.value.volume = volume.value / 100;
+    audioElement.value.volume = pc_Volume.value / 100;
   }
 };
 
-const addSongToPersonalPlaylist = (song: string) => {
-  if (!playlist.value.includes(song)) {
-    playlist.value.push(song);
+const pc_Addsong = (song: string) => {
+  if (!pc_playlist.value.includes(song)) {
+    pc_playlist.value.push(song);
   }
 };
 
@@ -174,7 +177,7 @@ const savePersonalPlaylist = async () => {
     const response = await fetch('http://127.0.0.1:8001/pc_playlist', {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify(playlist.value),
+      body: JSON.stringify(pc_playlist.value),
     });
     if (!response.ok) {
       throw new Error('Failed to save personal playlist');
@@ -185,114 +188,23 @@ const savePersonalPlaylist = async () => {
   }
 };
 
+const pc_Playradio= () => {
+
+};
+
+
+const set_pc_Playmode= () => {
+
+};
+
 onMounted(() => {
-  fetchPlaylist();
-  fetchMasterPlaylist();
+  fetch_pc_Playlist();
+  fetch_MasterPlaylist();
   if (audioElement.value) {
-    audioElement.value.volume = volume.value / 100; // Set initial volume
+    audioElement.value.volume = pc_Volume.value / 100; // Set initial volume
   }
 });
+
 </script>
 
-<style scoped>
-main {
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
 
-.player-controls, .playlist, .master-playlist {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  width: 80%;
-  max-width: 600px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.player-controls h3, .playlist h3, .master-playlist h3 {
-  text-align: center;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.current-song {
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-.buttons {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.buttons button {
-  padding: 0.8rem 1.5rem;
-  background-color: #42b983;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.buttons button:hover {
-  background-color: #369f75;
-}
-
-.volume-control {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.play-modes {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.playlist ul, .master-playlist ul {
-  list-style: none;
-  padding: 0;
-}
-
-.playlist li, .master-playlist li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #eee;
-}
-
-.playlist li:last-child, .master-playlist li:last-child {
-  border-bottom: none;
-}
-
-.playlist li button, .master-playlist li button {
-  padding: 0.3rem 0.8rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.playlist li button:hover, .master-playlist li button:hover {
-  background-color: #0056b3;
-}
-
-.playlist li.is-playing {
-  font-weight: bold;
-  color: #42b983;
-}
-
-/* Removed .error style */
-</style>

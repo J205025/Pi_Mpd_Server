@@ -14,8 +14,8 @@ interface RouteComponents {
 }
 
 const routes: RouteComponents = {
-  '/': Pc_Play,
-  '/pi': Pi_Play,
+  '/pcplay': Pc_Play,
+  '/piplay': Pi_Play,
   '/login': Login,
   '/register': Register
 }
@@ -46,9 +46,13 @@ const currentComponent = computed(() => {
 </script>
 
 <template>
-  <Navbar />
-  <div v-if="globalError" class="global-error">{{ globalError }}</div>
-  <component :is="currentComponent" />
+  <div id="app-container">
+    <Navbar />
+    <div v-if="globalError" class="global-error">{{ globalError }}</div>
+    <main>
+      <component :is="currentComponent" />
+    </main>
+  </div>
 </template>
 
 <style scoped>

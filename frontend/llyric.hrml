@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MP3 with Synced Lyrics</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        #player-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        #lyrics-container {
+            margin-top: 20px;
+            background-color: #e0e0e0;
+            padding: 15px;
+            border-radius: 5px;
+            min-height: 80px; /* To prevent jumping when lyrics are short */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            color: #333;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+        #current-lyric {
+            font-weight: bold;
+            color: #007bff; /* Highlight current lyric */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="player-container">
+        <h1>MP3 Player with Synced Lyrics</h1>
+        <audio id="audioPlayer" controls>
+            <source src="song.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+
+    <div id="lyrics-container">
+        <p id="current-lyric">Loading lyrics...</p>
+    </div>
+
+    <script>
+        const audioPlayer = document.getElementById('audioPlayer');
+        const currentLyricDisplay = document.getElementById('current-lyric');
+        let lyrics = []; // To store parsed LRC data
+
+        // Function to parse LRC content
+        async function loadLRC(url) {
+            try {
+                const response = await fetch(url);
+                const lrcText = await response.text();
+                const lines = lrcText.split('\n');
+                let parsedLyrics = [];
+
+                lines.forEach(line => {
+                    // Regular expression to match timestamps like [mm:ss.xx]
+                    const match = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/);
+                    if (match) {
+                        const minutes = parseInt(match[1], 10);
+                        const seconds = parseInt(match[2], 10);
+                        const milliseconds = parseInt(match[3], 10);
+                        const time = (minutes * 60) + seconds + (milliseconds / (match[3].length === 2 ? 100 : 1000)); // Handle 2 or 3 digit milliseconds
+                        const text = match[4].trim();
+                        if (text) { // Only add if there's actual text
+                            parsedLyrics.push({ time: time, text: text });
+                        }
+                    }
+                });
+                // Sort lyrics by time to ensure correct order
+                parsedLyrics.sort((a, b) => a.time - b.time);
+                return parsedLyrics;
+            } catch (error) {
+                console.error('Error loading or parsing LRC file:', error);
+                return [];
+            }
+        }
+
+        // Function to update the displayed lyric
+        function updateLyric() {
+            const currentTime = audioPlayer.currentTime;
+            let foundLyric = false;
+
+            for (let i = 0; i < lyrics.length; i++) {
+                if (currentTime >= lyrics[i].time) {
+                    // Check if there's a next lyric and if current time is before it
+                    if (i + 1 < lyrics.length && currentTime < lyrics[i + 1].time) {
+                        currentLyricDisplay.textContent = lyrics[i].text;
+                        foundLyric = true;
+                        break;
+                    } else if (i + 1 === lyrics.length) { // Last lyric
+                        currentLyricDisplay.textContent = lyrics[i].text;
+                        foundLyric = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!foundLyric) {
+                currentLyricDisplay.textContent = ""; // Clear if no lyric is active
+            }
+        }
+
+        // Event listener for time updates
+        audioPlayer.addEventListener('timeupdate', updateLyric);
+
+        // Load lyrics when the page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            lyrics = await loadLRC('song.lrc');
+            if (lyrics.length > 0) {
+                currentLyricDisplay.textContent = "Play the audio to see lyrics.";
+            } else {
+                currentLyricDisplay.textContent = "No lyrics found or an error occurred.";
+            }
+        });
+
+        // Optional: Reset lyric display when audio ends
+        audioPlayer.addEventListener('ended', () => {
+            currentLyricDisplay.textContent = "Song ended.";
+        });
+    </script>
+</body>
+</html>

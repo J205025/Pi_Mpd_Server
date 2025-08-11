@@ -170,7 +170,7 @@ class MPDClientController:
         except (ValueError, MPDCommandError) as e:
             print(f"Error setting volume: {e}")
 
-    def add_song(self, path):
+    def queue_add_song(self, path):
         """
         Adds a song to the current playlist.
 
@@ -187,7 +187,7 @@ class MPDClientController:
             print(f"Error adding song: {e}")
 
 
-    def add_music_from_folder(self, music_folder):
+    def queue_add_folder(self, music_folder):
         """
         Adds all music files from a specified folder to the MPD playlist.
 
@@ -201,15 +201,7 @@ class MPDClientController:
         """
         if not self._check_connection():
             return
-        
-        # We first clear the playlist to ensure we're adding fresh content.
-        try:
-            #self.client.clear()
-            print("Playlist cleared.")
-        except MPDCommandError as e:
-            print(f"Error clearing playlist: {e}")
-            return
-        
+
         # We then tell MPD to add the entire folder. This correctly handles
         # symbolic links and recursive folder structures from MPD's perspective.
         try:
@@ -299,8 +291,28 @@ class MPDClientController:
         except MPDCommandError as e:
             print(f"Command Error: {e}")
             return []
+
+#TTT
+    def get_playlists_List(self):
+        """
+        Retrieves the current playlists_list.
+
+        Returns:
+            list: A list of dictionaries, where each dictionary represents a playlist.
+        """
+        if not self._check_connection():
+            print("Mpd not connected")
+            return []
         
-    def clear_playlist(self):
+        try:
+            playlists_List = self.client.listplaylists()
+            print("--- Current playlists_List ---")
+            return playlists_List
+        except MPDCommandError as e:
+            print(f"Command Error: {e}")
+            return []
+
+    def queue_clear(self):
         """
         Clears the current playlist on the MPD server.
         """
@@ -314,7 +326,7 @@ class MPDClientController:
         except MPDCommandError as e:
             print(f"Command Error: {e}")
 
-    def save_playlist(self, playlist_name):
+    def save_to_playlist(self, pi_plname):
         """
         Saves the current playlist on the MPD server.
 
@@ -324,52 +336,27 @@ class MPDClientController:
         if not self._check_connection():
             return
         
-        print(f"Saving current playlist as '{playlist_name}'...")
+        print(f"Saving current playlist as '{pi_plname}'...")
         try:
-            self.client.save(playlist_name)
-            print(f"Playlist saved as '{playlist_name}'.")
+            self.client.save(pi_plname)
+            print(f"Playlist saved as '{pi_plname}'")
         except MPDCommandError as e:
             print(f"Command Error: {e}")
-# Example usage of the MPDClientController class
-if __name__ == "__main__":
-    # Define the directory where your music files are located.
-    MUSIC_FOLDER = "MUSIC"
 
-    print("--- Using the class with a context manager ---")
-    try:
-        with MPDClientController() as mpd_controller:
-            # Add all songs from the specified folder
-            mpd_controller.add_music_from_folder(MUSIC_FOLDER)
-            
-            # Check the current status and playlist
-            mpd_controller.get_status()
-            mpd_controller.get_current_song()
-            mpd_controller.get_playlist()
 
-            # Play some music
-            mpd_controller.play()
-            
-            # Change volume
-            mpd_controller.set_volume(50)
-            
-            # Go to the next song
-            mpd_controller.next_song()
+    def load_from_playlist(self, pi_plname):
+        """
+        Load  pi_plname to Queue.
 
-            # Pause and then play again
-            mpd_controller.pause()
-            
-            # Disconnect is automatically handled by the `with` statement
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-    print("\n--- Using the class with manual connect/disconnect ---")
-    mpd_controller_manual = MPDClientController()
-    mpd_controller_manual.connect()
-    
-    if mpd_controller_manual.is_connected:
+        Args:
+            pi_plname(str): The name of the playlist to load to Queue.
+        """
+        if not self._check_connection():
+            return
+        
         try:
-            mpd_controller_manual.get_status()
-            mpd_controller_manual.set_volume(75)
-        finally:
-            # Always ensure the disconnect method is called
-            mpd_controller_manual.disconnect()
+            self.client.load({pi_plname})
+            print(f"Playlist '{pi_plname}' loading")      
+        except MPDCommandError as e:
+            print(f"Command Error: {e}") 
+

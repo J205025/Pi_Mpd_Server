@@ -1,14 +1,10 @@
 <template>
-  <header>
-    <h1>Pi Media Player</h1>
-  </header>
+       <main>
+          <h1>Welcome to Your App!</h1>
+        </main>
 </template>
+<script setup lang="ts">
+</script>
 
 <style scoped>
-header {
-  background-color: #42b983;
-  color: white;
-  padding: 1rem;
-  text-align: center;
-}
 </style>

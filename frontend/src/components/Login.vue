@@ -1,22 +1,23 @@
 <template>
   <div>
-    <Header />
     <main>
-      <h2>Login</h2>
-      <form @submit.prevent="handleLogin">
-        <div>
-          <label for="username">Username:</label>
-          <input type="text" id="username" v-model="username" required :disabled="loading" />
-        </div>
-        <div>
-          <label for="password">Password:</label>
-          <input type="password" id="password" v-model="password" required :disabled="loading" />
-        </div>
-        <button type="submit" :disabled="loading">
-          <span v-if="loading">Logging in...</span>
-          <span v-else>Login</span>
-        </button>
-      </form>
+      <div>
+        <h2>Login</h2>
+        <form @submit.prevent="handleLogin">
+          <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username" v-model="username" required :disabled="loading" />
+          </div>
+          <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" v-model="password" required :disabled="loading" />
+          </div>
+          <button type="submit" :disabled="loading">
+            <span v-if="loading">Logging in...</span>
+            <span v-else>Login</span>
+          </button>
+        </form>
+      </div>
     </main>
     <Footer />
   </div>
@@ -24,7 +25,7 @@
 
 <script setup lang="ts">
 import { ref, inject } from 'vue';
-import Header from './Header.vue';
+import Navbar from './Navbar.vue';
 import Footer from './Footer.vue';
 
 const username = ref('');
@@ -55,7 +56,7 @@ const handleLogin = async () => {
     const data = await response.json();
     localStorage.setItem('access_token', data.access_token);
     console.log('Login successful!', data);
-    window.location.hash = '/';
+    window.location.hash = '/piplay';
   } catch (err: any) {
     setGlobalError(err.message);
   } finally {
@@ -64,15 +65,5 @@ const handleLogin = async () => {
 };
 </script>
 
-<style scoped>
-main {
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-form div {
-  margin-bottom: 1rem;
-}
-</style>
+
 

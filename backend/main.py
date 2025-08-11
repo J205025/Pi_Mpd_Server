@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
+from pathlib import Path
 from my_package.mpd_controller import MPDClientController
 from my_package.database import get_db
 from my_package.models import User, UserPlaylist # Added UserPlaylist
@@ -24,13 +25,16 @@ import uvicorn
 from contextlib import asynccontextmanager
 from my_package.database import Base, engine
 # ----------------------------------------------
-music_folder = "/home/ubuntu/Music/"
-musictype= ["國語","台語","古典"]
-musicstyle = musictype[0]
-artist = "張學友"
-pi_playlist= []
-# pc_playlist = [] # Removed global pc_playlist
+music_Basefolder = "/home/ubuntu/Music/"
+musiccatagory= ["國語","台語","英語","古典","播客"]
+folder_path = Path(music_Basefolder+musiccatagory[0])
+artist = [item.name for item in folder_path.iterdir() if item.is_dir()]
+pi_PLAYLIST_ALL = []
+pi_Playlist= []  # Only 1 pi_Playlist for Pi_Server
+pc_PLAYLIST_ALL = []
+pc_Playlist = [] # Each user will have his own pc_Playlists.
 pc_Indexmax = 2
+pi_IndexMax = 1
 pi_Index = 0
 pi_Playing = None
 pi_Playmode = None
@@ -40,12 +44,9 @@ pi_Mute = False
 pi_Playrate = 1
 pi_Duration = 0
 cron_Status =  False
-cron_TimeHour = '00'
-cron_TimeMin = '00'
+cron_Hour = '00'
+cron_Min = '00'
 cron_pi_Index = 1
-
-
-
 
 # Initialize the MPD client controller globally
 mpd_player = MPDClientController()
@@ -77,60 +78,53 @@ RADIO_STREAMS = {
     "url19":"http://stream.live.vc.bbcmedia.co.uk/bbc_6music",
     "url30":"http://media-ice.musicradio.com:80/ClassicFMMP3"
 }
-
-
-def genFilelist(subdir):
-    global music_folder
+# Generate filespath base from music_Basefolder
+def genFilelist(subfolder):
     global pc_Indexmax
+    global music_Basefolder
     songs = []; 
-    for path, subdirs, files in os.walk(music_folder + subdir, followlinks=True):
+    for path, subdirs, files in os.walk(music_Basefolder + subfolder, followlinks=True):
        # for name in files:
-        path = path[(len(music_folder)-1):]
+        path = path[(len(music_Basefolder)-1):]
         path = path+"/"
         path = path[1:]
         files = [path + file for file in files]
         songs = songs + files; 
-    songsPc = [ f for f in songs if f[-4:] == '.mp3' or f[-4:] =='.MP3' or f[-5:] == '.flac' or f[-5:] == '.FLAC']
-    songsPc.sort()
-   # flac/ape format song  extend (for PI Vlc player, vlc support more types of formats)
-    songsPi = [ f for f in songs if f[-4:] == '.ape' or f[-4:] == '.APE']
-    songsPi = songsPi +songsPc
-    songsPi.sort()
-    return songsPc
+    songs = [ f for f in songs if f[-4:] == '.mp3' or f[-4:] =='.MP3' or f[-5:] == '.flac' or f[-5:] == '.FLAC']
+    songs.sort()
+    return songs
 
 # --- FastAPI App  Setup ---
 # --- Application Lifespan Event Handler ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global music_folder
-    global p_playlist
-    # global pc_playlist # Removed global pc_playlist
+    global musiccatagory
+    global pi_PLAYLIST_ALL
+    global pc_PLAYLIST_ALL  
+    global folder_path
     """
     Handles application startup and shutdown events.
     This replaces the deprecated @app.on_event("startup") and @app.on_event("shutdown").
     """
     print("Application startup...")
-
-
     # Create database tables
     Base.metadata.create_all(bind=engine)
     # Connect to the MPD server before the application starts
     mpd_player.connect()
     mpd_player.update()
-    mpd_player.clear_playlist()
-    mpd_player.add_music_from_folder(musicstyle+"/"+artist)
-    #laylist_name = "張學友全輯"
-    #mpd_player.save_playlist(playlist_name)
-    mpd_player.add_song(RADIO_STREAMS["BBCWorldService"])
+      # mpd directory is relative to music_Basefolder
+    # When  fastapi starts, save all songs to Queue
+    mpd_player.queue_clear()
+    #mpd_player.queue_add_folder("")
+    #mpd_player.add_song(RADIO_STREAMS["BBCWorldService"])
     if not mpd_player.is_connected:
         raise HTTPException(status_code=503, detail="MPD is not connected")
-    pi_playlist= mpd_player.get_playlist()
-    print("pi_playlist:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print(pi_playlist)
-
-    # pc_playlist = genFilelist(musicstyle) # Removed global pc_playlist initialization
-    # print("pc_playlist:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    # print(pc_playlist)
+    #When fastapi starts,  it generates  pi_Playlist_ALL
+    pi_PLAYLIST_ALL = mpd_player.get_playlist()
+    ####print("ALL songs in Music_BaseFolder_Pi:"+str(pi_PLAYLIST_ALL))
+    #When fastapi starts,  it generate pc_playist_ALL
+    pc_PLAYLIST_ALL = genFilelist("")
+    ####print("ALL songs in Music_BaseFolder_Pc:"+str(pc_PLAYLIST_ALL))
     try:
         # The `yield` statement indicates that the application is ready to serve requests
         yield
@@ -197,7 +191,7 @@ async def read_root():
     return HTMLResponse(content=html_content, status_code=200)
 
 @app.get("/status")
-async def get_player_status():
+async def get_pi_status():
     """
     Returns the current status of the MPD player.
     """
@@ -213,8 +207,8 @@ async def get_player_status():
 @app.post('/')
 async def index_post():
     global music_folder
-    global pc_playlist
-    global pi_playlist
+    global pc_PLAYLIST_ALL
+    global pi_PLAYLIST_ALL
     global pi_Index
     global pi_Playing
     global pi_Playmode
@@ -224,30 +218,80 @@ async def index_post():
     global pi_Playrate
     global pi_Duration
     global cron_Status
-    global cron_TimeHour
-    global cron_TimeMin
+    global cron_Hour
+    global cron_Min
     global cron_pi_Index
     return JSONResponse({
-        "fileListPc" : pc_playlist,
-        "fileListPi" : pi_playlist,
-        "indexPi" : pi_Index,
-        "musicPiPlaying" : pi_Playing,
-        "musicPiPlayMode" : pi_Playmode,
-        "radioPiPlayingNo" : pi_RadioNo,
-        "volumePi" : pi_Volume,
-        "volumePiMute" : pi_Mute,
-        "playRatePi" : pi_Playrate,
-        "musicPiDuration" : pi_Duration,
+        "pc_Playlist" : pc_PLAYLIST_ALL,
+        "pi_Playlist" : pi_PLAYLIST_ALL,
+        "pi_Index" : pi_Index,
+        "pi_Playing" : pi_Playing,
+        "pi_Playmopde" : pi_Playmode,
+        "pi_RadioNo" : pi_RadioNo,
+        "pi_Volume" : pi_Volume,
+        "pi_Mute" : pi_Mute,
+        "pi_Playrate" : pi_Playrate,
+        "pi_Duration" : pi_Duration,
         "cronStatus" : cron_Status,
-        "cronTimeHour" : cron_TimeHour,
-        "cronTimeMin" : cron_TimeMin,
+        "cronTimeHour" : cron_Hour,
+        "cronTimeMin" : cron_Min,
         "cronIndexPi" : cron_pi_Index
          })
 
-@app.get("/pi_playlist")
-async def get_current_playlist():
-    global pi_playlist
-    return pi_playlist
+@app.get("/pi_Playlist/")
+async def pi_playlist_current():
+    """
+    Get playlist in Queue
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    try:
+            
+        playlist = mpd_player.get_playlist()
+        return playlist
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving playplaylist: {e}") 
+
+#TTT
+@app.get("/pi_load_from_playlist/{pi_plname}")
+async def pi_load_from_playlist(pi_plname:str):
+    """
+    Find if pi_plname in playlists list, and load to Queue
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    try:
+            
+        mpd_player.load_from_playlist(pi_plname)
+        return {"message": "Loading '{pi_plname}'."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading playlist: {e}")
+    
+#TTT
+@app.get("/pi_save_to_playlist/{pi_plname}")
+async def save_pi_playlist_current(pi_plname:str):
+    """
+    Save current Queue to mpd playlist
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    try:
+            
+        mpd_player.save_to_playlist(pi_plname)
+        return {"message": "Playlist saved."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving playplaylist: {e}")
+#    
+@app.get("/pi_get_playlists_list")
+async def get_playlists_list():
+    """
+    Get  playlists list.
+    """
+    try:
+        pi_playlists_list = mpd_player.get_playlists_List()
+        return pi_playlists_list 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting playlists list: {e}")    
 
 @app.post("/play")
 async def play_music():
@@ -357,7 +401,7 @@ async def set_playmode(repeat: Optional[bool] = None, random: Optional[bool] = N
         raise HTTPException(status_code=500, detail=f"Error setting play mode: {e}")
 
 @app.post("/select/{song_id}")
-async def select_and_play_song(song_id: int):
+async def select_and_play_song(song_id: str):
     """
     Selects a song from the playlist and starts playing it.
     The song_id is the position in the playlist (0-indexed).
@@ -366,31 +410,29 @@ async def select_and_play_song(song_id: int):
         raise HTTPException(status_code=503, detail="MPD is not connected")
     
     try:
-        playlist_length = len(mpd_player.get_playlist())
-        if not 0 <= song_id < playlist_length:
-            raise HTTPException(status_code=400, detail=f"Song ID must be between 0 and {playlist_length - 1}.")
-        
-        mpd_player.client.play(song_id)
-        return {"message": f"Playing song at position {song_id}."}
+        mpd_player.client.playid(song_id)
+        return {"message": f"Playing song with id {song_id}."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error selecting and playing song: {e}")
 
 
-@app.get("/pc_playlist")
+@app.get("/get_pc_playlist/{pc_plname}")
 async def get_pc_playlist(
+    pc_plname :str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
+
 ):
     user_playlist = db.query(UserPlaylist).filter(
         UserPlaylist.user_id == current_user.id,
-        UserPlaylist.playlist_name == "pc_playlist"
+        UserPlaylist.playlist_name == pc_plname
     ).first()
 
     if user_playlist:
         return json.loads(user_playlist.playlist_data)
     return []
 
-@app.post("/pc_playlist")
+@app.post("/save_pc_playlist/{namepl}")
 async def save_pc_playlist(
     playlist_data: List[str], # Expecting a list of strings (file paths)
     current_user: User = Depends(get_current_user),
@@ -417,7 +459,7 @@ async def save_pc_playlist(
 
 @app.get("/master_playlist")
 async def get_master_playlist():
-    return genFilelist(musicstyle)
+    return pc_PLAYLIST_ALL
 
 @app.post("/register", response_model=UserResponse)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
