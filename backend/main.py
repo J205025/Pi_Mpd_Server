@@ -19,21 +19,19 @@ from pathlib import Path
 from my_package.mpd_controller import MPDClientController
 from my_package.database import get_db
 from my_package.models import User, UserPlaylist # Added UserPlaylist
-from my_package.schemas import UserCreate, UserResponse, Token, UserPlaylistCreate, UserPlaylistResponse # Added UserPlaylistCreate, UserPlaylistResponse
+# Updated imports to include PlaylistPayload
+from my_package.schemas import UserCreate, UserResponse, Token, UserPlaylistCreate, UserPlaylistResponse, PlaylistPayload, PlaylistsListResponse
 from my_package.auth import get_password_hash, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user
 import uvicorn
 from contextlib import asynccontextmanager
 from my_package.database import Base, engine
 # ----------------------------------------------
 music_Basefolder = "/home/ubuntu/Music/"
-musiccatagory= ["國語","台語","英語","古典","播客"]
-folder_path = Path(music_Basefolder+musiccatagory[0])
-artist = [item.name for item in folder_path.iterdir() if item.is_dir()]
+music_Type= ["國語","台語","英語","古典","播客"]
+folderpath = Path(music_Basefolder+music_Type[0])
+artist = [item.name for item in folderpath.iterdir() if item.is_dir()]
 pi_PLAYLIST_ALL = []
-pi_Playlist= []  # Only 1 pi_Playlist for Pi_Server
-pc_PLAYLIST_ALL = []
-pc_Playlist = [] # Each user will have his own pc_Playlists.
-pc_Indexmax = 2
+pi_Playlist= []  # Only one pi_Playlist for Pi_Server
 pi_IndexMax = 1
 pi_Index = 0
 pi_Playing = None
@@ -47,6 +45,9 @@ cron_Status =  False
 cron_Hour = '00'
 cron_Min = '00'
 cron_pi_Index = 1
+pc_PLAYLIST_ALL = []
+pc_Playlist = [] # Each user will have his own pc_Playlists.
+pc_Indexmax = 1
 
 # Initialize the MPD client controller globally
 mpd_player = MPDClientController()
@@ -98,7 +99,7 @@ def genFilelist(subfolder):
 # --- Application Lifespan Event Handler ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global musiccatagory
+    global music_Type
     global pi_PLAYLIST_ALL
     global pc_PLAYLIST_ALL  
     global folder_path
@@ -119,7 +120,7 @@ async def lifespan(app: FastAPI):
     #mpd_player.add_song(RADIO_STREAMS["BBCWorldService"])
     if not mpd_player.is_connected:
         raise HTTPException(status_code=503, detail="MPD is not connected")
-    #When fastapi starts,  it generates  pi_Playlist_ALL
+    #When fastapi starts,  it generates  pi_Playlist_ALL,()
     pi_PLAYLIST_ALL = mpd_player.get_playlist()
     ####print("ALL songs in Music_BaseFolder_Pi:"+str(pi_PLAYLIST_ALL))
     #When fastapi starts,  it generate pc_playist_ALL
@@ -158,7 +159,7 @@ app.add_middleware(
 
 # --- API Endpoints ---
 @app.get("/", response_class=HTMLResponse)
-async def read_root():
+async def index_get():
     # Dynamically find the hashed CSS and JS files
     js_file = ""
     css_file = ""
@@ -190,23 +191,8 @@ async def read_root():
 """
     return HTMLResponse(content=html_content, status_code=200)
 
-@app.get("/status")
-async def get_pi_status():
-    """
-    Returns the current status of the MPD player.
-    """
-    if not mpd_player.is_connected:
-        raise HTTPException(status_code=503, detail="MPD is not connected")
-    
-    status = mpd_player.get_status()
-    if status is None:
-        raise HTTPException(status_code=500, detail="Failed to retrieve status")
-    
-    return status
-
 @app.post('/')
 async def index_post():
-    global music_folder
     global pc_PLAYLIST_ALL
     global pi_PLAYLIST_ALL
     global pi_Index
@@ -237,9 +223,22 @@ async def index_post():
         "cronTimeMin" : cron_Min,
         "cronIndexPi" : cron_pi_Index
          })
+@app.get("/status")
+async def get_pi_status():
+    """
+    Returns the current status of the MPD player.
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    
+    status = mpd_player.get_status()
+    if status is None:
+        raise HTTPException(status_code=500, detail="Failed to retrieve status")
+    
+    return status
 
-@app.get("/pi_Playlist/")
-async def pi_playlist_current():
+@app.get("/pi_get_playlist/")
+async def pi_get_playlist():
     """
     Get playlist in Queue
     """
@@ -252,7 +251,35 @@ async def pi_playlist_current():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error saving playplaylist: {e}") 
 
-#TTT
+@app.get("/pi_get_playlistid/")
+async def pi_get_playlistid():
+    """
+    Get playlist in Queue
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    try:
+            
+        playlistid = mpd_player.get_playlisidt()
+        return playlistid
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving playplaylist: {e}") 
+
+@app.get("/pi_gen_playlist/{foldername}")
+async def pi_gen_playlist(folder_name:str):
+    """
+    Generate a  playlist and save to  Queue
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    try:
+            
+        playlist = mpd_player.queue_add_folder(folder_name)
+        return playlist
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving playplaylist: {e}") 
+    
+#TTTok
 @app.get("/pi_load_from_playlist/{pi_plname}")
 async def pi_load_from_playlist(pi_plname:str):
     """
@@ -293,8 +320,8 @@ async def get_playlists_list():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting playlists list: {e}")    
 
-@app.post("/play")
-async def play_music():
+@app.post("/pi_play")
+async def pi_play():
     """
     Starts or resumes music playback.
     """
@@ -306,9 +333,24 @@ async def play_music():
         return {"message": "Playback started."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error playing music: {e}")
+    
+@app.post("/pi_playid/{song_id}")
+async def pi_playid(song_id: str):
+    """
+    Selects a song from the playlist and starts playing it.
+    The song_id is the position in the playlist (0-indexed).
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    
+    try:
+        mpd_player.client.playid(song_id)
+        return {"message": f"Playing song with id {song_id}."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error selecting and playing song: {e}")
 
-@app.post("/pause")
-async def pause_music():
+@app.post("/pi_pause")
+async def pi_pause():
     """
     Pauses or unpauses music playback.
     """
@@ -321,8 +363,8 @@ async def pause_music():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error pausing music: {e}")
 
-@app.post("/stop")
-async def stop_music():
+@app.post("/pi_stop")
+async def pi_stop():
     """
     Stops music playback.
     """
@@ -335,8 +377,8 @@ async def stop_music():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error stopping music: {e}")
 
-@app.post("/next")
-async def next_song():
+@app.post("/pi_next")
+async def pi_next():
     """
     Skips to the next song in the playlist.
     """
@@ -349,8 +391,8 @@ async def next_song():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error skipping to next song: {e}")
 
-@app.post("/previous")
-async def previous_song():
+@app.post("/pi_prev")
+async def pi_prev():
     """
     Goes back to the previous song in the playlist.
     """
@@ -363,8 +405,8 @@ async def previous_song():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error skipping to previous song: {e}")
 
-@app.put("/volume/{volume}")
-async def set_player_volume(volume: int):
+@app.put("/pi_setvolume/{volume}")
+async def pi_setvol(volume: int):
     """
     Sets the volume of the MPD player.
     """
@@ -380,8 +422,8 @@ async def set_player_volume(volume: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error setting volume: {e}")
 
-@app.put("/playmode")
-async def set_playmode(repeat: Optional[bool] = None, random: Optional[bool] = None, single: Optional[bool] = None):
+@app.put("/pi_playmode")
+async def pi_playmode(repeat: Optional[bool] = None, random: Optional[bool] = None, single: Optional[bool] = None):
     """
     Sets the play mode of the MPD player (repeat, shuffle, single).
     """
@@ -399,66 +441,89 @@ async def set_playmode(repeat: Optional[bool] = None, random: Optional[bool] = N
         return {"message": "Play mode updated."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error setting play mode: {e}")
-
-@app.post("/select/{song_id}")
-async def select_and_play_song(song_id: str):
-    """
-    Selects a song from the playlist and starts playing it.
-    The song_id is the position in the playlist (0-indexed).
-    """
-    if not mpd_player.is_connected:
-        raise HTTPException(status_code=503, detail="MPD is not connected")
     
-    try:
-        mpd_player.client.playid(song_id)
-        return {"message": f"Playing song with id {song_id}."}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error selecting and playing song: {e}")
+@app.get("/pc_get_playlists_list", response_model=PlaylistsListResponse)
+async def pc_get_playlists_list(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Retrieves a list of all playlist names for the current user.
+    """
+    # Query the database for playlist names belonging to the current user
+    playlist_names_tuples = db.query(UserPlaylist.playlist_name).filter(UserPlaylist.user_id == current_user.id).all()
+    
+    # The query returns a list of tuples, e.g., [('playlist1',), ('playlist2',)].
+    # We need to flatten it into a simple list of strings.
+    playlist_names = [name for (name,) in playlist_names_tuples]
+    
+    return {"names": playlist_names}
 
-
-@app.get("/get_pc_playlist/{pc_plname}")
-async def get_pc_playlist(
+@app.get("/pc_get_playlist/{pc_plname}")
+async def pc_get_playlist(
     pc_plname :str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 
 ):
+    """
+    Retrieves a specific playlist for the current user.
+    """
     user_playlist = db.query(UserPlaylist).filter(
         UserPlaylist.user_id == current_user.id,
         UserPlaylist.playlist_name == pc_plname
     ).first()
 
     if user_playlist:
+        # The data is stored as a JSON string, so we need to parse it back into a list
         return json.loads(user_playlist.playlist_data)
+    
+    # If no playlist is found, return an empty list
     return []
 
-@app.post("/save_pc_playlist/{namepl}")
-async def save_pc_playlist(
-    playlist_data: List[str], # Expecting a list of strings (file paths)
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+# --- MODIFIED ENDPOINT ---
+@app.post("/pc_save_playlist/{pc_plname}")
+async def pc_save_playlist(
+    pc_plname: str, # Captures the playlist name from the URL path
+    payload: PlaylistPayload, # Uses the Pydantic model for the request body
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
+    """
+    Saves or updates a playlist for the currently authenticated user.
+    - pc_plname: The name of the playlist to save.
+    - payload: The request body containing the list of songs.
+    """
+    # Check if a playlist with this name already exists for this user
     user_playlist = db.query(UserPlaylist).filter(
         UserPlaylist.user_id == current_user.id,
-        UserPlaylist.playlist_name == "pc_playlist"
+        UserPlaylist.playlist_name == pc_plname
     ).first()
 
+    # Convert the list of songs into a JSON string for storage
+    playlist_data_json = json.dumps(payload.songs)
+
     if user_playlist:
-        user_playlist.playlist_data = json.dumps(playlist_data)
+        # If it exists, update the playlist data
+        user_playlist.playlist_data = playlist_data_json
+        db.commit()
+        db.refresh(user_playlist)
+        return {"message": f"Playlist '{pc_plname}' updated successfully"}
     else:
+        # If it does not exist, create a new playlist entry
         new_playlist = UserPlaylist(
             user_id=current_user.id,
-            playlist_name="pc_playlist",
-            playlist_data=json.dumps(playlist_data)
+            playlist_name=pc_plname,
+            playlist_data=playlist_data_json
         )
         db.add(new_playlist)
-    db.commit()
-    db.refresh(user_playlist or new_playlist) # Refresh the object that was modified/created
-    return {"message": "PC playlist saved successfully"}
+        db.commit()
+        db.refresh(new_playlist)
+        return {"message": f"Playlist '{pc_plname}' created successfully"}
 
 
-@app.get("/master_playlist")
-async def get_master_playlist():
+@app.get("/pc_get_playlist_all")
+async def pc_get_playlist_all():
     return pc_PLAYLIST_ALL
 
 @app.post("/register", response_model=UserResponse)
@@ -497,4 +562,3 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
 if __name__ == "__main__":
     # The --reload flag automatically reloads the server on code changes.
     uvicorn.run(app, host="127.0.0.1", port=8001)
-

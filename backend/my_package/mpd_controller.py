@@ -191,10 +191,6 @@ class MPDClientController:
         """
         Adds all music files from a specified folder to the MPD playlist.
 
-        This method is more reliable than manually walking the file system, as it
-        uses MPD's built-in `add` command, which correctly handles paths
-        relative to the MPD server's music_directory.
-
         Args:
             music_folder (str): The path to the folder containing music files,
                                 relative to the MPD server's music_directory.
@@ -292,6 +288,25 @@ class MPDClientController:
             print(f"Command Error: {e}")
             return []
 
+    def get_playlistid(self):
+        """
+        Retrieves the current playlist.
+
+        Returns:
+            list: A list of dictionaries, where each dictionary represents a song.
+        """
+        if not self._check_connection():
+            return []
+        
+        try:
+            playlistid = self.client.playlistid()
+            print("--- Current Playlist ---")
+            for i, song in enumerate(playlistid):
+                print(f"{i+1}. {song.get('artist', 'Unknown')} - {song.get('title', song.get('file', 'Unknown'))}")
+            return playlistid
+        except MPDCommandError as e:
+            print(f"Command Error: {e}")
+            return []
 #TTT
     def get_playlists_List(self):
         """
@@ -343,20 +358,20 @@ class MPDClientController:
         except MPDCommandError as e:
             print(f"Command Error: {e}")
 
-
     def load_from_playlist(self, pi_plname):
         """
-        Load  pi_plname to Queue.
+        Load pi_plname to Queue.
 
         Args:
-            pi_plname(str): The name of the playlist to load to Queue.
+            pi_plname (str): The name of the playlist to load to Queue.
         """
         if not self._check_connection():
             return
         
         try:
-            self.client.load({pi_plname})
+            # Corrected line: Pass the string directly
+            self.client.load(pi_plname)
             print(f"Playlist '{pi_plname}' loading")      
         except MPDCommandError as e:
-            print(f"Command Error: {e}") 
+            print(f"Command Error: {e}")
 
