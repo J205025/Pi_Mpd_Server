@@ -36,7 +36,7 @@
         <section>
           <h3>Available Songs</h3>
           <ul>
-            <li v-for="(song, index) in masterPlaylist" :key="index">
+            <li v-for="(song, index) in pc_playlist_all" :key="index">
               {{ song }}
               <button @click="pc_Addsong(song)">Add to My Playlist</button>
             </li>
@@ -55,7 +55,7 @@ import { ref, onMounted, computed, inject } from 'vue';
 import Header from './Header.vue';
 const audioElement = ref<HTMLAudioElement | null>(null);
 const pc_playlist = ref<string[]>([]); // User's personal playlist
-const masterPlaylist = ref<string[]>([]); // All available songs
+const pc_playlist_all = ref<string[]>([]); // All available songs
 const pc_Index = ref(-1);
 const pc_Playing= ref(false);
 const pc_Playmode = ref(0);
@@ -87,9 +87,9 @@ const getAuthHeaders = () => {
   return headers;
 };
 
-const fetch_pc_Playlist = async () => {
+const fetch_pc_playlist = async () => {
   try {
-    const response = await fetch('http://127.0.0.1:8001/pc_playlist', {
+    const response = await fetch('http://127.0.0.1:8001/pc_get_playlist', {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
@@ -102,16 +102,16 @@ const fetch_pc_Playlist = async () => {
   }
 };
 
-const fetch_MasterPlaylist = async () => {
+const fetch_pc_playlist_all = async () => {
   try {
-    const response = await fetch('http://127.0.0.1:8001/master_playlist', {
+    const response = await fetch('http://127.0.0.1:8001/pc_get_playlist_all', {
       headers: getAuthHeaders(),
     });
     if (!response.ok) {
       throw new Error('Failed to fetch master playlist');
     }
     const data = await response.json();
-    masterPlaylist.value = data;
+    pc_playlist_all.value = data;
   } catch (err: any) {
     setGlobalError(err.message);
   }
@@ -198,8 +198,8 @@ const set_pc_Playmode= () => {
 };
 
 onMounted(() => {
-  fetch_pc_Playlist();
-  fetch_MasterPlaylist();
+  fetch_pc_playlist();
+  fetch_pc_playlist_all();
   if (audioElement.value) {
     audioElement.value.volume = pc_Volume.value / 100; // Set initial volume
   }
