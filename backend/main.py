@@ -102,7 +102,6 @@ async def lifespan(app: FastAPI):
     global music_Type
     global pi_PLAYLIST_ALL
     global pc_PLAYLIST_ALL  
-    global folder_path
     """
     Handles application startup and shutdown events.
     This replaces the deprecated @app.on_event("startup") and @app.on_event("shutdown").
@@ -113,18 +112,18 @@ async def lifespan(app: FastAPI):
     # Connect to the MPD server before the application starts
     mpd_player.connect()
     mpd_player.update()
-      # mpd directory is relative to music_Basefolder
-    # When  fastapi starts, save all songs to Queue
     mpd_player.queue_clear()
-    #mpd_player.queue_add_folder("")
-    #mpd_player.add_song(RADIO_STREAMS["BBCWorldService"])
     if not mpd_player.is_connected:
         raise HTTPException(status_code=503, detail="MPD is not connected")
-    #When fastapi starts,  it generates  pi_Playlist_ALL,()
-    pi_PLAYLIST_ALL = mpd_player.get_playlist()
-    ####print("ALL songs in Music_BaseFolder_Pi:"+str(pi_PLAYLIST_ALL))
+    mpd_player.queue_add_folder(music_Type[0])
+    mpd_player.queue_saveto_playlist(music_Type[0])
+    mpd_player.queue_clear()
+    mpd_player.queue_add_folder(music_Type[1])
+    mpd_player.queue_saveto_playlist(music_Type[1])
+
     #When fastapi starts,  it generate pc_playist_ALL
     pc_PLAYLIST_ALL = genFilelist("")
+    print(f"--- Found {len(pc_PLAYLIST_ALL)} songs for PC playlist. First 5: {pc_PLAYLIST_ALL[:5]} ---")
     ####print("ALL songs in Music_BaseFolder_Pc:"+str(pc_PLAYLIST_ALL))
     try:
         # The `yield` statement indicates that the application is ready to serve requests
@@ -138,8 +137,9 @@ async def lifespan(app: FastAPI):
 # Configure CORS (Cross-Origin Resource Sharing)
 # This allows the frontend (running on a different origin) to make requests to the backend.
 origins = [
-    "http://localhost:5173",  # The default address for a Vite dev server
-    "http://127.0.0.1:5173",
+    "http://localhost:3000",  # The default address for a Vite dev server
+    "http://127.0.0.1:3000",
+    "*"
 ]
 app = FastAPI(lifespan=lifespan,
     title="MPD Player API",
@@ -260,7 +260,7 @@ async def pi_get_playlistid():
         raise HTTPException(status_code=503, detail="MPD is not connected")
     try:
             
-        playlistid = mpd_player.get_playlisidt()
+        playlistid = mpd_player.get_playlisid()
         return playlistid
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error saving playplaylist: {e}") 
@@ -289,7 +289,7 @@ async def pi_load_from_playlist(pi_plname:str):
         raise HTTPException(status_code=503, detail="MPD is not connected")
     try:
             
-        mpd_player.load_from_playlist(pi_plname)
+        mpd_player.queue_loadfrom_playlist(pi_plname)
         return {"message": "Loading '{pi_plname}'."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading playlist: {e}")
@@ -304,7 +304,7 @@ async def save_pi_playlist_current(pi_plname:str):
         raise HTTPException(status_code=503, detail="MPD is not connected")
     try:
             
-        mpd_player.save_to_playlist(pi_plname)
+        mpd_player.queue_saveto_playlist(pi_plname)
         return {"message": "Playlist saved."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error saving playplaylist: {e}")
@@ -315,7 +315,7 @@ async def get_playlists_list():
     Get  playlists list.
     """
     try:
-        pi_playlists_list = mpd_player.get_playlists_List()
+        pi_playlists_list = mpd_player.get_playlists_list()
         return pi_playlists_list 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting playlists list: {e}")    
@@ -386,7 +386,7 @@ async def pi_next():
         raise HTTPException(status_code=503, detail="MPD is not connected")
     
     try:
-        mpd_player.next_song()
+        mpd_player.next()
         return {"message": "Skipped to the next song."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error skipping to next song: {e}")
@@ -400,7 +400,7 @@ async def pi_prev():
         raise HTTPException(status_code=503, detail="MPD is not connected")
     
     try:
-        mpd_player.previous_song()
+        mpd_player.prev()
         return {"message": "Skipped to the previous song."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error skipping to previous song: {e}")
@@ -417,7 +417,7 @@ async def pi_setvol(volume: int):
         raise HTTPException(status_code=400, detail="Volume must be an integer between 0 and 100.")
     
     try:
-        mpd_player.set_volume(volume)
+        mpd_player.setvolume(volume)
         return {"message": f"Volume set to {volume}."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error setting volume: {e}")
@@ -524,6 +524,8 @@ async def pc_save_playlist(
 
 @app.get("/pc_get_playlist_all")
 async def pc_get_playlist_all():
+    global pc_PLAYLIST_ALL
+    print("/pc_get_playlist_all:"+ str(pc_PLAYLIST_ALL))
     return pc_PLAYLIST_ALL
 
 @app.post("/register", response_model=UserResponse)

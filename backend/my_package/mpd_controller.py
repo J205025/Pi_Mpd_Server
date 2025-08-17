@@ -84,7 +84,26 @@ class MPDClientController:
             print("Error: Not connected to MPD. Please connect first.")
             return False
         return True
+    def get_status(self):
+        """
+        Retrieves the current status of the MPD server.
 
+        Returns:
+            dict: A dictionary containing the player status, or None if not connected.
+        """
+        if not self._check_connection():
+            return None
+        
+        try:
+            status = self.client.status()
+            print("--- Player Status ---")
+            for key, value in status.items():
+                print(f"{key.capitalize()}: {value}")
+            return status
+        except MPDCommandError as e:
+            print(f"Command Error: {e}")
+            return None
+        
     def play(self):
         """
         Starts playback of the current playlist.
@@ -124,7 +143,7 @@ class MPDClientController:
         except MPDCommandError as e:
             print(f"Command Error: {e}")
 
-    def next_song(self):
+    def next(self):
         """
         Skips to the next song in the playlist.
         """
@@ -137,7 +156,7 @@ class MPDClientController:
         except MPDCommandError as e:
             print(f"Command Error: {e}")
     
-    def previous_song(self):
+    def prev(self):
         """
         Goes back to the previous song in the playlist.
         """
@@ -150,7 +169,7 @@ class MPDClientController:
         except MPDCommandError as e:
             print(f"Command Error: {e}")
 
-    def set_volume(self, volume):
+    def setvolume(self, volume):
         """
         Sets the volume of the MPD player.
 
@@ -169,6 +188,20 @@ class MPDClientController:
                 print("Error: Volume must be an integer between 0 and 100.")
         except (ValueError, MPDCommandError) as e:
             print(f"Error setting volume: {e}")
+    def update(self):
+        """
+        Updates the MPD server's music database. This is necessary for MPD
+        to discover new files or changes in the music directory.
+        """
+        if not self._check_connection():
+            return
+        
+        print("Starting MPD database update...")
+        try:
+            self.client.update()
+            print("MPD database update command sent. The update will run in the background.")
+        except MPDCommandError as e:
+            print(f"Command Error: {e}")
 
     def queue_add_song(self, path):
         """
@@ -210,40 +243,6 @@ class MPDClientController:
             print(f"Please ensure '{music_folder}' is a directory within MPD's configured music_directory.")
             return
         
-    def update(self):
-        """
-        Updates the MPD server's music database. This is necessary for MPD
-        to discover new files or changes in the music directory.
-        """
-        if not self._check_connection():
-            return
-        
-        print("Starting MPD database update...")
-        try:
-            self.client.update()
-            print("MPD database update command sent. The update will run in the background.")
-        except MPDCommandError as e:
-            print(f"Command Error: {e}")
-
-    def get_status(self):
-        """
-        Retrieves the current status of the MPD server.
-
-        Returns:
-            dict: A dictionary containing the player status, or None if not connected.
-        """
-        if not self._check_connection():
-            return None
-        
-        try:
-            status = self.client.status()
-            print("--- Player Status ---")
-            for key, value in status.items():
-                print(f"{key.capitalize()}: {value}")
-            return status
-        except MPDCommandError as e:
-            print(f"Command Error: {e}")
-            return None
 
     def get_current_song(self):
         """
@@ -308,7 +307,7 @@ class MPDClientController:
             print(f"Command Error: {e}")
             return []
 #TTT
-    def get_playlists_List(self):
+    def get_playlists_list(self):
         """
         Retrieves the current playlists_list.
 
@@ -341,7 +340,7 @@ class MPDClientController:
         except MPDCommandError as e:
             print(f"Command Error: {e}")
 
-    def save_to_playlist(self, pi_plname):
+    def queue_saveto_playlist(self, pi_plname):
         """
         Saves the current playlist on the MPD server.
 
@@ -358,7 +357,7 @@ class MPDClientController:
         except MPDCommandError as e:
             print(f"Command Error: {e}")
 
-    def load_from_playlist(self, pi_plname):
+    def queue_loadfrom_playlist(self, pi_plname):
         """
         Load pi_plname to Queue.
 
