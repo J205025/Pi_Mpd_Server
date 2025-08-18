@@ -79,6 +79,7 @@ RADIO_STREAMS = {
     "url19":"http://stream.live.vc.bbcmedia.co.uk/bbc_6music",
     "url30":"http://media-ice.musicradio.com:80/ClassicFMMP3"
 }
+
 # Generate filespath base from music_Basefolder
 def genFilelist(subfolder):
     global pc_Indexmax
@@ -146,7 +147,15 @@ app = FastAPI(lifespan=lifespan,
     description="A Player with Music Player Daemon (MPD).",
     version="1.0.0"
 )
-app.mount("/static", StaticFiles(directory="../frontend/dist"))
+# Path to your built Nuxt.js application
+NUXT_DIST_PATH = Path("../frontend/.output/public")  # Adjust path as needed
+NUXT_SERVER_PATH = Path("./frontend/.output/server")
+# Check if Nuxt build exists
+if not NUXT_DIST_PATH.exists():
+    raise Exception(f"Nuxt build not found at {NUXT_DIST_PATH}. Run 'npm run build' in your Nuxt project first.")
+
+app.mount("/static", StaticFiles(directory=NUXT_DIST_PATH), name="static")
+app.mount("/_nuxt", StaticFiles(directory=NUXT_DIST_PATH / "_nuxt"), name="nuxt_assets")
 app.mount("/music", StaticFiles(directory="/home/ubuntu/Music"))
 app.add_middleware(
     CORSMiddleware,
@@ -158,38 +167,17 @@ app.add_middleware(
 
 
 # --- API Endpoints ---
-@app.get("/", response_class=HTMLResponse)
-async def index_get():
-    # Dynamically find the hashed CSS and JS files
-    js_file = ""
-    css_file = ""
-    assets_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist", "assets")
-    for filename in os.listdir(assets_path):
-        if filename.startswith("index-") and filename.endswith(".js"):
-            js_file = filename
-        elif filename.startswith("index-") and filename.endswith(".css"):
-            css_file = filename
-
-    if not js_file or not css_file:
-        raise HTTPException(status_code=500, detail="Frontend assets not found. Please build the frontend.")
-
-    html_content = f"""
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/static/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Vue + TS</title>
-    <script type="module" crossorigin src="/static/assets/{js_file}"></script>
-    <link rel="stylesheet" crossorigin href="/static/assets/{css_file}">
-  </head>
-  <body>
-    <div id="app"></div>
-  </body>
-</html>
-"""
-    return HTMLResponse(content=html_content, status_code=200)
+# Serve the main index.html file for the root path
+@app.get("/")
+async def root():
+    """
+    Explicitly serve the root route
+    """
+    index_file = NUXT_DIST_PATH / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
+    else:
+        return HTMLResponse("<h1>Welcome! Nuxt app not found.</h1>")
 
 @app.post('/')
 async def index_post():

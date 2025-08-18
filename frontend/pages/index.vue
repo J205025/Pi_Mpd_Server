@@ -5,13 +5,13 @@
 
     <main class="container mx-auto mt-10 mb-10 p-6 min-h-screen">
       <div class="bg-white p-8 rounded-lg shadow-xl text-center">
-        <h1 class="text-5xl font-extrabold text-gray-900 mb-4">My Music Player Website! 🚀</h1>
+        <h1 class="text-5xl font-extrabold text-gray-900 mb-4">My Media Player Website! 🚀</h1>
         <p class="text-gray-600 text-lg mb-6">
-          This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.
+          This is my personal media player station. 
         </p>
-        <a href="#" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition duration-300">
-          Learn More
-        </a>
+        <a href="login" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition duration-300">
+          Login in 
+       </a>
       </div>
 
       <div class="grid md:grid-cols-3 gap-8 mt-12">
