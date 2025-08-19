@@ -7,7 +7,6 @@
         <h1 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">Welcome Back</h1>
         
         <form @submit.prevent="handleLogin" class="space-y-6">
-          <!-- Name Field -->
           <div>
             <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
               Name
@@ -24,7 +23,6 @@
             <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
           </div>
 
-          <!-- Password Field -->
           <div>
             <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
               Password
@@ -41,7 +39,6 @@
             <p v-if="errors.password" class="mt-1 text-sm text-red-600">{{ errors.password }}</p>
           </div>
 
-          <!-- Remember Me Checkbox -->
           <div class="flex items-center">
             <input
               id="remember"
@@ -54,7 +51,6 @@
             </label>
           </div>
 
-          <!-- Submit Button -->
           <button
             type="submit"
             :disabled="isLoading"
@@ -65,17 +61,14 @@
           </button>
         </form>
 
-        <!-- Error Message -->
         <div v-if="errors.general" class="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           {{ errors.general }}
         </div>
 
-        <!-- Success Message -->
         <div v-if="successMessage" class="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
           {{ successMessage }}
         </div>
 
-        <!-- Additional Links -->
         <div class="mt-6 text-center space-y-2">
           <div>
             <a href="#" class="text-blue-500 hover:text-blue-700 text-sm">Forgot your password?</a>
@@ -155,12 +148,10 @@ const handleLogin = async () => {
     if (response.ok) {
       const data = await response.json();
       
-      // Store the access token (in a real app, consider using secure httpOnly cookies)
       const token = data.access_token;
       
-      // Store token in memory for this session
-      // In production, you might want to use a more secure storage method
-      window.authToken = token;
+      // Store token in localStorage to persist it
+      localStorage.setItem('authToken', token);
       
       successMessage.value = 'Login successful! Redirecting...';
       

@@ -8,33 +8,19 @@
         <h1 class="text-5xl font-extrabold text-gray-900 mb-4">Pc Player</h1>
       </div>
 
-      <!-- Track Selection -->
-      <div v-if="pc_playlist_all.length > 0" class="bg-white p-6 rounded-lg shadow-xl mt-12">
-        <label for="playlist-select" class="block text-xl font-bold mb-3 text-gray-800">Select a Track:</label>
-        <select 
-          id="playlist-select" 
-          v-model="selectedTrack" 
-          @change="onTrackChange"
-          class="block w-full p-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option disabled value="">-- Please choose a track --</option>
-          <option v-for="track in pc_playlist_all" :key="track" :value="track">
-            {{ formatTrackName(track) }}
-          </option>
-        </select>
-      </div>
-
-      <!-- Audio Player -->
       <div v-if="selectedTrack" class="bg-white p-6 rounded-lg shadow-xl mt-8">
         <div class="text-center mb-4">
-          <h3 class="text-xl font-semibold text-gray-800 mb-2">Now Playing</h3>
-          <p class="text-gray-600">{{ formatTrackName(selectedTrack) }}</p>
+          <p class="text-gray-600 font-bold">{{ trackTitle }}</p>
+          <p class="text-gray-500 text-sm mt-1">
+            <span v-if="trackArtist">{{ trackArtist }}</span>
+            <span v-if="trackArtist && trackAlbum"> - </span>
+            <span v-if="trackAlbum">{{ trackAlbum }}</span>
+          </p>
         </div>
 
-        <!-- Audio Element -->
         <audio
           ref="audioPlayer"
-          :src="`http://127.0.0.1:8001/music/${selectedTrack}`"
+          :src="`http://127.00.1:8001/music/${selectedTrack}`"
           @loadedmetadata="onLoadedMetadata"
           @timeupdate="onTimeUpdate"
           @ended="onTrackEnded"
@@ -46,7 +32,6 @@
           class="hidden"
         ></audio>
 
-        <!-- Progress Bar -->
         <div class="mb-6">
           <div class="flex justify-between text-sm text-gray-600 mb-2">
             <span>{{ formatTime(currentTime) }}</span>
@@ -63,9 +48,7 @@
           </div>
         </div>
 
-        <!-- Main Controls -->
         <div class="flex items-center justify-center space-x-4 mb-6">
-          <!-- Previous Button -->
           <button
             @click="previousTrack"
             :disabled="pc_playlist_all.length <= 1"
@@ -76,7 +59,6 @@
             </svg>
           </button>
 
-          <!-- Play/Pause Button -->
           <button
             @click="togglePlayPause"
             :disabled="isLoading"
@@ -93,7 +75,6 @@
             </svg>
           </button>
 
-          <!-- Next Button -->
           <button
             @click="nextTrack"
             :disabled="pc_playlist_all.length <= 1"
@@ -105,9 +86,7 @@
           </button>
         </div>
 
-        <!-- Secondary Controls -->
         <div class="flex items-center justify-between">
-          <!-- Volume Control -->
           <div class="flex items-center space-x-2">
             <button @click="toggleMute" class="text-gray-600 hover:text-gray-800">
               <svg v-if="isMuted || volume === 0" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -132,9 +111,7 @@
             <span class="text-sm text-gray-600 w-8">{{ Math.round(volume * 100) }}</span>
           </div>
 
-          <!-- Play Mode Controls -->
           <div class="flex items-center space-x-2">
-            <!-- Shuffle Button -->
             <button
               @click="toggleShuffle"
               :class="[
@@ -147,7 +124,6 @@
               </svg>
             </button>
 
-            <!-- Repeat Button -->
             <button
               @click="toggleRepeat"
               :class="[
@@ -165,7 +141,6 @@
           </div>
         </div>
 
-        <!-- Track Info -->
         <div class="mt-4 text-center text-sm text-gray-500">
           Track {{ currentTrackIndex + 1 }} of {{ pc_playlist_all.length }}
           <span v-if="isShuffleMode" class="ml-2">(Shuffle)</span>
@@ -173,6 +148,41 @@
           <span v-if="repeatMode === 'one'" class="ml-2">(Repeat One)</span>
         </div>
       </div>
+
+      <div v-if="pc_playlist_all.length > 0" class="bg-white p-6 rounded-lg shadow-xl mt-12">
+        <label for="playlist-select" class="block text-xl font-bold mb-3 text-gray-800">Select a Track:</label>
+        <select 
+          id="playlist-select" 
+          v-model="selectedTrack" 
+          @change="onTrackChange"
+          class="block w-full p-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option disabled value="">-- Please choose a track --</option>
+          <option v-for="(track, index) in pc_playlist_all" :key="track" :value="track">
+            {{ index + 1 }} - {{ getTrackArtist(track) }} - {{ getTrackAlbum(track) }} - {{ getTrackTitle(track) }}
+          </option>
+        </select>
+        
+        <div class="mt-4">
+            <p class="text-lg font-bold mb-2 text-gray-800">Enter Track Index:</p>
+            <div class="flex flex-wrap gap-2 justify-center">
+                <button
+                    v-for="number in 10"
+                    :key="number - 1"
+                    @click="handleNumberPress(number - 1)"
+                    class="bg-gradient-to-r from-blue-400 to-blue-600 text-white p-3 rounded-full w-14 h-14 flex items-center justify-center text-xl font-bold
+                           hover:from-blue-500 hover:to-blue-700 hover:shadow-lg transition-transform hover:scale-105"
+                >
+                    {{ number - 1 }}
+                </button>
+            </div>
+            <div class="mt-2 text-center text-gray-600">
+                Current Number: <span class="font-bold">{{ currentNumberString }}</span>
+            </div>
+        </div>
+      </div>
+
+
       
       <div class="grid md:grid-cols-3 gap-8 mt-12">
         <div class="bg-white p-6 rounded-lg shadow-lg">
@@ -219,6 +229,11 @@ const previousVolume = ref(0.7);
 const isShuffleMode = ref(false);
 const repeatMode = ref('none'); // 'none', 'all', 'one'
 
+// State for button-based number input
+const currentNumberString = ref('');
+let inputTimer = null;
+const INPUT_TIMEOUT = 4000; // 4 seconds
+
 // Computed properties
 const currentTrackIndex = computed(() => {
   return pc_playlist_all.value.findIndex(track => track === selectedTrack.value);
@@ -227,6 +242,31 @@ const currentTrackIndex = computed(() => {
 const progressPercentage = computed(() => {
   return duration.value > 0 ? (currentTime.value / duration.value) * 100 : 0;
 });
+
+// New functions for parsing track metadata for the select dropdown
+const getTrackTitle = (fullPath) => {
+  if (!fullPath) return '';
+  const parts = fullPath.split('/');
+  return parts.pop().replace(/\.(mp3|MP3|flac|FLAC)$/, '');
+};
+
+const getTrackAlbum = (fullPath) => {
+  if (!fullPath) return '';
+  const parts = fullPath.split('/');
+  return parts.length > 2 ? parts[parts.length - 2] : '';
+};
+
+const getTrackArtist = (fullPath) => {
+  if (!fullPath) return '';
+  const parts = fullPath.split('/');
+  return parts.length > 2 ? parts[parts.length - 3] : '';
+};
+
+
+// Now Playing display properties (still use computed for reactivity)
+const trackTitle = computed(() => getTrackTitle(selectedTrack.value));
+const trackAlbum = computed(() => getTrackAlbum(selectedTrack.value));
+const trackArtist = computed(() => getTrackArtist(selectedTrack.value));
 
 onMounted(async () => {
   loading.value = true;
@@ -432,9 +472,63 @@ const formatTime = (seconds) => {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
-const formatTrackName = (fullPath) => {
-  if (!fullPath) return '';
-  return fullPath.split('/').pop().replace(/\.(mp3|MP3|flac|FLAC)$/, '');
+const handleNumberPress = (number) => {
+    // Clear any existing timer
+    clearTimeout(inputTimer);
+    
+    // Add the new digit
+    let newNumberString = currentNumberString.value + String(number);
+    
+    // Trim the string if it's longer than 4 digits
+    if (newNumberString.length > 4) {
+        newNumberString = newNumberString.substring(newNumberString.length - 4);
+    }
+    
+    currentNumberString.value = newNumberString;
+    
+    // Set a new timer to play the track after the timeout
+    inputTimer = setTimeout(() => {
+        playTrackFromInput();
+    }, INPUT_TIMEOUT);
+};
+
+const playTrackFromInput = () => {
+    // Clear the timer after a track is played
+    clearTimeout(inputTimer);
+    
+    const maxIndex = pc_playlist_all.value.length;
+    let index = parseInt(currentNumberString.value, 10);
+    
+    if (isNaN(index)) {
+        alert('Invalid input. Please enter a valid number.');
+        currentNumberString.value = '';
+        return;
+    }
+
+    if (index === 0) {
+        alert('Track index cannot be 0. Please enter a number between 1 and ' + maxIndex);
+        currentNumberString.value = '';
+        return;
+    }
+    
+    if (index > maxIndex) {
+        index = index % maxIndex;
+        if (index === 0) {
+            index = maxIndex;
+        }
+    }
+    
+    // Set the selected track and play it
+    selectedTrack.value = pc_playlist_all.value[index - 1];
+    setTimeout(() => {
+        if (audioPlayer.value) {
+            audioPlayer.value.play();
+            isPlaying.value = true;
+        }
+    }, 100);
+    
+    // Reset the number string
+    currentNumberString.value = '';
 };
 
 // Add debugging event handlers
