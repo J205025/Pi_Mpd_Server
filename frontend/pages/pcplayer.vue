@@ -174,23 +174,7 @@
             </div>
         </div>
       </div>
-      
-      <div class="grid md:grid-cols-3 gap-8 mt-12">
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-bold mb-2 text-gray-800">Feature One</h2>
-          <p class="text-gray-700">Explore the first amazing feature we have to offer. It's designed to make your life easier and more productive.</p>
-        </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-bold mb-2 text-gray-800">Feature Two</h2>
-          <p class="text-gray-700">Discover how our second feature can help you achieve your goals faster than ever before.</p>
-        </div>
-
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-bold mb-2 text-gray-800">Feature Three</h2>
-          <p class="text-gray-700">Our third feature is revolutionary, providing insights and capabilities you won't find anywhere else.</p>
-        </div>
-      </div>
     </main>
     
     <footer />

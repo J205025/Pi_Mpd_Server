@@ -9,7 +9,7 @@
         <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">Home</NuxtLink>
         <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">PC Player</NuxtLink>
         <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">Pi Player</NuxtLink>
-        
+        <NuxtLink :to="isLoggedIn ? '/playlist' : '/'" class="text-gray-300 hover:text-white transition duration-300">歌單編輯</NuxtLink>
         <div class="flex-grow"></div>
 
         <template v-if="isLoggedIn">
@@ -31,7 +31,7 @@
       <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">Home</NuxtLink>
       <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">PC Player</NuxtLink>
       <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">Pi Player</NuxtLink>
-      
+      <NuxtLink :to="isLoggedIn ? '/playlist' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">歌單編輯</NuxtLink>      
       <template v-if="isLoggedIn">
         <span class="block text-gray-300 py-2 px-4">Welcome, {{ currentUser.toUpperCase() }}</span>
         <button @click="handleLogout" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">

@@ -605,6 +605,15 @@ async def pc_get_allfiles():
     global pc_ALLFILES
     print("/pc_get_allfiles:"+ str(pc_ALLFILES))
     return pc_ALLFILES
+
+@app.get("/pc_gen_fileslist/{foldername}")
+async def pc_gen_fileslist(
+    foldername :str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):   
+    fileslist = genFilelist(foldername)
+    return fileslist
 #------------------------------------------------------------------------------
 # User Management
 @app.post("/register", response_model=UserResponse)
