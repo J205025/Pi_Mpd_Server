@@ -1,14 +1,14 @@
 <template>
   <nav class="bg-gray-800 p-4 shadow-lg">
     <div class="container mx-auto flex justify-between items-center">
-      <a :href="isLoggedIn ? '/pcplayer' : '/'" class="text-white text-2xl font-bold">
+      <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="text-white text-2xl font-bold">
         My Media Player
-      </a>
+      </NuxtLink>
       
       <div class="hidden md:flex items-center space-x-6">
-        <a :href="isLoggedIn ? '/pcplayer' : '/'"  class="text-gray-300 hover:text-white transition duration-300">Home</a>
-        <a :href="isLoggedIn ? '/pcplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">PC Player</a>
-        <a :href="isLoggedIn ? '/piplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">Pi Player</a>
+        <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">Home</NuxtLink>
+        <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">PC Player</NuxtLink>
+        <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">Pi Player</NuxtLink>
         
         <div class="flex-grow"></div>
 
@@ -28,9 +28,9 @@
     </div>
     
     <div :class="{ 'hidden': !isMobileMenuOpen }" class="md:hidden mt-4">
-      <a :href="isLoggedIn ? '/pcplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">Home</a>
-      <a :href="isLoggedIn ? '/pcplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">PC Player</a>
-      <a :href="isLoggedIn ? '/piplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">Pi Player</a>
+      <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">Home</NuxtLink>
+      <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">PC Player</NuxtLink>
+      <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">Pi Player</NuxtLink>
       
       <template v-if="isLoggedIn">
         <span class="block text-gray-300 py-2 px-4">Welcome, {{ currentUser.toUpperCase() }}</span>
@@ -94,7 +94,8 @@ const handleLogout = () => {
   localStorage.removeItem('authToken');
   isLoggedIn.value = false;
   currentUser.value = '';
-  window.location.href = '/';
+  // Use Nuxt's navigateTo for proper SPA navigation
+  navigateTo('/');
 };
 
 // Check auth status when component mounts

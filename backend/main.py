@@ -3,7 +3,7 @@
 # for controlling the Music Player Daemon (MPD).
 import os
 import json # Added for JSON handling
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,7 +26,7 @@ import uvicorn
 from contextlib import asynccontextmanager
 from my_package.database import Base, engine
 # ----------------------------------------------
-music_Basefolder = "/home/ubuntu/Music/"
+music_Basefolder = "/home/j205025/Music/"
 music_Type= ["國語","台語","英語","古典","播客"]
 folderpath = Path(music_Basefolder+music_Type[0])
 artist = [item.name for item in folderpath.iterdir() if item.is_dir()]
@@ -147,16 +147,28 @@ app = FastAPI(lifespan=lifespan,
     description="A Player with Music Player Daemon (MPD).",
     version="1.0.0"
 )
+
 # Path to your built Nuxt.js application
 NUXT_DIST_PATH = Path("../frontend/.output/public")  # Adjust path as needed
 NUXT_SERVER_PATH = Path("./frontend/.output/server")
+
 # Check if Nuxt build exists
 if not NUXT_DIST_PATH.exists():
     raise Exception(f"Nuxt build not found at {NUXT_DIST_PATH}. Run 'npm run build' in your Nuxt project first.")
 
-app.mount("/static", StaticFiles(directory=NUXT_DIST_PATH), name="static")
+# Mount static files - ORDER MATTERS!
+# 1. Mount your backend static files first with a specific prefix
+app.mount("/static", StaticFiles(directory="static"), name="backend_static")  # Your backend static files
+
+# 2. Mount Nuxt assets and the entire public directory
 app.mount("/_nuxt", StaticFiles(directory=NUXT_DIST_PATH / "_nuxt"), name="nuxt_assets")
-app.mount("/music", StaticFiles(directory="/home/ubuntu/Music"))
+
+# 3. Mount music files
+app.mount("/music", StaticFiles(directory="/home/j205025/Music"), name="music_files")
+
+# 4. Mount the entire Nuxt public directory to serve all static files including _payload.json
+app.mount("/app", StaticFiles(directory=NUXT_DIST_PATH, html=True), name="nuxt_app")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  # Allows specified origins
@@ -171,7 +183,7 @@ app.add_middleware(
 @app.get("/")
 async def root():
     """
-    Explicitly serve the root route
+    Serve the root route
     """
     index_file = NUXT_DIST_PATH / "index.html"
     if index_file.exists():
@@ -179,6 +191,39 @@ async def root():
     else:
         return HTMLResponse("<h1>Welcome! Nuxt app not found.</h1>")
 
+# Handle _payload.json requests specifically
+@app.get("/_payload.json")
+async def serve_payload():
+    """
+    Serve the main _payload.json file
+    """
+    payload_file = NUXT_DIST_PATH / "_payload.json"
+    if payload_file.exists():
+        return FileResponse(payload_file, media_type="application/json")
+    else:
+        # Return empty payload if file doesn't exist
+        return JSONResponse({})
+
+# Handle dynamic _payload.json requests with query parameters
+@app.get("/{path:path}/_payload.json")
+async def serve_dynamic_payload(path: str):
+    """
+    Serve dynamic _payload.json files for specific routes
+    """
+    # Try to find the specific payload file
+    payload_file = NUXT_DIST_PATH / path / "_payload.json"
+    if payload_file.exists():
+        return FileResponse(payload_file, media_type="application/json")
+    
+    # Fallback to main payload
+    main_payload = NUXT_DIST_PATH / "_payload.json"
+    if main_payload.exists():
+        return FileResponse(main_payload, media_type="application/json")
+    
+    # Return empty payload if no file exists
+    return JSONResponse({})
+
+# API routes - make sure all your API routes are defined BEFORE the catch-all route
 @app.post('/')
 async def index_post():
     global pc_PLAYLIST_ALL
@@ -211,6 +256,7 @@ async def index_post():
         "cronTimeMin" : cron_Min,
         "cronIndexPi" : cron_pi_Index
          })
+
 @app.get("/status")
 async def get_pi_status():
     """
@@ -429,7 +475,8 @@ async def pi_playmode(repeat: Optional[bool] = None, random: Optional[bool] = No
         return {"message": "Play mode updated."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error setting play mode: {e}")
-    
+
+# Add all your other API endpoints here...
 @app.get("/pc_get_playlists_list", response_model=PlaylistsListResponse)
 async def pc_get_playlists_list(
     db: Session = Depends(get_db),
@@ -548,7 +595,32 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
-# --- Main block for running the server ---
+
+# IMPORTANT: This catch-all route MUST be the LAST route defined
+# It handles all SPA routes that don't match API endpoints or static files
+@app.get("/{full_path:path}")
+async def catch_all(full_path: str):
+    """
+    Catch-all route to serve index.html for all SPA routes
+    This ensures that client-side routing works properly
+    """
+    # Skip API routes and static assets
+    if full_path.startswith(("api/", "_nuxt/", "music/", "static/", "app/")):
+        raise HTTPException(status_code=404, detail="Not found")
+    
+    # Skip _payload.json requests (they should be handled by specific routes above)
+    if full_path.endswith("_payload.json"):
+        raise HTTPException(status_code=404, detail="Payload not found")
+    
+    # Skip files with extensions (likely static files)
+    if "." in full_path.split("/")[-1] and not full_path.endswith(".html"):
+        raise HTTPException(status_code=404, detail="Not found")
+    
+    index_file = NUXT_DIST_PATH / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
+    else:
+        raise HTTPException(status_code=404, detail="Frontend not found")
+
 if __name__ == "__main__":
-    # The --reload flag automatically reloads the server on code changes.
-    uvicorn.run(app, host="127.0.0.1", port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=8001)
