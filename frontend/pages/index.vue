@@ -9,9 +9,11 @@
         <p class="text-gray-600 text-lg mb-6">
           This is my personal media player station. 
         </p>
-        <a href="login" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition duration-300">
-          Login in 
-       </a>
+        <template v-if="!isLoggedIn">
+          <a href="login" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition duration-300">
+            Login in 
+          </a>
+        </template>
       </div>
 
     </main>
@@ -23,13 +25,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
-const isMobileMenuOpen = ref(false);
+const isLoggedIn = ref(false);
 
-const toggleMobileMenu = () => {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value;
-};
+onMounted(() => {
+  const token = localStorage.getItem('authToken');
+  isLoggedIn.value = !!token;
+});
 </script>
 
 <style scoped>

@@ -340,6 +340,31 @@ class MPDClientController:
         except MPDCommandError as e:
             print(f"Command Error: {e}")
 
+    # --- ADD THE NEW METHOD HERE ---
+    def queue_load_radiostreams(self, streams_dict):
+        """
+        Clears the current playlist and loads a dictionary of radio streams.
+
+        Args:
+            streams_dict (dict): A dictionary where keys are stream names
+                                 and values are the stream URLs.
+        """
+        if not self._check_connection():
+            return
+        
+        print("Clearing the current playlist and loading radio streams...")
+        try:
+            # 1. Clear the existing queue
+            self.client.clear()
+            
+            # 2. Iterate through the dictionary's values (the URLs) and add them
+            for url in streams_dict.values():
+                self.client.add(url)
+            
+            print(f"Successfully loaded {len(streams_dict)} radio streams to the playlist.")
+        except MPDCommandError as e:
+            print(f"Command Error while loading radio streams: {e}")
+
     def queue_saveto_playlist(self, pi_plname):
         """
         Saves the current playlist on the MPD server.

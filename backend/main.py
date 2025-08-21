@@ -26,12 +26,14 @@ import uvicorn
 from contextlib import asynccontextmanager
 from my_package.database import Base, engine
 # ----------------------------------------------
-music_Basefolder = "/home/j205025/Music/"
+music_Basefolder = "/home/ubuntu/Music/"
 music_Type= ["國語","台語","英語","古典","播客"]
 folderpath = Path(music_Basefolder+music_Type[0])
 artist = [item.name for item in folderpath.iterdir() if item.is_dir()]
-pi_PLAYLIST_ALL = []
-pi_Playlist= []  # Only one pi_Playlist for Pi_Server
+#-----------------------------------------------
+pi_ALLFILES = [] 
+pi_Playlist_List = []  # Only one pi_Playlist_List for Pi_Server
+pi_playlist_files = []
 pi_IndexMax = 1
 pi_Index = 0
 pi_Playing = None
@@ -45,8 +47,9 @@ cron_Status =  False
 cron_Hour = '00'
 cron_Min = '00'
 cron_pi_Index = 1
-pc_PLAYLIST_ALL = []
-pc_Playlist = [] # Each user will have his own pc_Playlists.
+pc_ALLFILES = []
+pc_Playlist_List = [] # Each user will have his own pc_Playlist_List
+pc_Playlist_files = []
 pc_Indexmax = 1
 
 # Initialize the MPD client controller globally
@@ -101,8 +104,8 @@ def genFilelist(subfolder):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global music_Type
-    global pi_PLAYLIST_ALL
-    global pc_PLAYLIST_ALL  
+    global pi_ALLFILES  
+    global pc_ALLFILES
     """
     Handles application startup and shutdown events.
     This replaces the deprecated @app.on_event("startup") and @app.on_event("shutdown").
@@ -112,19 +115,33 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     # Connect to the MPD server before the application starts
     mpd_player.connect()
-    mpd_player.update()
-    mpd_player.queue_clear()
+
     if not mpd_player.is_connected:
         raise HTTPException(status_code=503, detail="MPD is not connected")
+   #Update the music database and save to playlist
+    mpd_player.update()
+    mpd_player.queue_clear()
     mpd_player.queue_add_folder(music_Type[0])
     mpd_player.queue_saveto_playlist(music_Type[0])
     mpd_player.queue_clear()
     mpd_player.queue_add_folder(music_Type[1])
     mpd_player.queue_saveto_playlist(music_Type[1])
+    mpd_player.queue_clear()
+    mpd_player.queue_add_folder(music_Type[2])
+    mpd_player.queue_saveto_playlist(music_Type[2])
+    mpd_player.queue_clear()
+    mpd_player.queue_add_folder(music_Type[3])
+    mpd_player.queue_saveto_playlist(music_Type[3])
+    mpd_player.queue_clear()
+    mpd_player.queue_add_folder(music_Type[4])
+    mpd_player.queue_saveto_playlist(music_Type[4])
+    mpd_player.queue_clear()
+    mpd_player.queue_load_radiostreams(RADIO_STREAMS)
+    mpd_player.queue_saveto_playlist("廣播")
 
     #When fastapi starts,  it generate pc_playist_ALL
-    pc_PLAYLIST_ALL = genFilelist("")
-    print(f"--- Found {len(pc_PLAYLIST_ALL)} songs for PC playlist. First 5: {pc_PLAYLIST_ALL[:5]} ---")
+    pc_ALLFILES = genFilelist("")
+    print(f"--- Found {len(pc_ALLFILES)} songs for PC ALLFILEs.")
     ####print("ALL songs in Music_BaseFolder_Pc:"+str(pc_PLAYLIST_ALL))
     try:
         # The `yield` statement indicates that the application is ready to serve requests
@@ -164,7 +181,7 @@ app.mount("/static", StaticFiles(directory="static"), name="backend_static")  # 
 app.mount("/_nuxt", StaticFiles(directory=NUXT_DIST_PATH / "_nuxt"), name="nuxt_assets")
 
 # 3. Mount music files
-app.mount("/music", StaticFiles(directory="/home/j205025/Music"), name="music_files")
+app.mount("/music", StaticFiles(directory="/home/ubuntu/Music"), name="music_files")
 
 # 4. Mount the entire Nuxt public directory to serve all static files including _payload.json
 app.mount("/app", StaticFiles(directory=NUXT_DIST_PATH, html=True), name="nuxt_app")
@@ -476,8 +493,8 @@ async def pi_playmode(repeat: Optional[bool] = None, random: Optional[bool] = No
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error setting play mode: {e}")
 
-# Add all your other API endpoints here...
-@app.get("/pc_get_playlists_list", response_model=PlaylistsListResponse)
+# Pcplayer API 
+@app.get("/pc_get_playlist_List", response_model=PlaylistsListResponse)
 async def pc_get_playlists_list(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -494,8 +511,8 @@ async def pc_get_playlists_list(
     
     return {"names": playlist_names}
 
-@app.get("/pc_get_playlist/{pc_plname}")
-async def pc_get_playlist(
+@app.get("/pc_get_playlist_files/{pc_plname}")
+async def pc_get_playlist_files(
     pc_plname :str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -516,9 +533,8 @@ async def pc_get_playlist(
     # If no playlist is found, return an empty list
     return []
 
-# --- MODIFIED ENDPOINT ---
-@app.post("/pc_save_playlist/{pc_plname}")
-async def pc_save_playlist(
+@app.post("/pc_save_playlists_tolist/{pc_plname}")
+async def pc_save_playlist_files(
     pc_plname: str, # Captures the playlist name from the URL path
     payload: PlaylistPayload, # Uses the Pydantic model for the request body
     db: Session = Depends(get_db),
@@ -556,13 +572,41 @@ async def pc_save_playlist(
         db.refresh(new_playlist)
         return {"message": f"Playlist '{pc_plname}' created successfully"}
 
+@app.delete("/pc_delete_playlist_list/{pc_plname}")
+async def pc_delete_playlist_list(
+    pc_plname: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Deletes a specific playlist for the current user.
+    - pc_plname: The name of the playlist to delete.
+    """
+    # Query the database for the specific playlist belonging to the current user
+    playlist_to_delete = db.query(UserPlaylist).filter(
+        UserPlaylist.user_id == current_user.id,
+        UserPlaylist.playlist_name == pc_plname
+    ).first()
 
-@app.get("/pc_get_playlist_all")
-async def pc_get_playlist_all():
-    global pc_PLAYLIST_ALL
-    print("/pc_get_playlist_all:"+ str(pc_PLAYLIST_ALL))
-    return pc_PLAYLIST_ALL
+    # If the playlist doesn't exist, raise a 404 Not Found error
+    if not playlist_to_delete:
+        raise HTTPException(status_code=404, detail=f"Playlist '{pc_plname}' not found")
 
+    # Delete the playlist from the database session
+    db.delete(playlist_to_delete)
+    # Commit the transaction to make the deletion permanent
+    db.commit()
+
+    return {"message": f"Playlist '{pc_plname}' deleted successfully"}
+
+
+@app.get("/pc_get_allfiles")
+async def pc_get_allfiles():
+    global pc_ALLFILES
+    print("/pc_get_allfiles:"+ str(pc_ALLFILES))
+    return pc_ALLFILES
+#------------------------------------------------------------------------------
+# User Management
 @app.post("/register", response_model=UserResponse)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()

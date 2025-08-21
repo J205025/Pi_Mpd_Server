@@ -20,12 +20,12 @@
 
         <audio
           ref="audioPlayer"
-          :src="`http://127.00.1:8001/music/${selectedTrack}`"
+          :src="`http://127.0.0.1:8001/music/${selectedTrack}`"
           @loadedmetadata="onLoadedMetadata"
           @timeupdate="onTimeUpdate"
           @ended="onTrackEnded"
           @loadstart="isLoading = true"
-          @canplay="isLoading = false"
+          @canplay="handleCanPlay"
           @error="onAudioError"
           @canplaythrough="onCanPlayThrough"
           preload="metadata"
@@ -62,15 +62,15 @@
           <button
             @click="togglePlayPause"
             :disabled="isLoading"
-            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white p-4 rounded-full transition-colors duration-200 shadow-lg"
+            class="w-24 h-24 rounded-full bg-blue-500 hover:bg-blue-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors duration-200 flex items-center justify-center shadow-lg"
           >
-            <svg v-if="isLoading" class="w-8 h-8 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+            <svg v-if="isLoading" class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
               <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
             </svg>
-            <svg v-else-if="isPlaying" class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+            <svg v-else-if="isPlaying" class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd"/>
             </svg>
-            <svg v-else class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+            <svg v-else class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
             </svg>
           </button>
@@ -89,15 +89,9 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-2">
             <button @click="toggleMute" class="text-gray-600 hover:text-gray-800">
-              <svg v-if="isMuted || volume === 0" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clipRule="evenodd"/>
-              </svg>
-              <svg v-else-if="volume < 0.5" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.146 6.146a.5.5 0 01.708 0l.646.647.646-.647a.5.5 0 11.708.708L13.207 8.5l1.647 1.646a.5.5 0 01-.708.708L12.5 9.207l-.646.647a.5.5 0 11-.708-.708L12.793 7.5l-1.647-1.646a.5.5 0 010-.708z" clipRule="evenodd"/>
-              </svg>
-              <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM15.657 6.343a1 1 0 00-1.414 1.414.5.5 0 000 .707l.707.707a1 1 0 101.414-1.414l-.707-.707a.5.5 0 000-.707zm1.414 5.657a1 1 0 01-1.414 0 .5.5 0 000-.707l-.707-.707a1 1 0 111.414-1.414l.707.707a.5.5 0 000 .707z" clipRule="evenodd"/>
-              </svg>
+              <svg v-if="isMuted || volume === 0" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+              <svg v-else-if="volume < 0.5" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.146 6.146a.5.5 0 01.708 0l.646.647.646-.647a.5.5 0 11.708.708L13.207 8.5l1.647 1.646a.5.5 0 01-.708.708L12.5 9.207l-.646.647a.5.5 0 11-.708-.708L12.793 7.5l-1.647-1.646a.5.5 0 010-.708z" clip-rule="evenodd"></path></svg>
+              <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM15.657 6.343a1 1 0 00-1.414 1.414.5.5 0 000 .707l.707.707a1 1 0 101.414-1.414l-.707-.707a.5.5 0 000-.707zm1.414 5.657a1 1 0 01-1.414 0 .5.5 0 000-.707l-.707-.707a1 1 0 111.414-1.414l.707.707a.5.5 0 000 .707z" clip-rule="evenodd"></path></svg>
             </button>
             <input
               type="range"
@@ -114,29 +108,14 @@
           <div class="flex items-center space-x-2">
             <button
               @click="toggleShuffle"
-              :class="[
-                'p-2 rounded transition-colors duration-200',
-                isShuffleMode ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800'
-              ]"
-            >
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732L14.146 12.8l-1.179 4.456a1 1 0 01-1.856-.288L12.382 12H10a1 1 0 110-2h2.382l-.271-4.968A1 1 0 0112 2z" clipRule="evenodd"/>
-              </svg>
-            </button>
-
+              :class="['p-2 rounded transition-colors duration-200', isShuffleMode ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800']"
+            ><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732L14.146 12.8l-1.179 4.456a1 1 0 01-1.856-.288L12.382 12H10a1 1 0 110-2h2.382l-.271-4.968A1 1 0 0112 2z" clip-rule="evenodd"></path></svg></button>
             <button
               @click="toggleRepeat"
-              :class="[
-                'p-2 rounded transition-colors duration-200',
-                repeatMode === 'none' ? 'text-gray-600 hover:text-gray-800' : 'bg-blue-100 text-blue-600'
-              ]"
+              :class="['p-2 rounded transition-colors duration-200', repeatMode === 'none' ? 'text-gray-600 hover:text-gray-800' : 'bg-blue-100 text-blue-600']"
             >
-              <svg v-if="repeatMode === 'one'" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M5 12V7H3l4-4 4 4H9v5a1 1 0 01-1 1H5zm10 1v5h2l-4 4-4-4h2V8a1 1 0 011-1h3zm-5-3h2v2h-2V10z"/>
-              </svg>
-              <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M5 12V7H3l4-4 4 4H9v5a1 1 0 01-1 1H5zm10 1v5h2l-4 4-4-4h2V8a1 1 0 011-1h3z"/>
-              </svg>
+              <svg v-if="repeatMode === 'one'" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 12V7H3l4-4 4 4H9v5a1 1 0 01-1 1H5zm10 1v5h2l-4 4-4-4h2V8a1 1 0 011-1h3zm-5-3h2v2h-2V10z"></path></svg>
+              <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 12V7H3l4-4 4 4H9v5a1 1 0 01-1 1H5zm10 1v5h2l-4 4-4-4h2V8a1 1 0 011-1h3z"></path></svg>
             </button>
           </div>
         </div>
@@ -149,7 +128,21 @@
         </div>
       </div>
 
-      <div v-if="pc_playlist_all.length > 0" class="bg-white p-6 rounded-lg shadow-xl mt-12">
+      <div class="bg-white p-6 rounded-lg shadow-xl mt-12">
+        <label for="load-playlist-select" class="block text-xl font-bold mb-3 text-gray-800">Load a Playlist:</label>
+        <select
+          id="load-playlist-select"
+          @change="loadPlaylist($event.target.value)"
+          class="block w-full p-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option disabled selected value="">-- Choose a playlist --</option>
+          <option v-for="name in playlistNames" :key="name" :value="name">
+            {{ name }}
+          </option>
+        </select>
+      </div>
+
+      <div v-if="pc_playlist_all.length > 0" class="bg-white p-6 rounded-lg shadow-xl mt-6">
         <label for="playlist-select" class="block text-xl font-bold mb-3 text-gray-800">Select a Track:</label>
         <select 
           id="playlist-select" 
@@ -170,7 +163,7 @@
                     v-for="number in 10"
                     :key="number - 1"
                     @click="handleNumberPress(number - 1)"
-                    class="bg-gradient-to-r from-blue-400 to-blue-600 text-white p-3 rounded-full w-14 h-14 flex items-center justify-center text-xl font-bold
+                    class="bg-gradient-to-r from-blue-400 to-blue-600 text-white p-4 rounded-lg w-[120px] h-20 flex items-center justify-center text-3xl font-bold
                            hover:from-blue-500 hover:to-blue-700 hover:shadow-lg transition-transform hover:scale-105"
                 >
                     {{ number - 1 }}
@@ -181,8 +174,6 @@
             </div>
         </div>
       </div>
-
-
       
       <div class="grid md:grid-cols-3 gap-8 mt-12">
         <div class="bg-white p-6 rounded-lg shadow-lg">
@@ -203,7 +194,6 @@
     </main>
     
     <footer />
-
   </div>
 </template>
 
@@ -215,6 +205,9 @@ const selectedTrack = ref('');
 const loading = ref(false);
 const error = ref(null);
 
+// NEW: State for playlist names
+const playlistNames = ref([]);
+
 // Audio player state
 const audioPlayer = ref(null);
 const isPlaying = ref(false);
@@ -224,6 +217,7 @@ const duration = ref(0);
 const volume = ref(0.7);
 const isMuted = ref(false);
 const previousVolume = ref(0.7);
+const autoPlayOnLoad = ref(false);
 
 // Play modes
 const isShuffleMode = ref(false);
@@ -232,7 +226,7 @@ const repeatMode = ref('none'); // 'none', 'all', 'one'
 // State for button-based number input
 const currentNumberString = ref('');
 let inputTimer = null;
-const INPUT_TIMEOUT = 4000; // 4 seconds
+const INPUT_TIMEOUT = 4000;
 
 // Computed properties
 const currentTrackIndex = computed(() => {
@@ -243,7 +237,7 @@ const progressPercentage = computed(() => {
   return duration.value > 0 ? (currentTime.value / duration.value) * 100 : 0;
 });
 
-// New functions for parsing track metadata for the select dropdown
+// Functions for parsing track metadata
 const getTrackTitle = (fullPath) => {
   if (!fullPath) return '';
   const parts = fullPath.split('/');
@@ -262,38 +256,77 @@ const getTrackArtist = (fullPath) => {
   return parts.length > 2 ? parts[parts.length - 3] : '';
 };
 
-
-// Now Playing display properties (still use computed for reactivity)
+// Now Playing display properties
 const trackTitle = computed(() => getTrackTitle(selectedTrack.value));
 const trackAlbum = computed(() => getTrackAlbum(selectedTrack.value));
 const trackArtist = computed(() => getTrackArtist(selectedTrack.value));
 
+// Fetch initial data on component mount
 onMounted(async () => {
   loading.value = true;
   error.value = null;
   
   try {
-    const response = await $fetch('http://127.0.0.1:8001/pc_get_playlist_all');
-    
-    console.log('Raw response from API:', response);
-    
-    if (Array.isArray(response) && response.length > 0) {
-      pc_playlist_all.value = response;
-      console.log('Playlist data received:', pc_playlist_all.value);
-    } else if (Array.isArray(response)) {
-      console.log('Fetch was successful, but the playlist is empty.');
-      pc_playlist_all.value = [];
+    // Fetch the default list of all available files
+    const allFilesResponse = await $fetch('http://127.0.0.1:8001/pc_get_allfiles');
+    if (Array.isArray(allFilesResponse)) {
+      pc_playlist_all.value = allFilesResponse;
+      console.log('Default track list loaded:', pc_playlist_all.value);
     } else {
-      console.error('Invalid response format:', response);
-      error.value = 'Invalid response format from server';
+      console.error('Invalid format for all files list:', allFilesResponse);
     }
+
+    // NEW: Fetch the list of user-saved playlist names
+    const playlistNamesResponse = await $fetch('http://127.0.0.1:8001/pc_get_playlist_List');
+    if (playlistNamesResponse && Array.isArray(playlistNamesResponse.names)) {
+      playlistNames.value = playlistNamesResponse.names;
+      console.log('Playlist names received:', playlistNames.value);
+    } else {
+      console.error('Invalid format for playlist names:', playlistNamesResponse);
+    }
+
   } catch (err) {
-    console.error('Error fetching playlist:', err);
-    error.value = `Failed to fetch playlist: ${err.message || 'Unknown error'}`;
+    console.error('Error fetching initial data:', err);
+    error.value = `Failed to fetch data: ${err.message || 'Unknown error'}`;
   } finally {
     loading.value = false;
   }
 });
+
+// NEW: Function to load tracks from a selected playlist
+const loadPlaylist = async (playlistName) => {
+  if (!playlistName) return;
+
+  console.log(`Loading playlist: ${playlistName}`);
+  loading.value = true;
+  error.value = null;
+
+  try {
+    const response = await $fetch(`http://127.0.0.1:8001/pc_get_playlist_files/${playlistName}`);
+    
+    if (Array.isArray(response)) {
+      pc_playlist_all.value = response;
+      console.log('Tracks for', playlistName, 'loaded:', pc_playlist_all.value);
+      
+      // Automatically select the first track of the new playlist
+      if (pc_playlist_all.value.length > 0) {
+        selectedTrack.value = pc_playlist_all.value[0];
+        autoPlayOnLoad.value = true; // Optional: auto-play the first track
+      } else {
+        selectedTrack.value = ''; // Clear selection if playlist is empty
+      }
+    } else {
+      console.error('Invalid response format for playlist files:', response);
+      error.value = 'Invalid response format from server';
+    }
+  } catch (err) {
+    console.error(`Error fetching playlist ${playlistName}:`, err);
+    error.value = `Failed to fetch playlist: ${err.message || 'Unknown error'}`;
+  } finally {
+    loading.value = false;
+  }
+};
+
 
 // Watch for volume changes
 watch(volume, (newVolume) => {
@@ -307,38 +340,33 @@ watch(volume, (newVolume) => {
 
 // Audio player methods
 const onTrackChange = () => {
-  if (audioPlayer.value) {
-    console.log('🎵 Loading new track:', selectedTrack.value);
-    console.log('🎵 Audio src:', audioPlayer.value.src);
-    audioPlayer.value.load();
-    currentTime.value = 0;
-    duration.value = 0;
-    isPlaying.value = false;
+  autoPlayOnLoad.value = true;
+};
+
+const handleCanPlay = () => {
+  isLoading.value = false;
+  if (autoPlayOnLoad.value) {
+    autoPlayOnLoad.value = false;
+    audioPlayer.value.play().then(() => {
+      isPlaying.value = true;
+    }).catch(error => {
+      console.error('Autoplay was prevented.', error);
+      isPlaying.value = false;
+    });
   }
 };
 
 const togglePlayPause = () => {
   if (!audioPlayer.value) return;
-  
-  console.log('🎵 Toggle play/pause - Current state:', isPlaying.value);
-  console.log('🎵 Audio element readyState:', audioPlayer.value.readyState);
-  console.log('🎵 Audio element paused:', audioPlayer.value.paused);
-  console.log('🎵 Audio element src:', audioPlayer.value.src);
-  console.log('🎵 Audio element volume:', audioPlayer.value.volume);
-  console.log('🎵 Audio element muted:', audioPlayer.value.muted);
-  
   if (isPlaying.value) {
     audioPlayer.value.pause();
     isPlaying.value = false;
-    console.log('🎵 Paused audio');
   } else {
-    audioPlayer.value.play().then(() => {
-      isPlaying.value = true;
-      console.log('🎵 Started playing audio successfully');
-    }).catch((error) => {
-      console.error('🎵 Error playing audio:', error);
+    audioPlayer.value.play().catch((error) => {
+      console.error('Error playing audio:', error);
       isPlaying.value = false;
     });
+    isPlaying.value = true; // Assume play will succeed
   }
 };
 
@@ -346,8 +374,6 @@ const onLoadedMetadata = () => {
   if (audioPlayer.value) {
     duration.value = audioPlayer.value.duration;
     audioPlayer.value.volume = volume.value;
-    console.log('🎵 Metadata loaded - Duration:', duration.value);
-    console.log('🎵 Audio format supported:', audioPlayer.value.canPlayType('audio/mpeg'));
   }
 };
 
@@ -359,17 +385,13 @@ const onTimeUpdate = () => {
 
 const onTrackEnded = () => {
   isPlaying.value = false;
-  
   if (repeatMode.value === 'one') {
-    // Repeat current track
     audioPlayer.value.currentTime = 0;
     audioPlayer.value.play();
     isPlaying.value = true;
   } else if (repeatMode.value === 'all' || isShuffleMode.value) {
-    // Go to next track
     nextTrack();
   } else {
-    // Stop at end of playlist
     const nextIndex = currentTrackIndex.value + 1;
     if (nextIndex < pc_playlist_all.value.length) {
       nextTrack();
@@ -379,21 +401,15 @@ const onTrackEnded = () => {
 
 const seekTo = (event) => {
   if (!audioPlayer.value || duration.value === 0) return;
-  
   const rect = event.currentTarget.getBoundingClientRect();
   const percentage = (event.clientX - rect.left) / rect.width;
-  const newTime = percentage * duration.value;
-  
-  audioPlayer.value.currentTime = newTime;
-  currentTime.value = newTime;
+  audioPlayer.value.currentTime = percentage * duration.value;
 };
 
 const previousTrack = () => {
   if (pc_playlist_all.value.length <= 1) return;
-  
   let newIndex;
   if (isShuffleMode.value) {
-    // Random previous track
     do {
       newIndex = Math.floor(Math.random() * pc_playlist_all.value.length);
     } while (newIndex === currentTrackIndex.value && pc_playlist_all.value.length > 1);
@@ -403,21 +419,14 @@ const previousTrack = () => {
       newIndex = repeatMode.value === 'all' ? pc_playlist_all.value.length - 1 : 0;
     }
   }
-  
   selectedTrack.value = pc_playlist_all.value[newIndex];
-  setTimeout(() => {
-    if (isPlaying.value) {
-      audioPlayer.value.play();
-    }
-  }, 100);
+  autoPlayOnLoad.value = isPlaying.value;
 };
 
 const nextTrack = () => {
   if (pc_playlist_all.value.length <= 1) return;
-  
   let newIndex;
   if (isShuffleMode.value) {
-    // Random next track
     do {
       newIndex = Math.floor(Math.random() * pc_playlist_all.value.length);
     } while (newIndex === currentTrackIndex.value && pc_playlist_all.value.length > 1);
@@ -427,13 +436,8 @@ const nextTrack = () => {
       newIndex = repeatMode.value === 'all' ? 0 : pc_playlist_all.value.length - 1;
     }
   }
-  
   selectedTrack.value = pc_playlist_all.value[newIndex];
-  setTimeout(() => {
-    if (isPlaying.value) {
-      audioPlayer.value.play();
-    }
-  }, 100);
+  autoPlayOnLoad.value = isPlaying.value;
 };
 
 const updateVolume = () => {
@@ -460,83 +464,47 @@ const toggleShuffle = () => {
 const toggleRepeat = () => {
   const modes = ['none', 'all', 'one'];
   const currentIndex = modes.indexOf(repeatMode.value);
-  const nextIndex = (currentIndex + 1) % modes.length;
-  repeatMode.value = modes[nextIndex];
+  repeatMode.value = modes[(currentIndex + 1) % modes.length];
 };
 
 const formatTime = (seconds) => {
   if (isNaN(seconds) || seconds === 0) return '0:00';
-  
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
 const handleNumberPress = (number) => {
-    // Clear any existing timer
     clearTimeout(inputTimer);
-    
-    // Add the new digit
     let newNumberString = currentNumberString.value + String(number);
-    
-    // Trim the string if it's longer than 4 digits
     if (newNumberString.length > 4) {
         newNumberString = newNumberString.substring(newNumberString.length - 4);
     }
-    
     currentNumberString.value = newNumberString;
-    
-    // Set a new timer to play the track after the timeout
-    inputTimer = setTimeout(() => {
-        playTrackFromInput();
-    }, INPUT_TIMEOUT);
+    inputTimer = setTimeout(playTrackFromInput, INPUT_TIMEOUT);
 };
 
 const playTrackFromInput = () => {
-    // Clear the timer after a track is played
     clearTimeout(inputTimer);
-    
     const maxIndex = pc_playlist_all.value.length;
     let index = parseInt(currentNumberString.value, 10);
-    
-    if (isNaN(index)) {
-        alert('Invalid input. Please enter a valid number.');
+    if (isNaN(index) || index === 0) {
+        alert('Invalid index. Please enter a number between 1 and ' + maxIndex);
         currentNumberString.value = '';
         return;
     }
-
-    if (index === 0) {
-        alert('Track index cannot be 0. Please enter a number between 1 and ' + maxIndex);
-        currentNumberString.value = '';
-        return;
-    }
-    
     if (index > maxIndex) {
-        index = index % maxIndex;
-        if (index === 0) {
-            index = maxIndex;
-        }
+        index = (index % maxIndex === 0) ? maxIndex : index % maxIndex;
     }
-    
-    // Set the selected track and play it
     selectedTrack.value = pc_playlist_all.value[index - 1];
-    setTimeout(() => {
-        if (audioPlayer.value) {
-            audioPlayer.value.play();
-            isPlaying.value = true;
-        }
-    }, 100);
-    
-    // Reset the number string
+    autoPlayOnLoad.value = true;
     currentNumberString.value = '';
 };
 
-// Add debugging event handlers
+// Debugging event handlers
 const onAudioError = (event) => {
   console.error('🎵 Audio error:', event);
   console.error('🎵 Audio error code:', audioPlayer.value?.error?.code);
-  console.error('🎵 Audio error message:', audioPlayer.value?.error?.message);
-  console.error('🎵 Audio src that failed:', audioPlayer.value?.src);
 };
 
 const onCanPlayThrough = () => {
@@ -547,6 +515,7 @@ const onCanPlayThrough = () => {
 <style scoped>
 /* Custom slider styling */
 .slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
   appearance: none;
   height: 16px;
   width: 16px;
