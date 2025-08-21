@@ -258,8 +258,8 @@ async def index_post():
     global cron_Min
     global cron_pi_Index
     return JSONResponse({
-        "pc_Playlist" : pc_PLAYLIST_ALL,
-        "pi_Playlist" : pi_PLAYLIST_ALL,
+        "pc_Playlist" : pc_ALLFILES,
+        "pi_Playlist" : pi_ALLFILES,
         "pi_Index" : pi_Index,
         "pi_Playing" : pi_Playing,
         "pi_Playmopde" : pi_Playmode,

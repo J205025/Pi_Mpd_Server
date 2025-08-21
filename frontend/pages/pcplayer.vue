@@ -265,10 +265,22 @@ const trackArtist = computed(() => getTrackArtist(selectedTrack.value));
 onMounted(async () => {
   loading.value = true;
   error.value = null;
-  
+
+
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+    // Redirect to login or show an error
+    window.location.href = '/login';
+    return;
+  }
+
   try {
     // Fetch the default list of all available files
-    const allFilesResponse = await $fetch('http://127.0.0.1:8001/pc_get_allfiles');
+    const allFilesResponse = await $fetch('http://127.0.0.1:8001/pc_get_allfiles', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     if (Array.isArray(allFilesResponse)) {
       pc_playlist_all.value = allFilesResponse;
       console.log('Default track list loaded:', pc_playlist_all.value);
@@ -277,7 +289,11 @@ onMounted(async () => {
     }
 
     // NEW: Fetch the list of user-saved playlist names
-    const playlistNamesResponse = await $fetch('http://127.0.0.1:8001/pc_get_playlist_List');
+    const playlistNamesResponse = await $fetch('http://127.0.0.1:8001/pc_get_playlist_List', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     if (playlistNamesResponse && Array.isArray(playlistNamesResponse.names)) {
       playlistNames.value = playlistNamesResponse.names;
       console.log('Playlist names received:', playlistNames.value);
@@ -301,8 +317,19 @@ const loadPlaylist = async (playlistName) => {
   loading.value = true;
   error.value = null;
 
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+    // Redirect to login or show an error
+    window.location.href = '/login';
+    return;
+  }
+
   try {
-    const response = await $fetch(`http://127.0.0.1:8001/pc_get_playlist_files/${playlistName}`);
+    const response = await $fetch(`http://127.0.0.1:8001/pc_get_playlist_files/${playlistName}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     
     if (Array.isArray(response)) {
       pc_playlist_all.value = response;
@@ -311,7 +338,7 @@ const loadPlaylist = async (playlistName) => {
       // Automatically select the first track of the new playlist
       if (pc_playlist_all.value.length > 0) {
         selectedTrack.value = pc_playlist_all.value[0];
-        autoPlayOnLoad.value = true; // Optional: auto-play the first track
+        autoPlayOnLoad.value = false; // Optional: auto-play the first track
       } else {
         selectedTrack.value = ''; // Clear selection if playlist is empty
       }
