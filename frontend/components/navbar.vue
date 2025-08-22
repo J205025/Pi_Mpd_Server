@@ -45,6 +45,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 
+// Get runtime config
+const config = useRuntimeConfig();
+const apiBase = config.public.apiBase;
+
 // Mobile menu state
 const isMobileMenuOpen = ref(false);
 
@@ -65,7 +69,7 @@ const checkAuthStatus = async () => {
       return;
     }
 
-    const response = await fetch('http://127.0.0.1:8001/users/me/', {
+    const response = await fetch(`${apiBase}/users/me/`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

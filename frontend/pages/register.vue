@@ -7,7 +7,6 @@
         <h1 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">Create Account</h1>
         
         <form @submit.prevent="handleRegister" class="space-y-6">
-          <!-- Name Field -->
           <div>
             <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
               Full Name
@@ -24,7 +23,6 @@
             <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
           </div>
 
-          <!-- Password Field -->
           <div>
             <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
               Password
@@ -41,7 +39,6 @@
             <p v-if="errors.password" class="mt-1 text-sm text-red-600">{{ errors.password }}</p>
           </div>
 
-          <!-- Confirm Password Field -->
           <div>
             <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
               Confirm Password
@@ -58,7 +55,6 @@
             <p v-if="errors.confirmPassword" class="mt-1 text-sm text-red-600">{{ errors.confirmPassword }}</p>
           </div>
 
-          <!-- Submit Button -->
           <button
             type="submit"
             :disabled="isLoading"
@@ -69,12 +65,10 @@
           </button>
         </form>
 
-        <!-- Success Message -->
         <div v-if="successMessage" class="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
           {{ successMessage }}
         </div>
 
-        <!-- Login Link -->
         <div class="mt-6 text-center">
           <p class="text-gray-600">
             Already have an account?
@@ -90,6 +84,10 @@
 
 <script setup>
 import { ref, reactive } from 'vue';
+
+// Get runtime config
+const config = useRuntimeConfig();
+const apiBase = config.public.apiBase;
 
 // Form data
 const form = reactive({
@@ -146,7 +144,7 @@ const handleRegister = async () => {
 
   try {
     // Call your FastAPI backend
-    const response = await fetch('http://127.0.0.1:8001/register', {
+    const response = await fetch(`${apiBase}/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

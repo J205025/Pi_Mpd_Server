@@ -29,7 +29,7 @@ export default defineNuxtConfig({
   },
   
   // CSS framework (if using Tailwind)
-  css: ['~/assets/css/tailwind.css'], // Corrected to use tailwind.css
+  css: ['~/assets/css/tailwind.css'],
   
   // Modules
   modules: [
@@ -39,9 +39,17 @@ export default defineNuxtConfig({
   // Development server configuration
   devtools: { enabled: true },
   
-  // Router configuration for SPA
-  router: {
-    // Ensure proper SPA routing
-    mode: 'history'
+  // Runtime configuration
+  runtimeConfig: {
+    // 這些變數只在伺服器端可用
+    // privateRuntimeConfig: {}, 
+    
+    // public 中的變數在客戶端和伺服器端都可用
+    public: {
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://127.0.0.1:8001'
+    }
   }
+  
+  // Note: router.mode is deprecated in Nuxt 3
+  // SPA routing is handled by ssr: false
 })

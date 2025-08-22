@@ -65,7 +65,6 @@
         </div>
       </div>
 
-      <!-- Playlist Name Dialog -->
       <div v-if="showSaveDialog" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
         <div class="bg-white p-6 rounded-lg shadow-xl">
           <h3 class="text-xl font-bold mb-4">Enter Playlist Name</h3>
@@ -108,6 +107,10 @@
 <script setup>
 import { ref } from 'vue';
 
+// Get runtime config
+const config = useRuntimeConfig();
+const apiBase = config.public.apiBase;
+
 const folderName = ref('');
 const fileList = ref([]);
 const isLoading = ref(false);
@@ -133,7 +136,7 @@ const getFiles = async () => {
       throw new Error("Authentication token is not available. Please log in.");
     }
     
-    const response = await fetch(`http://localhost:8001/pc_gen_fileslist/${encodeURIComponent(folderName.value)}`, {
+    const response = await fetch(`${apiBase}/pc_gen_fileslist/${encodeURIComponent(folderName.value)}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -193,7 +196,7 @@ const savePlaylist = async () => {
       throw new Error("Authentication token is not available. Please log in.");
     }
 
-    const response = await fetch(`http://localhost:8001/pc_save_playlists_tolist/${encodeURIComponent(newPlaylistName.value)}`,
+    const response = await fetch(`${apiBase}/pc_save_playlists_tolist/${encodeURIComponent(newPlaylistName.value)}`,
     {
       method: 'POST',
       headers: {

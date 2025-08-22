@@ -20,7 +20,7 @@
 
         <audio
           ref="audioPlayer"
-          :src="`http://127.0.0.1:8001/music/${selectedTrack}`"
+          :src="`${apiBase}/music/${selectedTrack}`"
           @loadedmetadata="onLoadedMetadata"
           @timeupdate="onTimeUpdate"
           @ended="onTrackEnded"
@@ -184,6 +184,10 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue';
 
+// Get runtime config
+const config = useRuntimeConfig();
+const apiBase = config.public.apiBase;
+
 const pc_playlist_all = ref([]);
 const selectedTrack = ref('');
 const loading = ref(false);
@@ -260,7 +264,7 @@ onMounted(async () => {
 
   try {
     // Fetch the default list of all available files
-    const allFilesResponse = await $fetch('http://127.0.0.1:8001/pc_get_allfiles', {
+    const allFilesResponse = await $fetch(`${apiBase}/pc_get_allfiles`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -273,7 +277,7 @@ onMounted(async () => {
     }
 
     // NEW: Fetch the list of user-saved playlist names
-    const playlistNamesResponse = await $fetch('http://127.0.0.1:8001/pc_get_playlist_List', {
+    const playlistNamesResponse = await $fetch(`${apiBase}/pc_get_playlist_List`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -309,7 +313,7 @@ const loadPlaylist = async (playlistName) => {
   }
 
   try {
-    const response = await $fetch(`http://127.0.0.1:8001/pc_get_playlist_files/${playlistName}`, {
+    const response = await $fetch(`${apiBase}/pc_get_playlist_files/${playlistName}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }

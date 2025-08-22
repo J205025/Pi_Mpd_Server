@@ -90,6 +90,10 @@
 <script setup>
 import { ref, reactive } from 'vue';
 
+// Get runtime config
+const config = useRuntimeConfig();
+const apiBase = config.public.apiBase;
+
 // Form data
 const form = reactive({
   name: '',
@@ -140,7 +144,7 @@ const handleLogin = async () => {
     formData.append('password', form.password);
 
     // Call your FastAPI backend token endpoint
-    const response = await fetch('http://127.0.0.1:8001/token', {
+    const response = await fetch(`${apiBase}/token`, {
       method: 'POST',
       body: formData
     });

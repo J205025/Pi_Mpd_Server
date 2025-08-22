@@ -197,6 +197,10 @@ app.add_middleware(
 
 # --- API Endpoints ---
 # Serve the main index.html file for the root path
+@app.get("/favicon.ico")
+async def favicon():
+    return FileResponse(os.path.join("static", "favicon.ico"))
+
 @app.get("/")
 async def root():
     """
