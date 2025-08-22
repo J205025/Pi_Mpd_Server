@@ -25,6 +25,7 @@
           <p class="text-gray-700">Our third feature is revolutionary, providing insights and capabilities you won't find anywhere else.</p>
         </div>
       </div>
+      
     </main>
 
     <footer />

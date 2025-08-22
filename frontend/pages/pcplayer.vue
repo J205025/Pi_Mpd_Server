@@ -20,7 +20,6 @@
 
         <audio
           ref="audioPlayer"
-          :src="`${apiBase}/music/${selectedTrack}`"
           @loadedmetadata="onLoadedMetadata"
           @timeupdate="onTimeUpdate"
           @ended="onTrackEnded"
@@ -175,6 +174,160 @@
         </div>
       </div>
 
+      <div class="grid md:grid-cols-5 gap-4 mt-12">
+      <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+      <img 
+        src="/BBC_World_Service.png" 
+        alt="BBC World Service logo" 
+        @click="playStream"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <p class="text-gray-700 mt-4">Click .</p>
+       </div>
+
+       <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+       <img 
+        src="/LBC.png" 
+        alt="LBC logo" 
+        @click="playStream"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+        >
+        <p class="text-gray-700 mt-4">Click .</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <img 
+        src="/Classical_FM.png" 
+        alt="Classical_FM logo" 
+        @click="playStream"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+        >
+        <p class="text-gray-700 mt-4">Click .</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <img 
+        src="/TIMES_Radio.png" 
+        alt="BTIMES_Radio logo" 
+        @click="playStream"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+        >
+        <p class="text-gray-700 mt-4">Click .</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <img 
+        src="/Gold.jpg" 
+        alt="Gold logo" 
+        @click="playStream"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+        >
+        <p class="text-gray-700 mt-4">Click .</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <img 
+        src="/BBC_Radio_1.png" 
+        alt="BBC_Radio_1 logo" 
+        @click="playStream"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+        >
+        <p class="text-gray-700 mt-4">Click .</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <img 
+        src="/BBC_Radio_2.png" 
+        alt="BBC_Radio_2 logo" 
+        @click="playStream"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+        >
+        <p class="text-gray-700 mt-4">Click .</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <img 
+        src="/BBC_Radio_3.png" 
+        alt="BBC_Radio_3 logo" 
+        @click="playStream"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+        >
+        <p class="text-gray-700 mt-4">Click .</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <img 
+        src="/BBC_Radio_4.png" 
+        alt="BBC_Radio_4 logo" 
+        @click="playStream"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+        >
+        <p class="text-gray-700 mt-4">Click .</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <img 
+        src="/BBC_Radio_5.png" 
+        alt="BBC_Radio_5 logo" 
+        @click="playStream"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+        >
+        <p class="text-gray-700 mt-4">Click .</p>
+        </div>
+
+
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <img 
+        src="/Classical_Hits_1000.jpg" 
+        alt="Classical_Hits_1000 logo" 
+        @click="playStream"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+        >
+        <p class="text-gray-700 mt-4">Click .</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <img 
+        src="/Classical_Mozart.jpg" 
+        alt="Classical_Mozart logo" 
+        @click="playStream"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+        >
+        <p class="text-gray-700 mt-4">Click .</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <img 
+        src="/SKY_News.png" 
+        alt="SKY_News logo" 
+        @click="playStream"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+        >
+        <p class="text-gray-700 mt-4">Click .</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <img 
+        src="/TIMES_Radio.png" 
+        alt="TIMES_Radio logo" 
+        @click="playStream"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+        >
+        <p class="text-gray-700 mt-4">Click .</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <img 
+        src="/BBC_Radio_Wales.png" 
+        alt="BBC_Radio_Wales logo" 
+        @click="playStream"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+        >
+        <p class="text-gray-700 mt-4">Click .</p>
+        </div>
+
+      </div>
+
     </main>
     
     <footer />
@@ -218,6 +371,7 @@ const INPUT_TIMEOUT = 4000;
 
 // Computed properties
 const currentTrackIndex = computed(() => {
+  if (selectedTrack.value === 'LIVE_STREAM_BBC') return -1;
   return pc_playlist_all.value.findIndex(track => track === selectedTrack.value);
 });
 
@@ -244,10 +398,20 @@ const getTrackArtist = (fullPath) => {
   return parts.length > 2 ? parts[parts.length - 3] : '';
 };
 
-// Now Playing display properties
-const trackTitle = computed(() => getTrackTitle(selectedTrack.value));
-const trackAlbum = computed(() => getTrackAlbum(selectedTrack.value));
-const trackArtist = computed(() => getTrackArtist(selectedTrack.value));
+// ==== MODIFIED COMPUTED PROPERTIES FOR DISPLAY ====
+const trackTitle = computed(() => {
+  if (selectedTrack.value === 'LIVE_STREAM_BBC') return 'BBC World Service';
+  return getTrackTitle(selectedTrack.value);
+});
+const trackAlbum = computed(() => {
+  if (selectedTrack.value === 'LIVE_STREAM_BBC') return '';
+  return getTrackAlbum(selectedTrack.value);
+});
+const trackArtist = computed(() => {
+  if (selectedTrack.value === 'LIVE_STREAM_BBC') return 'Live Radio';
+  return getTrackArtist(selectedTrack.value);
+});
+// ===============================================
 
 // Fetch initial data on component mount
 onMounted(async () => {
@@ -353,6 +517,51 @@ watch(volume, (newVolume) => {
   }
 });
 
+// ==== NEW WATCHER FOR SOURCE CONTROL ====
+watch(selectedTrack, (newTrack) => {
+  if (!audioPlayer.value) return;
+  // This watcher handles changing the source ONLY for playlist tracks.
+  // The live stream source is set manually in its own function.
+  if (newTrack && newTrack !== 'LIVE_STREAM_BBC') {
+    audioPlayer.value.src = `${apiBase}/music/${newTrack}`;
+    audioPlayer.value.load(); // Tell the browser to load the new source
+  }
+});
+// ======================================
+
+// ==== NEW FUNCTION TO PLAY BBC STREAM ====
+const playStream = async () => {
+  if (!audioPlayer.value) return;
+
+  isLoading.value = true;
+  if (isPlaying.value) {
+    audioPlayer.value.pause();
+    isPlaying.value = false;
+  }
+  
+  const streamUrl = 'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service';
+  
+  // Set a special identifier for the selected track
+  selectedTrack.value = 'LIVE_STREAM_BBC';
+  
+  // Manually set the src for the stream
+  audioPlayer.value.src = streamUrl;
+
+  // Reset duration and time for live stream
+  duration.value = 0;
+  currentTime.value = 0;
+
+  try {
+    await audioPlayer.value.load(); // Load the new stream source
+    await audioPlayer.value.play();
+    isPlaying.value = true;
+  } catch (error) {
+    console.error("Error playing BBC stream:", error);
+    isPlaying.value = false;
+  }
+};
+// =========================================
+
 // Audio player methods
 const onTrackChange = () => {
   autoPlayOnLoad.value = true;
@@ -372,7 +581,7 @@ const handleCanPlay = () => {
 };
 
 const togglePlayPause = () => {
-  if (!audioPlayer.value) return;
+  if (!audioPlayer.value || !audioPlayer.value.src) return;
   if (isPlaying.value) {
     audioPlayer.value.pause();
     isPlaying.value = false;
@@ -387,7 +596,9 @@ const togglePlayPause = () => {
 
 const onLoadedMetadata = () => {
   if (audioPlayer.value) {
-    duration.value = audioPlayer.value.duration;
+    // For live streams, duration can be Infinity. Handle this.
+    const newDuration = audioPlayer.value.duration;
+    duration.value = isFinite(newDuration) ? newDuration : 0;
     audioPlayer.value.volume = volume.value;
   }
 };
@@ -400,6 +611,9 @@ const onTimeUpdate = () => {
 
 const onTrackEnded = () => {
   isPlaying.value = false;
+  // Do not auto-play next track if it was a stream
+  if (selectedTrack.value === 'LIVE_STREAM_BBC') return;
+
   if (repeatMode.value === 'one') {
     audioPlayer.value.currentTime = 0;
     audioPlayer.value.play();
@@ -415,6 +629,7 @@ const onTrackEnded = () => {
 };
 
 const seekTo = (event) => {
+  // Disable seeking for live streams
   if (!audioPlayer.value || duration.value === 0) return;
   const rect = event.currentTarget.getBoundingClientRect();
   const percentage = (event.clientX - rect.left) / rect.width;
