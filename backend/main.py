@@ -87,6 +87,7 @@ RADIO_STREAMS = {
 def genFilelist(subfolder):
     global pc_Indexmax
     global music_Basefolder
+    
     songs = []; 
     for path, subdirs, files in os.walk(music_Basefolder + subfolder, followlinks=True):
        # for name in files:
@@ -606,9 +607,10 @@ async def pc_delete_playlist_list(
 
 @app.get("/pc_get_allfiles")
 async def pc_get_allfiles():
-    global pc_ALLFILES
-    print("/pc_get_allfiles:"+ str(pc_ALLFILES))
-    return pc_ALLFILES
+    #global pc_ALLFILES
+    #print("/pc_get_allfiles:"+ str(pc_ALLFILES))
+    files = [""]
+    return files
 
 @app.get("/pc_gen_fileslist/{foldername}")
 async def pc_gen_fileslist(

@@ -5,7 +5,7 @@
 
     <main class="container mx-auto mt-10 mb-10 p-6 min-h-screen">
       <div class="bg-white p-2 rounded-lg shadow-xl text-center">
-        <h1 class="text-5xl font-extrabold text-gray-900 mb-4">Pi Player</h1>
+        <h1 class="text-5xl font-extrabold text-gray-900 mb-4">Pi Audio Player</h1>
 
       </div>
 

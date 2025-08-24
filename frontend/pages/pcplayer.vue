@@ -5,7 +5,7 @@
 
     <main class="container mx-auto mt-10 mb-10 p-6 min-h-screen">
       <div class="bg-white p-2 rounded-lg shadow-xl text-center">
-        <h1 class="text-5xl font-extrabold text-gray-900 mb-4">Pc Player</h1>
+        <h1 class="text-5xl font-extrabold text-gray-900 mb-4">Pc Audio Player</h1>
       </div>
 
       <div v-if="selectedTrack" class="bg-white p-6 rounded-lg shadow-xl mt-8">
@@ -28,7 +28,7 @@
           @error="onAudioError"
           @canplaythrough="onCanPlayThrough"
           preload="metadata"
-          class="hidden"
+          class="w-full"
         ></audio>
 
         <div class="mb-6">
@@ -128,7 +128,7 @@
       </div>
 
       <div class="bg-white p-6 rounded-lg shadow-xl mt-12">
-        <label for="load-playlist-select" class="block text-xl font-bold mb-3 text-gray-800">Load a Playlist:</label>
+        <label for="load-playlist-select" class="block text-xl font-bold mb-3 text-gray-800">選擇歌單:</label>
         <select
           id="load-playlist-select"
           @change="loadPlaylist($event.target.value)"
@@ -142,14 +142,14 @@
       </div>
 
       <div v-if="pc_playlist_all.length > 0" class="bg-white p-6 rounded-lg shadow-xl mt-6">
-        <label for="playlist-select" class="block text-xl font-bold mb-3 text-gray-800">Select a Track:</label>
+        <label for="playlist-select" class="block text-xl font-bold mb-3 text-gray-800">選擇歌曲:</label>
         <select 
           id="playlist-select" 
           v-model="selectedTrack" 
           @change="onTrackChange"
           class="block w-full p-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
         >
-          <option disabled value="">-- Please choose a track --</option>
+          <option disabled value="">-- Choose a track --</option>
           <option v-for="(track, index) in pc_playlist_all" :key="track" :value="track">
             {{ index + 1 }} - {{ getTrackArtist(track) }} - {{ getTrackAlbum(track) }} - {{ getTrackTitle(track) }}
           </option>
@@ -175,155 +175,290 @@
       </div>
 
       <div class="grid md:grid-cols-5 gap-4 mt-12">
-      <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+      <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
       <img 
         src="/BBC_World_Service.png" 
         alt="BBC World Service logo" 
-        @click="playStream"
+        @click="playStream('https://stream.live.vc.bbcmedia.co.uk/bbc_world_service', 'BBC World Service', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
-      <p class="text-gray-700 mt-4">Click .</p>
+      <div v-if="loadingStreamTitle === 'BBC World Service'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo.title === 'BBC World Service'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
        </div>
 
-       <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+       <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
        <img 
         src="/LBC.png" 
         alt="LBC logo" 
-        @click="playStream"
+        @click="playStream('https://media-ssl.musicradio.com/LBCLondon', 'LBC', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
         >
-        <p class="text-gray-700 mt-4">Click .</p>
+        <div v-if="loadingStreamTitle === 'LBC'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo.title === 'LBC'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
         <img 
         src="/Classical_FM.png" 
         alt="Classical_FM logo" 
-        @click="playStream"
+        @click="playStream('https://media-the.musicradio.com/ClassicFM', 'Classical FM', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
         >
-        <p class="text-gray-700 mt-4">Click .</p>
+        <div v-if="loadingStreamTitle === 'Classical FM'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo.title === 'Classical FM'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
         </div>
         
-        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
         <img 
         src="/TIMES_Radio.png" 
         alt="BTIMES_Radio logo" 
-        @click="playStream"
+        @click="playStream('https://timesradio.wireless.radio/stream', 'Times Radio', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
         >
-        <p class="text-gray-700 mt-4">Click .</p>
+        <div v-if="loadingStreamTitle === 'Times Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo.title === 'Times Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
         <img 
         src="/Gold.jpg" 
         alt="Gold logo" 
-        @click="playStream"
+        @click="playStream('https://media-ssl.musicradio.com/Gold', 'Gold', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
         >
-        <p class="text-gray-700 mt-4">Click .</p>
+        <div v-if="loadingStreamTitle === 'Gold'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo.title === 'Gold'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
         <img 
         src="/BBC_Radio_1.png" 
         alt="BBC_Radio_1 logo" 
-        @click="playStream"
+        @click="playStream('https://lstn.lv/bbcradio.m3u8?station=bbc_radio_one', 'BBC Radio 1', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
         >
-        <p class="text-gray-700 mt-4">Click .</p>
+        <div v-if="loadingStreamTitle === 'BBC Radio 1'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo.title === 'BBC Radio 1'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
         <img 
         src="/BBC_Radio_2.png" 
         alt="BBC_Radio_2 logo" 
-        @click="playStream"
+        @click="playStream('https://stream.live.vc.bbcmedia.co.uk/bbc_radio_two', 'BBC Radio 2', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
         >
-        <p class="text-gray-700 mt-4">Click .</p>
+        <div v-if="loadingStreamTitle === 'BBC Radio 2'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo.title === 'BBC Radio 2'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
         <img 
         src="/BBC_Radio_3.png" 
         alt="BBC_Radio_3 logo" 
-        @click="playStream"
+        @click="playStream('https://stream.live.vc.bbcmedia.co.uk/bbc_radio_three', 'BBC Radio 3', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
         >
-        <p class="text-gray-700 mt-4">Click .</p>
+        <div v-if="loadingStreamTitle === 'BBC Radio 3'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo.title === 'BBC Radio 3'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
         <img 
         src="/BBC_Radio_4.png" 
         alt="BBC_Radio_4 logo" 
-        @click="playStream"
+        @click="playStream('https://stream.live.vc.bbcmedia.co.uk/bbc_radio_fourfm', 'BBC Radio 4', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
         >
-        <p class="text-gray-700 mt-4">Click .</p>
+        <div v-if="loadingStreamTitle === 'BBC Radio 4'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo.title === 'BBC Radio 4'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
         <img 
         src="/BBC_Radio_5.png" 
         alt="BBC_Radio_5 logo" 
-        @click="playStream"
+        @click="playStream('https://stream.live.vc.bbcmedia.co.uk/bbc_radio_five_live', 'BBC Radio 5 Live', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
         >
-        <p class="text-gray-700 mt-4">Click .</p>
+        <div v-if="loadingStreamTitle === 'BBC Radio 5 Live'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo.title === 'BBC Radio 5 Live'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
         </div>
 
 
-        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
         <img 
         src="/Classical_Hits_1000.jpg" 
         alt="Classical_Hits_1000 logo" 
-        @click="playStream"
+        @click="playStream('http://media-ssl.musicradio.com/ClassicalHits', 'Classical Hits', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
         >
-        <p class="text-gray-700 mt-4">Click .</p>
+        <div v-if="loadingStreamTitle === 'Classical Hits'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo.title === 'Classical Hits'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
         <img 
         src="/Classical_Mozart.jpg" 
         alt="Classical_Mozart logo" 
-        @click="playStream"
+        @click="playStream('http://media-ssl.musicradio.com/ClassicalMozart', 'Classical Mozart', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
         >
-        <p class="text-gray-700 mt-4">Click .</p>
+        <div v-if="loadingStreamTitle === 'Classical Mozart'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo.title === 'Classical Mozart'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
         <img 
         src="/SKY_News.png" 
         alt="SKY_News logo" 
-        @click="playStream"
+        @click="playStream('https://sky-live.hls.adaptive.skynews.com/hls/live/2012487/skynews/skynews.m3u8', 'Sky News', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
         >
-        <p class="text-gray-700 mt-4">Click .</p>
+        <div v-if="loadingStreamTitle === 'Sky News'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo.title === 'Sky News'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
         <img 
         src="/TIMES_Radio.png" 
         alt="TIMES_Radio logo" 
-        @click="playStream"
+        @click="playStream('http://media-ssl.musicradio.com/TimesRadio', 'Times Radio', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
         >
-        <p class="text-gray-700 mt-4">Click .</p>
+        <div v-if="loadingStreamTitle === 'Times Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo.title === 'Times Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
         <img 
         src="/BBC_Radio_Wales.png" 
         alt="BBC_Radio_Wales logo" 
-        @click="playStream"
+        @click="playStream('https://stream.live.vc.bbcmedia.co.uk/bbc_radio_wales_fm', 'BBC Radio Wales', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
         >
-        <p class="text-gray-700 mt-4">Click .</p>
+        <div v-if="loadingStreamTitle === 'BBC Radio Wales'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo.title === 'BBC Radio Wales'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg opacity-100 transition-opacity">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
         </div>
 
       </div>
@@ -358,7 +493,7 @@ const duration = ref(0);
 const volume = ref(0.7);
 const isMuted = ref(false);
 const previousVolume = ref(0.7);
-const autoPlayOnLoad = ref(false);
+const autoPlayOnLoad = ref(true);
 
 // Play modes
 const isShuffleMode = ref(false);
@@ -369,9 +504,21 @@ const currentNumberString = ref('');
 let inputTimer = null;
 const INPUT_TIMEOUT = 4000;
 
+// ==== NEW STATE FOR STREAM METADATA ====
+const currentStreamInfo = ref(null);
+const loadingStreamTitle = ref(null);
+let loadingTimer = null;
+const LOADING_TIMEOUT = 15000;
+
+
+// Computed property to check if a live stream is playing
+const isPlayingLiveStream = computed(() => {
+  return isPlaying.value && selectedTrack.value === 'LIVE_STREAM';
+});
+
 // Computed properties
 const currentTrackIndex = computed(() => {
-  if (selectedTrack.value === 'LIVE_STREAM_BBC') return -1;
+  if (selectedTrack.value === 'LIVE_STREAM') return -1;
   return pc_playlist_all.value.findIndex(track => track === selectedTrack.value);
 });
 
@@ -400,16 +547,22 @@ const getTrackArtist = (fullPath) => {
 
 // ==== MODIFIED COMPUTED PROPERTIES FOR DISPLAY ====
 const trackTitle = computed(() => {
-  if (selectedTrack.value === 'LIVE_STREAM_BBC') return 'BBC World Service';
-  return getTrackTitle(selectedTrack.value);
+    if (selectedTrack.value === 'LIVE_STREAM' && currentStreamInfo.value) {
+        return currentStreamInfo.value.title;
+    }
+    return getTrackTitle(selectedTrack.value);
 });
 const trackAlbum = computed(() => {
-  if (selectedTrack.value === 'LIVE_STREAM_BBC') return '';
-  return getTrackAlbum(selectedTrack.value);
+    if (selectedTrack.value === 'LIVE_STREAM') {
+        return '';
+    }
+    return getTrackAlbum(selectedTrack.value);
 });
 const trackArtist = computed(() => {
-  if (selectedTrack.value === 'LIVE_STREAM_BBC') return 'Live Radio';
-  return getTrackArtist(selectedTrack.value);
+    if (selectedTrack.value === 'LIVE_STREAM' && currentStreamInfo.value) {
+        return currentStreamInfo.value.artist;
+    }
+    return getTrackArtist(selectedTrack.value);
 });
 // ===============================================
 
@@ -436,6 +589,11 @@ onMounted(async () => {
     if (Array.isArray(allFilesResponse)) {
       pc_playlist_all.value = allFilesResponse;
       console.log('Default track list loaded:', pc_playlist_all.value);
+      // If the playlist has tracks, select the first one to display the player.
+      if (pc_playlist_all.value.length > 0) {
+        selectedTrack.value = pc_playlist_all.value[0];
+        autoPlayOnLoad.value = false; // Prevents it from playing automatically
+      }      
     } else {
       console.error('Invalid format for all files list:', allFilesResponse);
     }
@@ -522,42 +680,57 @@ watch(selectedTrack, (newTrack) => {
   if (!audioPlayer.value) return;
   // This watcher handles changing the source ONLY for playlist tracks.
   // The live stream source is set manually in its own function.
-  if (newTrack && newTrack !== 'LIVE_STREAM_BBC') {
+  if (newTrack && newTrack !== 'LIVE_STREAM') {
     audioPlayer.value.src = `${apiBase}/music/${newTrack}`;
     audioPlayer.value.load(); // Tell the browser to load the new source
   }
 });
 // ======================================
 
-// ==== NEW FUNCTION TO PLAY BBC STREAM ====
-const playStream = async () => {
+// ==== MODIFIED FUNCTION TO PLAY STREAMS ====
+const playStream = async (streamUrl, streamTitle, streamArtist) => {
   if (!audioPlayer.value) return;
 
-  isLoading.value = true;
+  // Clear any previous loading timer
+  clearTimeout(loadingTimer);
+  // Set the title of the stream currently attempting to load
+  loadingStreamTitle.value = streamTitle;
+
   if (isPlaying.value) {
     audioPlayer.value.pause();
     isPlaying.value = false;
   }
   
-  const streamUrl = 'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service';
-  
-  // Set a special identifier for the selected track
-  selectedTrack.value = 'LIVE_STREAM_BBC';
-  
-  // Manually set the src for the stream
+  // Start a timer to stop loading and hide the icon if playback doesn't begin
+  loadingTimer = setTimeout(() => {
+    if (!isPlaying.value || selectedTrack.value !== 'LIVE_STREAM') {
+      console.log('Stream loading timed out. Stopping playback attempt.');
+      audioPlayer.value.pause();
+      audioPlayer.value.src = '';
+      loadingStreamTitle.value = null; // Hide the icon
+    }
+  }, LOADING_TIMEOUT);
+
+  // Set stream info and source
+  selectedTrack.value = 'LIVE_STREAM';
+  currentStreamInfo.value = {
+    title: streamTitle,
+    artist: streamArtist
+  };
   audioPlayer.value.src = streamUrl;
 
-  // Reset duration and time for live stream
-  duration.value = 0;
-  currentTime.value = 0;
-
   try {
-    await audioPlayer.value.load(); // Load the new stream source
+    await audioPlayer.value.load();
     await audioPlayer.value.play();
     isPlaying.value = true;
+    clearTimeout(loadingTimer); // Clear the timer on successful playback
+    loadingStreamTitle.value = null; // Hide the icon
   } catch (error) {
-    console.error("Error playing BBC stream:", error);
+    console.error("Error playing stream:", error);
     isPlaying.value = false;
+    clearTimeout(loadingTimer); // Clear the timer on error
+    loadingStreamTitle.value = null; // Hide the icon
+    alert(`Failed to connect to ${streamTitle}. The station may be offline or your connection may be blocked.`);
   }
 };
 // =========================================
@@ -569,6 +742,9 @@ const onTrackChange = () => {
 
 const handleCanPlay = () => {
   isLoading.value = false;
+  // Clear the timer and loading icon state when playback is ready
+  clearTimeout(loadingTimer);
+  loadingStreamTitle.value = null; 
   if (autoPlayOnLoad.value) {
     autoPlayOnLoad.value = false;
     audioPlayer.value.play().then(() => {
@@ -612,7 +788,7 @@ const onTimeUpdate = () => {
 const onTrackEnded = () => {
   isPlaying.value = false;
   // Do not auto-play next track if it was a stream
-  if (selectedTrack.value === 'LIVE_STREAM_BBC') return;
+  if (selectedTrack.value === 'LIVE_STREAM') return;
 
   if (repeatMode.value === 'one') {
     audioPlayer.value.currentTime = 0;
@@ -735,6 +911,19 @@ const playTrackFromInput = () => {
 const onAudioError = (event) => {
   console.error('🎵 Audio error:', event);
   console.error('🎵 Audio error code:', audioPlayer.value?.error?.code);
+  
+  // Stop any loading indicators
+  isLoading.value = false;
+  loadingStreamTitle.value = null;
+  clearTimeout(loadingTimer);
+  isPlaying.value = false;
+  
+  // Inform the user with a specific message
+  if (selectedTrack.value === 'LIVE_STREAM') {
+    alert('The radio stream was interrupted or is unavailable. Please try reconnecting.');
+  } else {
+    alert('An error occurred while playing the track. It may be corrupted or unavailable.');
+  }
 };
 
 const onCanPlayThrough = () => {

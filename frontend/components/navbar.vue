@@ -6,9 +6,9 @@
       </NuxtLink>
       
       <div class="hidden md:flex items-center space-x-6">
-        <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">Home</NuxtLink>
-        <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">PC Player</NuxtLink>
-        <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">Pi Player</NuxtLink>
+        <!--NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">Home</NuxtLink-->
+        <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">電腦播放</NuxtLink>
+        <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">音響播放</NuxtLink>
         <NuxtLink :to="isLoggedIn ? '/playlist' : '/'" class="text-gray-300 hover:text-white transition duration-300">歌單編輯</NuxtLink>
         <div class="flex-grow"></div>
 
@@ -28,9 +28,9 @@
     </div>
     
     <div :class="{ 'hidden': !isMobileMenuOpen }" class="md:hidden mt-4">
-      <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">Home</NuxtLink>
-      <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">PC Player</NuxtLink>
-      <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">Pi Player</NuxtLink>
+      <!--NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">Home</NuxtLink-->
+      <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">電腦播放</NuxtLink>
+      <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">音響播放</NuxtLink>
       <NuxtLink :to="isLoggedIn ? '/playlist' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">歌單編輯</NuxtLink>      
       <template v-if="isLoggedIn">
         <span class="block text-gray-300 py-2 px-4">Welcome, {{ currentUser.toUpperCase() }}</span>
