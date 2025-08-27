@@ -22,15 +22,30 @@
 
     <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
       <img 
-        src="/images/LBC.png" 
-        alt="LBC logo" 
-        @click="onPlayStream('https://media-ssl.musicradio.com/LBCLondon', 'LBC', 'Live Radio')"
+        src="/images/LBC_News.png" 
+        alt="LBC_News logo" 
+        @click="onPlayStream('https://media-ice.musicradio.com/LBC1152', 'LBC_News', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
-      <div v-if="loadingStreamTitle === 'LBC'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+      <div v-if="loadingStreamTitle === 'LBC_News'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
         <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
       </div>
-      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'LBC'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'LBC_News'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/LBC_London.png" 
+        alt="LBC_London logo" 
+        @click="onPlayStream('https://media-ssl.musicradio.com/LBCLondon', 'LBC_London', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'LBC_London'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'LBC_London'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
       </div>
     </div>
