@@ -168,7 +168,6 @@ app = FastAPI(lifespan=lifespan,
 
 # Path to your built Nuxt.js application
 NUXT_DIST_PATH = Path("../frontend/.output/public")  # Adjust path as needed
-NUXT_SERVER_PATH = Path("./frontend/.output/server")
 
 # Check if Nuxt build exists
 if not NUXT_DIST_PATH.exists():
@@ -180,11 +179,11 @@ app.mount("/static", StaticFiles(directory="static"), name="backend_static")  # 
 
 # 2. Mount Nuxt assets and the entire public directory
 app.mount("/_nuxt", StaticFiles(directory=NUXT_DIST_PATH / "_nuxt"), name="nuxt_assets")
-
 # 3. Mount music files
 app.mount("/music", StaticFiles(directory="/home/ubuntu/Music"), name="music_files")
-
-# 4. Mount the entire Nuxt public directory to serve all static files including _payload.json
+# 4. Mount image files
+app.mount("/images", StaticFiles(directory=NUXT_DIST_PATH / "images"), name="nuxt_images")
+# 5. Mount the entire Nuxt public directory to serve all static files including _payload.json
 app.mount("/app", StaticFiles(directory=NUXT_DIST_PATH, html=True), name="nuxt_app")
 
 app.add_middleware(
