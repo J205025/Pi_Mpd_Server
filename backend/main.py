@@ -623,10 +623,20 @@ async def pc_gen_fileslist(
 # User Management
 @app.post("/register", response_model=UserResponse)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
+    # Define your designated registration code
+    # For better security, load this from an environment variable
+    DESIGNATED_CODE = "Happy"
+
+    # Check if the provided code matches
+    if user.code != DESIGNATED_CODE:
+        raise HTTPException(status_code=400, detail="Invalid registration code")
+    
+    # Check if the username is already registered
     db_user = db.query(User).filter(User.username == user.username).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
     
+    # Proceed with user creation
     hashed_password = get_password_hash(user.password)
     db_user = User(username=user.username, hashed_password=hashed_password)
     db.add(db_user)

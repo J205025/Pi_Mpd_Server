@@ -55,6 +55,22 @@
             <p v-if="errors.confirmPassword" class="mt-1 text-sm text-red-600">{{ errors.confirmPassword }}</p>
           </div>
 
+          <div>
+            <label for="registrationCode" class="block text-sm font-medium text-gray-700 mb-2">
+              Registration Code
+            </label>
+            <input
+              id="registrationCode"
+              v-model="form.code"
+              type="text"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              :class="{ 'border-red-500': errors.code }"
+              placeholder="Enter the registration code"
+            />
+            <p v-if="errors.code" class="mt-1 text-sm text-red-600">{{ errors.code }}</p>
+          </div>
+
           <button
             type="submit"
             :disabled="isLoading"
@@ -67,6 +83,10 @@
 
         <div v-if="successMessage" class="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
           {{ successMessage }}
+        </div>
+        
+        <div v-if="errors.general" class="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+          {{ errors.general }}
         </div>
 
         <div class="mt-6 text-center">
@@ -93,7 +113,8 @@ const apiBase = config.public.apiBase;
 const form = reactive({
   name: '',
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
+  code: '' // <-- Add code field
 });
 
 // Form state
@@ -126,6 +147,11 @@ const validateForm = () => {
     newErrors.confirmPassword = 'Passwords do not match';
   }
 
+  // Registration code validation
+  if (!form.code.trim()) {
+    newErrors.code = 'Registration code is required';
+  }
+
   errors.value = newErrors;
   return Object.keys(newErrors).length === 0;
 };
@@ -151,7 +177,8 @@ const handleRegister = async () => {
       },
       body: JSON.stringify({
         username: form.name,
-        password: form.password
+        password: form.password,
+        code: form.code // <-- Send the code
       })
     });
 
@@ -163,7 +190,8 @@ const handleRegister = async () => {
       Object.assign(form, {
         name: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        code: '' // <-- Reset code field
       });
       
       // Redirect to login after 2 seconds
@@ -173,10 +201,18 @@ const handleRegister = async () => {
       
     } else {
       const errorData = await response.json();
-      if (response.status === 400 && errorData.detail === "Username already registered") {
-        errors.value = { name: 'Username already exists. Please choose a different name.' };
+      // Clear all previous errors before setting new ones
+      errors.value = {}; 
+      if (response.status === 400) {
+          if (errorData.detail === "Username already registered") {
+              errors.value = { name: 'Username already exists. Please choose a different name.' };
+          } else if (errorData.detail === "Invalid registration code") {
+              errors.value = { code: 'The registration code is incorrect.' };
+          } else {
+              errors.value = { general: errorData.detail || 'Registration failed. Please try again.' };
+          }
       } else {
-        errors.value = { general: errorData.detail || 'Registration failed. Please try again.' };
+          errors.value = { general: errorData.detail || 'Registration failed. Please try again.' };
       }
     }
     
