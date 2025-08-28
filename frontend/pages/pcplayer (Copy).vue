@@ -213,9 +213,6 @@ const isMuted = ref(false);
 const previousVolume = ref(0.7);
 const autoPlayOnLoad = ref(true);
 
-// NEW: HLS.js instance
-const hls = ref(null);
-
 // Play modes
 const isShuffleMode = ref(false);
 const repeatMode = ref('none'); // 'none', 'all', 'one'
@@ -230,6 +227,7 @@ const currentStreamInfo = ref(null);
 const loadingStreamTitle = ref(null);
 let loadingTimer = null;
 const LOADING_TIMEOUT = 15000;
+
 
 // Computed property to check if a live stream is playing
 const isPlayingLiveStream = computed(() => {
@@ -286,92 +284,11 @@ const trackArtist = computed(() => {
 });
 // ===============================================
 
-// NEW: Function to check if URL is M3U8
-const isM3U8 = (url) => {
-  return url.includes('.m3u8') || url.includes('application/x-mpegURL');
-};
-
-// NEW: Function to load HLS.js dynamically
-const loadHLSScript = () => {
-  return new Promise((resolve, reject) => {
-    if (window.Hls) {
-      resolve(window.Hls);
-      return;
-    }
-    
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest';
-    script.onload = () => resolve(window.Hls);
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
-};
-
-// NEW: Function to setup HLS for M3U8 streams
-const setupHLS = async (url) => {
-  try {
-    const HLS = await loadHLSScript();
-    
-    // Destroy existing HLS instance
-    if (hls.value) {
-      hls.value.destroy();
-      hls.value = null;
-    }
-    
-    if (HLS.isSupported()) {
-      hls.value = new HLS({
-        enableWorker: true,
-        lowLatencyMode: true,
-        backBufferLength: 90
-      });
-      
-      hls.value.loadSource(url);
-      hls.value.attachMedia(audioPlayer.value);
-      
-      hls.value.on(HLS.Events.MANIFEST_PARSED, () => {
-        console.log('HLS manifest parsed');
-      });
-      
-      hls.value.on(HLS.Events.ERROR, (event, data) => {
-        console.error('HLS error:', data);
-        if (data.fatal) {
-          switch (data.type) {
-            case HLS.ErrorTypes.NETWORK_ERROR:
-              console.log('Network error - trying to recover');
-              hls.value.startLoad();
-              break;
-            case HLS.ErrorTypes.MEDIA_ERROR:
-              console.log('Media error - trying to recover');
-              hls.value.recoverMediaError();
-              break;
-            default:
-              console.log('Fatal error - destroying HLS');
-              hls.value.destroy();
-              hls.value = null;
-              break;
-          }
-        }
-      });
-      
-      return true;
-    } else if (audioPlayer.value.canPlayType('application/vnd.apple.mpegurl')) {
-      // Native support (Safari, mobile browsers)
-      audioPlayer.value.src = url;
-      return true;
-    } else {
-      console.error('HLS is not supported in this browser');
-      return false;
-    }
-  } catch (error) {
-    console.error('Error setting up HLS:', error);
-    return false;
-  }
-};
-
 // Fetch initial data on component mount
 onMounted(async () => {
   loading.value = true;
   error.value = null;
+
 
   const token = localStorage.getItem('authToken');
   if (!token) {
@@ -465,6 +382,7 @@ const loadPlaylist = async (playlistName) => {
   }
 };
 
+
 // Watch for volume changes
 watch(volume, (newVolume) => {
   if (audioPlayer.value) {
@@ -475,32 +393,19 @@ watch(volume, (newVolume) => {
   }
 });
 
-// MODIFIED WATCHER FOR SOURCE CONTROL WITH HLS SUPPORT
-watch(selectedTrack, async (newTrack) => {
+// ==== NEW WATCHER FOR SOURCE CONTROL ====
+watch(selectedTrack, (newTrack) => {
   if (!audioPlayer.value) return;
-  
-  // Destroy any existing HLS instance when switching tracks
-  if (hls.value) {
-    hls.value.destroy();
-    hls.value = null;
-  }
-  
   // This watcher handles changing the source ONLY for playlist tracks.
   // The live stream source is set manually in its own function.
   if (newTrack && newTrack !== 'LIVE_STREAM') {
-    const trackUrl = `${apiBase}/music/${newTrack}`;
-    
-    if (isM3U8(trackUrl)) {
-      await setupHLS(trackUrl);
-    } else {
-      audioPlayer.value.src = trackUrl;
-    }
-    
+    audioPlayer.value.src = `${apiBase}/music/${newTrack}`;
     audioPlayer.value.load(); // Tell the browser to load the new source
   }
 });
+// ======================================
 
-// MODIFIED FUNCTION TO PLAY STREAMS WITH HLS SUPPORT
+// ==== MODIFIED FUNCTION TO PLAY STREAMS ====
 const playStream = async (streamUrl, streamTitle, streamArtist) => {
   if (!audioPlayer.value) return;
 
@@ -520,10 +425,6 @@ const playStream = async (streamUrl, streamTitle, streamArtist) => {
       console.log('Stream loading timed out. Stopping playback attempt.');
       audioPlayer.value.pause();
       audioPlayer.value.src = '';
-      if (hls.value) {
-        hls.value.destroy();
-        hls.value = null;
-      }
       loadingStreamTitle.value = null; // Hide the icon
     }
   }, LOADING_TIMEOUT);
@@ -534,38 +435,23 @@ const playStream = async (streamUrl, streamTitle, streamArtist) => {
     title: streamTitle,
     artist: streamArtist
   };
+  audioPlayer.value.src = streamUrl;
 
   try {
-    let setupSuccess = false;
-    
-    if (isM3U8(streamUrl)) {
-      setupSuccess = await setupHLS(streamUrl);
-    } else {
-      audioPlayer.value.src = streamUrl;
-      setupSuccess = true;
-    }
-    
-    if (setupSuccess) {
-      await audioPlayer.value.load();
-      await audioPlayer.value.play();
-      isPlaying.value = true;
-      clearTimeout(loadingTimer); // Clear the timer on successful playback
-      loadingStreamTitle.value = null; // Hide the icon
-    } else {
-      throw new Error('Failed to setup stream playback');
-    }
+    await audioPlayer.value.load();
+    await audioPlayer.value.play();
+    isPlaying.value = true;
+    clearTimeout(loadingTimer); // Clear the timer on successful playback
+    loadingStreamTitle.value = null; // Hide the icon
   } catch (error) {
     console.error("Error playing stream:", error);
     isPlaying.value = false;
     clearTimeout(loadingTimer); // Clear the timer on error
     loadingStreamTitle.value = null; // Hide the icon
-    if (hls.value) {
-      hls.value.destroy();
-      hls.value = null;
-    }
     alert(`Failed to connect to ${streamTitle}. The station may be offline or your connection may be blocked.`);
   }
 };
+// =========================================
 
 // NEW: Event handler for the child component's event
 const handlePlayStream = (streamData) => {
@@ -755,12 +641,6 @@ const onAudioError = (event) => {
   clearTimeout(loadingTimer);
   isPlaying.value = false;
   
-  // Clean up HLS instance on error
-  if (hls.value) {
-    hls.value.destroy();
-    hls.value = null;
-  }
-  
   // Inform the user with a specific message
   if (selectedTrack.value === 'LIVE_STREAM') {
     alert('The radio stream was interrupted or is unavailable. Please try reconnecting.');
@@ -772,14 +652,6 @@ const onAudioError = (event) => {
 const onCanPlayThrough = () => {
   console.log('🎵 Audio can play through - ready for smooth playback');
 };
-
-// Clean up HLS instance when component unmounts
-onUnmounted(() => {
-  if (hls.value) {
-    hls.value.destroy();
-    hls.value = null;
-  }
-});
 </script>
 
 <style scoped>

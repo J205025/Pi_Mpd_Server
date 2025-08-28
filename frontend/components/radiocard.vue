@@ -5,7 +5,7 @@
       <img 
         src="/images/BBC_World_Service.png" 
         alt="BBC World Service logo" 
-        @click="onPlayStream('https://stream.live.vc.bbcmedia.co.uk/bbc_world_service', 'BBC World Service', 'Live Radio')"
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_world_service&bitrate=320000', 'BBC World Service', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
       <div v-if="loadingStreamTitle === 'BBC World Service'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
@@ -99,7 +99,7 @@
       <img 
         src="/images/BBC_Radio_1.png" 
         alt="BBC_Radio_1 logo" 
-        @click="onPlayStream('https://lstn.lv/bbcradio.m3u8?station=bbc_radio_one', 'BBC Radio 1', 'Live Radio')"
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_radio_one&bitrate=320000', 'BBC Radio 1', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
       <div v-if="loadingStreamTitle === 'BBC Radio 1'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
@@ -114,7 +114,7 @@
       <img 
         src="/images/BBC_Radio_2.png" 
         alt="BBC_Radio_2 logo" 
-        @click="onPlayStream('https://stream.live.vc.bbcmedia.co.uk/bbc_radio_two', 'BBC Radio 2', 'Live Radio')"
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_radio_two&bitrate=320000', 'BBC Radio 2', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
       <div v-if="loadingStreamTitle === 'BBC Radio 2'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
@@ -129,7 +129,7 @@
       <img 
         src="/images/BBC_Radio_3.png" 
         alt="BBC_Radio_3 logo" 
-        @click="onPlayStream('https://stream.live.vc.bbcmedia.co.uk/bbc_radio_three', 'BBC Radio 3', 'Live Radio')"
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_radio_three&bitrate=320000', 'BBC Radio 3', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
       <div v-if="loadingStreamTitle === 'BBC Radio 3'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
@@ -144,7 +144,7 @@
       <img 
         src="/images/BBC_Radio_4.png" 
         alt="BBC_Radio_4 logo" 
-        @click="onPlayStream('https://stream.live.vc.bbcmedia.co.uk/bbc_radio_fourfm', 'BBC Radio 4', 'Live Radio')"
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_radio_fourfm&bitrate=320000', 'BBC Radio 4', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
       <div v-if="loadingStreamTitle === 'BBC Radio 4'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
@@ -159,7 +159,7 @@
       <img 
         src="/images/BBC_Radio_5.png" 
         alt="BBC_Radio_5 logo" 
-        @click="onPlayStream('https://stream.live.vc.bbcmedia.co.uk/bbc_radio_five_live', 'BBC Radio 5 Live', 'Live Radio')"
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_radio_five_live&bitrate=320000', 'BBC Radio 5 Live', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
       <div v-if="loadingStreamTitle === 'BBC Radio 5 Live'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
