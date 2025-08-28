@@ -84,7 +84,7 @@
       <img 
         src="/images/icrt.jpg" 
         alt="Icrt logo" 
-        @click="onPlayStream('https://media-ssl.musicradio.com/Gold', 'Icrt', 'Live Radio')"
+        @click="onPlayStream('https://stream.rcs.revma.com/nkdfurztxp3vv', 'Icrt', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
       <div v-if="loadingStreamTitle === 'Gold'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
