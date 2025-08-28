@@ -67,21 +67,6 @@
     
     <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
       <img 
-        src="/images/TIMES_Radio.png" 
-        alt="TIMES_Radio logo" 
-        @click="onPlayStream('https://timesradio.wireless.radio/stream', 'Times Radio', 'Live Radio')"
-        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
-      >
-      <div v-if="loadingStreamTitle === 'Times Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
-        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
-      </div>
-      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'Times Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
-        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
-      </div>
-    </div>
-
-    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
-      <img 
         src="/images/Gold.jpg" 
         alt="Gold logo" 
         @click="onPlayStream('https://media-ssl.musicradio.com/Gold', 'Gold', 'Live Radio')"
@@ -91,6 +76,21 @@
         <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
       </div>
       <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'Gold'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/icrt.jpg" 
+        alt="Icrt logo" 
+        @click="onPlayStream('https://media-ssl.musicradio.com/Gold', 'Icrt', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'Gold'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'Icrt'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
       </div>
     </div>

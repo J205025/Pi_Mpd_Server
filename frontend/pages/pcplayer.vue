@@ -8,7 +8,7 @@
         <h1 class="text-5xl font-extrabold text-gray-900 mb-4">Pc Audio Player</h1>
       </div>
 
-      <div v-if="selectedTrack" class="bg-white p-6 rounded-lg shadow-xl mt-8">
+      <div  class="bg-white p-6 rounded-lg shadow-xl mt-8">
         <div class="text-center mb-4">
           <p class="text-gray-600 font-bold">{{ trackTitle }}</p>
           <p class="text-gray-500 text-sm mt-1">
