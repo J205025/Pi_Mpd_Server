@@ -616,8 +616,9 @@ async def pc_gen_fileslist(
     foldername :str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
-):   
-    fileslist = genFilelist(foldername)
+):  
+    folderpath = foldername.replace(" ", "/")
+    fileslist = genFilelist(folderpath)
     return fileslist
 #------------------------------------------------------------------------------
 # User Management

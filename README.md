@@ -21,11 +21,7 @@ https://stream.live.vc.bbcmedia.co.uk/bbc_world_service
 
 
 https://garfnet.org.uk/cms/tables/radio-frequencies/internet-radio-player/
-
+https://garfnet.org.uk/download/radio/bbc-radio.txt
 
 BBC DASH streams
 BBC HLS streams
-
-
-https://garfnet.org.uk/download/radio/bbc-radio.txt
-

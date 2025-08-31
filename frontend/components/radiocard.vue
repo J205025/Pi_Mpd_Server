@@ -22,6 +22,45 @@
 
     <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
       <img 
+        src="/images/BBC_Asian_Network.png" 
+        alt="BBC Asian Network logo" 
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_asian_network&bitrate=320000', 'BBC Asian Network', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'BBC Asian Network'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'BBC Asian Network'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/BBC_Radio_London.png" 
+        alt="BBC Radio London logo" 
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_london&bitrate=320000', 'BBC Radio London', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'BBC Radio London'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
+        </svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'BBC Radio London'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
+        </svg>
+      </div>
+    </div>
+
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
         src="/images/LBC_News.png" 
         alt="LBC_News logo" 
         @click="onPlayStream('https://media-ice.musicradio.com/LBC1152', 'LBC_News', 'Live Radio')"
@@ -172,9 +211,24 @@
 
     <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
       <img 
+        src="/images/BBC_Radio_6.png" 
+        alt="BBC_Radio_6 logo" 
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_6music&bitrate=320000', 'BBC Radio 6 Live', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'BBC Radio 6 Live'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'BBC Radio 6 Live'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
         src="/images/Classical_Hits_1000.jpg" 
         alt="Classical_Hits_1000 logo" 
-        @click="onPlayStream('http://media-ssl.musicradio.com/ClassicalHits', 'Classical Hits', 'Live Radio')"
+        @click="onPlayStream('https://radio2.vip-radios.fm:18042/stream-128kmp3-HitsClassical', 'Classical Hits', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
       <div v-if="loadingStreamTitle === 'Classical Hits'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
@@ -189,7 +243,7 @@
       <img 
         src="/images/Classical_Mozart.jpg" 
         alt="Classical_Mozart logo" 
-        @click="onPlayStream('http://media-ssl.musicradio.com/ClassicalMozart', 'Classical Mozart', 'Live Radio')"
+        @click="onPlayStream('https://stream.klassikradio.de/mozart/mp3-192/mytune', 'Classical Mozart', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
       <div v-if="loadingStreamTitle === 'Classical Mozart'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
@@ -204,7 +258,7 @@
       <img 
         src="/images/SKY_News.png" 
         alt="SKY_News logo" 
-        @click="onPlayStream('https://sky-live.hls.adaptive.skynews.com/hls/live/2012487/skynews/skynews.m3u8', 'Sky News', 'Live Radio')"
+        @click="onPlayStream('https://video.news.sky.com/snr/news/snrnews.mp3', 'Sky News', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
       <div v-if="loadingStreamTitle === 'Sky News'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
@@ -219,7 +273,7 @@
       <img 
         src="/images/TIMES_Radio.png" 
         alt="TIMES_Radio logo" 
-        @click="onPlayStream('http://media-ssl.musicradio.com/TimesRadio', 'Times Radio', 'Live Radio')"
+        @click="onPlayStream('https://timesradio.wireless.radio/stream?aw_0_1st.platform=website&aw_0_1st.playerid=wireless-website', 'Times Radio', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
       <div v-if="loadingStreamTitle === 'Times Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
@@ -234,13 +288,103 @@
       <img 
         src="/images/BBC_Radio_Wales.png" 
         alt="BBC_Radio_Wales logo" 
-        @click="onPlayStream('https://stream.live.vc.bbcmedia.co.uk/bbc_radio_wales_fm', 'BBC Radio Wales', 'Live Radio')"
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_radio_wales_fm&bitrate=320000', 'BBC Radio Wales', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
       <div v-if="loadingStreamTitle === 'BBC Radio Wales'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
         <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
       </div>
       <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'BBC Radio Wales'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/BBC_Radio_Leeds.png" 
+        alt="BBC_Radio_Leeds logo" 
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_radio_leeds&bitrate=320000', 'BBC Radio Leeds', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'BBC Radio Leeds'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'BBC Radio Leeds'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/TW_FM96.jpg" 
+        alt="TW FM96 logo" 
+        @click="onPlayStream('https://stream.rcs.revma.com/ndk05tyy2tzuv', 'TW FM96', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'TW FM96'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'TW FM96'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/TW_FM103.jpg" 
+        alt="TW FM103 logo" 
+        @click="onPlayStream('https://stream.rcs.revma.com/aw9uqyxy2tzuv', 'TW FM103', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'TW FM103'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'TW FM103'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/ASIAFM_927.jpg" 
+        alt="ASIAFM 927 logo" 
+        @click="onPlayStream('https://stream.rcs.revma.com/xpgtqc74hv8uv', 'ASIAFM 927', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'ASIAFM 927'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'ASIAFM 927'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/UFO_Network.jpg" 
+        alt="UFO Network logo" 
+        @click="onPlayStream('https://n17a-eu.rcs.revma.com/em90w4aeewzuv?rj-tok=AAABmP7objYAlBv1a7_GA_pPZw&rj-ttl=5', 'UFO Network', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'UFO Network'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'UFO Network'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/Hits_Radio.jpg" 
+        alt="Hits Radio logo" 
+        @click="onPlayStream('https://18853.live.streamtheworld.com/977_HITS_SC', 'Hits Radio', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'Hits Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'Hits Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
       </div>
     </div>

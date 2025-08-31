@@ -18,7 +18,7 @@
           </p>
         </div>
 
-        <audio
+        <audio 
           ref="audioPlayer"
           @loadedmetadata="onLoadedMetadata"
           @timeupdate="onTimeUpdate"
@@ -31,21 +31,28 @@
           class="w-full"
         ></audio>
 
-        <div class="mb-6">
-          <div class="flex justify-between text-sm text-gray-600 mb-2">
+<div class="mb-6">
+    <div v-if="!isPlayingLiveStream">
+        <div class="flex justify-between text-sm text-gray-600 mb-2">
             <span>{{ formatTime(currentTime) }}</span>
             <span>{{ formatTime(duration) }}</span>
-          </div>
-          <div 
+        </div>
+        <div 
             class="w-full bg-gray-200 rounded-full h-2 cursor-pointer"
             @click="seekTo($event)"
-          >
+        >
             <div 
-              class="bg-blue-600 h-2 rounded-full transition-all duration-100"
-              :style="{ width: progressPercentage + '%' }"
+                class="bg-blue-600 h-2 rounded-full transition-all duration-100"
+                :style="{ width: progressPercentage + '%' }"
             ></div>
-          </div>
         </div>
+    </div>
+
+    <div v-else class="text-center py-2">
+        <span class="text-red-500 font-bold text-lg animate-pulse">🔴 LIVE</span>
+        <p class="text-gray-500 text-sm mt-1">Elapsed: {{ formatTime(currentTime) }}</p>
+    </div>
+</div>
 
         <div class="flex items-center justify-center space-x-4 mb-6">
           <button
@@ -107,7 +114,7 @@
           <div class="flex items-center space-x-2">
             <button
               @click="toggleShuffle"
-              :class="['p-2 rounded transition-colors duration-200', isShuffleMode ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800']"
+              :class="['p-2 rounded transition-colors duration-200', shuffleMode ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800']"
             ><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732L14.146 12.8l-1.179 4.456a1 1 0 01-1.856-.288L12.382 12H10a1 1 0 110-2h2.382l-.271-4.968A1 1 0 0112 2z" clip-rule="evenodd"></path></svg></button>
             <button
               @click="toggleRepeat"
@@ -121,7 +128,7 @@
 
         <div class="mt-4 text-center text-sm text-gray-500">
           Track {{ currentTrackIndex + 1 }} of {{ pc_playlist_all.length }}
-          <span v-if="isShuffleMode" class="ml-2">(Shuffle)</span>
+          <span v-if="shuffleMode" class="ml-2">(Shuffle)</span>
           <span v-if="repeatMode === 'all'" class="ml-2">(Repeat All)</span>
           <span v-if="repeatMode === 'one'" class="ml-2">(Repeat One)</span>
         </div>
@@ -188,7 +195,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
 
 // Get runtime config
 const config = useRuntimeConfig();
@@ -213,11 +220,11 @@ const isMuted = ref(false);
 const previousVolume = ref(0.7);
 const autoPlayOnLoad = ref(true);
 
-// NEW: HLS.js instance
-const hls = ref(null);
+// HLS.js instance
+let hls = null;
 
 // Play modes
-const isShuffleMode = ref(false);
+const shuffleMode = ref(false);
 const repeatMode = ref('none'); // 'none', 'all', 'one'
 
 // State for button-based number input
@@ -286,85 +293,31 @@ const trackArtist = computed(() => {
 });
 // ===============================================
 
-// NEW: Function to check if URL is M3U8
-const isM3U8 = (url) => {
-  return url.includes('.m3u8') || url.includes('application/x-mpegURL');
+// Helper function to check if URL is an HLS stream
+const isHLSStream = (url) => {
+  return url.toLowerCase().includes('.m3u8');
 };
 
-// NEW: Function to load HLS.js dynamically
-const loadHLSScript = () => {
+// Helper function to load HLS.js library
+const loadHLS = async () => {
+  if (window.Hls) {
+    return window.Hls;
+  }
+  
   return new Promise((resolve, reject) => {
-    if (window.Hls) {
-      resolve(window.Hls);
-      return;
-    }
-    
     const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest';
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js';
     script.onload = () => resolve(window.Hls);
-    script.onerror = reject;
+    script.onerror = () => reject(new Error('Failed to load HLS.js'));
     document.head.appendChild(script);
   });
 };
 
-// NEW: Function to setup HLS for M3U8 streams
-const setupHLS = async (url) => {
-  try {
-    const HLS = await loadHLSScript();
-    
-    // Destroy existing HLS instance
-    if (hls.value) {
-      hls.value.destroy();
-      hls.value = null;
-    }
-    
-    if (HLS.isSupported()) {
-      hls.value = new HLS({
-        enableWorker: true,
-        lowLatencyMode: true,
-        backBufferLength: 90
-      });
-      
-      hls.value.loadSource(url);
-      hls.value.attachMedia(audioPlayer.value);
-      
-      hls.value.on(HLS.Events.MANIFEST_PARSED, () => {
-        console.log('HLS manifest parsed');
-      });
-      
-      hls.value.on(HLS.Events.ERROR, (event, data) => {
-        console.error('HLS error:', data);
-        if (data.fatal) {
-          switch (data.type) {
-            case HLS.ErrorTypes.NETWORK_ERROR:
-              console.log('Network error - trying to recover');
-              hls.value.startLoad();
-              break;
-            case HLS.ErrorTypes.MEDIA_ERROR:
-              console.log('Media error - trying to recover');
-              hls.value.recoverMediaError();
-              break;
-            default:
-              console.log('Fatal error - destroying HLS');
-              hls.value.destroy();
-              hls.value = null;
-              break;
-          }
-        }
-      });
-      
-      return true;
-    } else if (audioPlayer.value.canPlayType('application/vnd.apple.mpegurl')) {
-      // Native support (Safari, mobile browsers)
-      audioPlayer.value.src = url;
-      return true;
-    } else {
-      console.error('HLS is not supported in this browser');
-      return false;
-    }
-  } catch (error) {
-    console.error('Error setting up HLS:', error);
-    return false;
+// Helper function to destroy existing HLS instance
+const destroyHLS = () => {
+  if (hls) {
+    hls.destroy();
+    hls = null;
   }
 };
 
@@ -418,6 +371,11 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+});
+
+// Clean up HLS instance on unmount
+onBeforeUnmount(() => {
+  destroyHLS();
 });
 
 // NEW: Function to load tracks from a selected playlist
@@ -475,32 +433,23 @@ watch(volume, (newVolume) => {
   }
 });
 
-// MODIFIED WATCHER FOR SOURCE CONTROL WITH HLS SUPPORT
-watch(selectedTrack, async (newTrack) => {
+// ==== MODIFIED WATCHER FOR SOURCE CONTROL ====
+watch(selectedTrack, (newTrack) => {
   if (!audioPlayer.value) return;
   
   // Destroy any existing HLS instance when switching tracks
-  if (hls.value) {
-    hls.value.destroy();
-    hls.value = null;
-  }
+  destroyHLS();
   
   // This watcher handles changing the source ONLY for playlist tracks.
   // The live stream source is set manually in its own function.
   if (newTrack && newTrack !== 'LIVE_STREAM') {
-    const trackUrl = `${apiBase}/music/${newTrack}`;
-    
-    if (isM3U8(trackUrl)) {
-      await setupHLS(trackUrl);
-    } else {
-      audioPlayer.value.src = trackUrl;
-    }
-    
+    audioPlayer.value.src = `${apiBase}/music/${newTrack}`;
     audioPlayer.value.load(); // Tell the browser to load the new source
   }
 });
+// ======================================
 
-// MODIFIED FUNCTION TO PLAY STREAMS WITH HLS SUPPORT
+// ==== MODIFIED FUNCTION TO PLAY STREAMS WITH HLS SUPPORT ====
 const playStream = async (streamUrl, streamTitle, streamArtist) => {
   if (!audioPlayer.value) return;
 
@@ -514,21 +463,21 @@ const playStream = async (streamUrl, streamTitle, streamArtist) => {
     isPlaying.value = false;
   }
   
+  // Destroy any existing HLS instance
+  destroyHLS();
+  
   // Start a timer to stop loading and hide the icon if playback doesn't begin
   loadingTimer = setTimeout(() => {
     if (!isPlaying.value || selectedTrack.value !== 'LIVE_STREAM') {
       console.log('Stream loading timed out. Stopping playback attempt.');
       audioPlayer.value.pause();
       audioPlayer.value.src = '';
-      if (hls.value) {
-        hls.value.destroy();
-        hls.value = null;
-      }
+      destroyHLS();
       loadingStreamTitle.value = null; // Hide the icon
     }
   }, LOADING_TIMEOUT);
 
-  // Set stream info and source
+  // Set stream info
   selectedTrack.value = 'LIVE_STREAM';
   currentStreamInfo.value = {
     title: streamTitle,
@@ -536,36 +485,94 @@ const playStream = async (streamUrl, streamTitle, streamArtist) => {
   };
 
   try {
-    let setupSuccess = false;
-    
-    if (isM3U8(streamUrl)) {
-      setupSuccess = await setupHLS(streamUrl);
+    if (isHLSStream(streamUrl)) {
+      // Handle HLS streams (.m3u8)
+      console.log('Loading HLS stream:', streamUrl);
+      
+      // Load HLS.js library if not already loaded
+      const Hls = await loadHLS();
+      
+      if (Hls.isSupported()) {
+        hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: true,
+          backBufferLength: 90
+        });
+        
+        hls.loadSource(streamUrl);
+        hls.attachMedia(audioPlayer.value);
+        
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          console.log('HLS manifest parsed successfully');
+          audioPlayer.value.play().then(() => {
+            isPlaying.value = true;
+            clearTimeout(loadingTimer);
+            loadingStreamTitle.value = null;
+          }).catch(error => {
+            console.error('Error playing HLS stream:', error);
+            isPlaying.value = false;
+            clearTimeout(loadingTimer);
+            loadingStreamTitle.value = null;
+            alert(`Failed to play ${streamTitle}. Please try again.`);
+          });
+        });
+        
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          console.error('HLS error:', data);
+          if (data.fatal) {
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                console.error('Fatal network error encountered, trying to recover');
+                hls.startLoad();
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                console.error('Fatal media error encountered, trying to recover');
+                hls.recoverMediaError();
+                break;
+              default:
+                console.error('Fatal error, cannot recover');
+                destroyHLS();
+                isPlaying.value = false;
+                clearTimeout(loadingTimer);
+                loadingStreamTitle.value = null;
+                alert(`HLS stream error for ${streamTitle}. Please try again.`);
+                break;
+            }
+          }
+        });
+        
+      } else if (audioPlayer.value.canPlayType('application/vnd.apple.mpegurl')) {
+        // Fallback for browsers with native HLS support (Safari)
+        console.log('Using native HLS support');
+        audioPlayer.value.src = streamUrl;
+        await audioPlayer.value.load();
+        await audioPlayer.value.play();
+        isPlaying.value = true;
+        clearTimeout(loadingTimer);
+        loadingStreamTitle.value = null;
+      } else {
+        throw new Error('HLS is not supported in this browser');
+      }
     } else {
+      // Handle regular audio streams (MP3, etc.)
+      console.log('Loading regular audio stream:', streamUrl);
       audioPlayer.value.src = streamUrl;
-      setupSuccess = true;
-    }
-    
-    if (setupSuccess) {
       await audioPlayer.value.load();
       await audioPlayer.value.play();
       isPlaying.value = true;
-      clearTimeout(loadingTimer); // Clear the timer on successful playback
-      loadingStreamTitle.value = null; // Hide the icon
-    } else {
-      throw new Error('Failed to setup stream playback');
+      clearTimeout(loadingTimer);
+      loadingStreamTitle.value = null;
     }
   } catch (error) {
     console.error("Error playing stream:", error);
     isPlaying.value = false;
-    clearTimeout(loadingTimer); // Clear the timer on error
-    loadingStreamTitle.value = null; // Hide the icon
-    if (hls.value) {
-      hls.value.destroy();
-      hls.value = null;
-    }
+    clearTimeout(loadingTimer);
+    loadingStreamTitle.value = null;
+    destroyHLS();
     alert(`Failed to connect to ${streamTitle}. The station may be offline or your connection may be blocked.`);
   }
 };
+// =========================================
 
 // NEW: Event handler for the child component's event
 const handlePlayStream = (streamData) => {
@@ -594,7 +601,7 @@ const handleCanPlay = () => {
 };
 
 const togglePlayPause = () => {
-  if (!audioPlayer.value || !audioPlayer.value.src) return;
+  if (!audioPlayer.value || (!audioPlayer.value.src && !hls)) return;
   if (isPlaying.value) {
     audioPlayer.value.pause();
     isPlaying.value = false;
@@ -631,7 +638,7 @@ const onTrackEnded = () => {
     audioPlayer.value.currentTime = 0;
     audioPlayer.value.play();
     isPlaying.value = true;
-  } else if (repeatMode.value === 'all' || isShuffleMode.value) {
+  } else if (repeatMode.value === 'all' || shuffleMode.value) {
     nextTrack(true);
   } else {
     const nextIndex = currentTrackIndex.value + 1;
@@ -651,8 +658,12 @@ const seekTo = (event) => {
 
 const previousTrack = (shouldPlay = isPlaying.value) => {
   if (pc_playlist_all.value.length <= 1) return;
+  
+  // Stop any HLS stream when switching to playlist tracks
+  destroyHLS();
+  
   let newIndex;
-  if (isShuffleMode.value) {
+  if (shuffleMode.value) {
     do {
       newIndex = Math.floor(Math.random() * pc_playlist_all.value.length);
     } while (newIndex === currentTrackIndex.value && pc_playlist_all.value.length > 1);
@@ -668,8 +679,12 @@ const previousTrack = (shouldPlay = isPlaying.value) => {
 
 const nextTrack = (shouldPlay = isPlaying.value) => {
   if (pc_playlist_all.value.length <= 1) return;
+  
+  // Stop any HLS stream when switching to playlist tracks
+  destroyHLS();
+  
   let newIndex;
-  if (isShuffleMode.value) {
+  if (shuffleMode.value) {
     do {
       newIndex = Math.floor(Math.random() * pc_playlist_all.value.length);
     } while (newIndex === currentTrackIndex.value && pc_playlist_all.value.length > 1);
@@ -701,7 +716,7 @@ const toggleMute = () => {
 };
 
 const toggleShuffle = () => {
-  isShuffleMode.value = !isShuffleMode.value;
+  shuffleMode.value = !shuffleMode.value;
 };
 
 const toggleRepeat = () => {
@@ -739,6 +754,10 @@ const playTrackFromInput = () => {
     if (index > maxIndex) {
         index = (index % maxIndex === 0) ? maxIndex : index % maxIndex;
     }
+    
+    // Stop any HLS stream when switching to playlist tracks
+    destroyHLS();
+    
     selectedTrack.value = pc_playlist_all.value[index - 1];
     autoPlayOnLoad.value = true;
     currentNumberString.value = '';
@@ -755,11 +774,8 @@ const onAudioError = (event) => {
   clearTimeout(loadingTimer);
   isPlaying.value = false;
   
-  // Clean up HLS instance on error
-  if (hls.value) {
-    hls.value.destroy();
-    hls.value = null;
-  }
+  // Clean up HLS if there was an error
+  destroyHLS();
   
   // Inform the user with a specific message
   if (selectedTrack.value === 'LIVE_STREAM') {
@@ -772,14 +788,6 @@ const onAudioError = (event) => {
 const onCanPlayThrough = () => {
   console.log('🎵 Audio can play through - ready for smooth playback');
 };
-
-// Clean up HLS instance when component unmounts
-onUnmounted(() => {
-  if (hls.value) {
-    hls.value.destroy();
-    hls.value = null;
-  }
-});
 </script>
 
 <style scoped>

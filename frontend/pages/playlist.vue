@@ -133,6 +133,23 @@
         </div>
       </div>
 
+      <div class="grid md:grid-cols-3 gap-8 mt-12">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h2 class="text-2xl font-bold mb-2 text-gray-800">類型</h2>
+          <p class="text-gray-700">古典  台語  國語  播客  日語  有聲書  英語  輕音樂  韓語 </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h2 class="text-2xl font-bold mb-2 text-gray-800">歌手</h2>
+          <p class="text-gray-700">張學友 劉德華 </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h2 class="text-2xl font-bold mb-2 text-gray-800">Feature Three</h2>
+          <p class="text-gray-700">Our third feature is revolutionary, providing insights and capabilities you won't find anywhere else.</p>
+        </div>
+      </div>
+
     </main>
 
     <footer />

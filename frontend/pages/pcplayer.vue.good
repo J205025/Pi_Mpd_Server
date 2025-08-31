@@ -18,7 +18,7 @@
           </p>
         </div>
 
-        <audio
+        <audio 
           ref="audioPlayer"
           @loadedmetadata="onLoadedMetadata"
           @timeupdate="onTimeUpdate"
@@ -107,7 +107,7 @@
           <div class="flex items-center space-x-2">
             <button
               @click="toggleShuffle"
-              :class="['p-2 rounded transition-colors duration-200', isShuffleMode ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800']"
+              :class="['p-2 rounded transition-colors duration-200', shuffleMode ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800']"
             ><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732L14.146 12.8l-1.179 4.456a1 1 0 01-1.856-.288L12.382 12H10a1 1 0 110-2h2.382l-.271-4.968A1 1 0 0112 2z" clip-rule="evenodd"></path></svg></button>
             <button
               @click="toggleRepeat"
@@ -121,7 +121,7 @@
 
         <div class="mt-4 text-center text-sm text-gray-500">
           Track {{ currentTrackIndex + 1 }} of {{ pc_playlist_all.length }}
-          <span v-if="isShuffleMode" class="ml-2">(Shuffle)</span>
+          <span v-if="shuffleMode" class="ml-2">(Shuffle)</span>
           <span v-if="repeatMode === 'all'" class="ml-2">(Repeat All)</span>
           <span v-if="repeatMode === 'one'" class="ml-2">(Repeat One)</span>
         </div>
@@ -214,7 +214,7 @@ const previousVolume = ref(0.7);
 const autoPlayOnLoad = ref(true);
 
 // Play modes
-const isShuffleMode = ref(false);
+const shuffleMode = ref(false);
 const repeatMode = ref('none'); // 'none', 'all', 'one'
 
 // State for button-based number input
@@ -517,7 +517,7 @@ const onTrackEnded = () => {
     audioPlayer.value.currentTime = 0;
     audioPlayer.value.play();
     isPlaying.value = true;
-  } else if (repeatMode.value === 'all' || isShuffleMode.value) {
+  } else if (repeatMode.value === 'all' || shuffleMode.value) {
     nextTrack(true);
   } else {
     const nextIndex = currentTrackIndex.value + 1;
@@ -538,7 +538,7 @@ const seekTo = (event) => {
 const previousTrack = (shouldPlay = isPlaying.value) => {
   if (pc_playlist_all.value.length <= 1) return;
   let newIndex;
-  if (isShuffleMode.value) {
+  if (shuffleMode.value) {
     do {
       newIndex = Math.floor(Math.random() * pc_playlist_all.value.length);
     } while (newIndex === currentTrackIndex.value && pc_playlist_all.value.length > 1);
@@ -555,7 +555,7 @@ const previousTrack = (shouldPlay = isPlaying.value) => {
 const nextTrack = (shouldPlay = isPlaying.value) => {
   if (pc_playlist_all.value.length <= 1) return;
   let newIndex;
-  if (isShuffleMode.value) {
+  if (shuffleMode.value) {
     do {
       newIndex = Math.floor(Math.random() * pc_playlist_all.value.length);
     } while (newIndex === currentTrackIndex.value && pc_playlist_all.value.length > 1);
@@ -587,7 +587,7 @@ const toggleMute = () => {
 };
 
 const toggleShuffle = () => {
-  isShuffleMode.value = !isShuffleMode.value;
+  shuffleMode.value = !shuffleMode.value;
 };
 
 const toggleRepeat = () => {
