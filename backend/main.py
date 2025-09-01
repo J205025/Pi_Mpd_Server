@@ -17,7 +17,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from pathlib import Path
 from my_package.mpd_controller import MPDClientController
-from my_package.database import get_db
+from my_package.database import get_db, SessionLocal 
 from my_package.models import User, UserPlaylist # Added UserPlaylist
 # Updated imports to include PlaylistPayload
 from my_package.schemas import UserCreate, UserResponse, Token, UserPlaylistCreate, UserPlaylistResponse, PlaylistPayload, PlaylistsListResponse
@@ -27,9 +27,7 @@ from contextlib import asynccontextmanager
 from my_package.database import Base, engine
 # ----------------------------------------------
 music_Basefolder = "/home/ubuntu/Music/"
-music_Type= ["國語","台語","英語","古典","播客"]
-folderpath = Path(music_Basefolder+music_Type[0])
-artist = [item.name for item in folderpath.iterdir() if item.is_dir()]
+music_Type = [] # Will be populated at startup
 #-----------------------------------------------
 pi_ALLFILES = [] 
 pi_Playlist_List = []  # Only one pi_Playlist_List for Pi_Server
@@ -56,38 +54,12 @@ pc_Indexmax = 1
 mpd_player = MPDClientController()
 
 MPD_PLAYMODE = ["repeat", "random", "single", "consume"]
-RADIO_STREAMS = {
-    "BBCWorldService": "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
-    "ClassicFM": "https://media-the.musicradio.com/ClassicFM",
-    "LBCLondon": "https://media-ssl.musicradio.com/LBCLondon",
-    "TimesRadio": "https://timesradio.wireless.radio/stream",
-    "url01":"https://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
-    "url02":"http://stream.live.vc.bbcmedia.co.uk/bbc_london",
-    "url03":"https://npr-ice.streamguys1.com/live.mp3",
-    "url04":"https://prod-18-232-88-129.wostreaming.net/foxnewsradio-foxnewsradioaac-imc?session-id=0f99acd44126cef33b40ce217c9ea1ad",
-    "url05":"http://stream.live.vc.bbcmedia.co.uk/bbc_radio_five_live",
-    "url06":"http://stream.live.vc.bbcmedia.co.uk/bbc_asian_network",
-    "url07":"http://stream.live.vc.bbcmedia.co.uk/bbc_radio_one",
-    "url08":"https://icrt.leanstream.co/ICRTFM-MP3?args=web",
-    "url09":"http://stream.live.vc.bbcmedia.co.uk/bbc_radio_two",
-    "url10":"http://localhost:8000/stream.ogg",
-    "url11":"http://onair.family977.com.tw:8000/live.mp3",
-    "url12":"https://n09.rcs.revma.com/aw9uqyxy2tzuv?rj-ttl=5&rj-tok=AAABhZollCEACdvxzVVN61ARVg",
-    "url13":"https://n10.rcs.revma.com/ndk05tyy2tzuv?rj-ttl=5&rj-tok=AAABhZouFPAAQudE3-49-1PFHQ",
-    "url14":"https://n09.rcs.revma.com/7mnq8rt7k5zuv?rj-ttl=5&rj-tok=AAABhZovh0cASZAucd0xcmxkvQ",
-    "url15":"https://n11a-eu.rcs.revma.com/em90w4aeewzuv?rj-tok=AAABhZoyef8AtFfbdaYYtKJnaw&rj-ttl=5",
-    "url16":"https://n07.rcs.revma.com/78fm9wyy2tzuv?rj-ttl=5&rj-tok=AAABhZozdbQAkV-tPDO6A5aHag",
-    "url17":"http://stream.live.vc.bbcmedia.co.uk/bbc_radio_three",
-    "url18":"http://stream.live.vc.bbcmedia.co.uk/bbc_radio_fourfm",
-    "url19":"http://stream.live.vc.bbcmedia.co.uk/bbc_6music",
-    "url30":"http://media-ice.musicradio.com:80/ClassicFMMP3"
-}
+
 
 # Generate filespath base from music_Basefolder
 def genFilelist(subfolder):
     global pc_Indexmax
-    global music_Basefolder
-    
+    global music_Basefolder 
     songs = []; 
     for path, subdirs, files in os.walk(music_Basefolder + subfolder, followlinks=True):
        # for name in files:
@@ -112,6 +84,19 @@ async def lifespan(app: FastAPI):
     This replaces the deprecated @app.on_event("startup") and @app.on_event("shutdown").
     """
     print("Application startup...")
+
+    # --- START: Dynamically find music types ---
+    print(f"Scanning for music types in: {music_Basefolder}")
+    base_path = Path(music_Basefolder)
+    if base_path.is_dir():
+        # Find all subdirectories and use their names for music_Type
+        subfolders = [item.name for item in base_path.iterdir() if item.is_dir()]
+        music_Type.extend(sorted(subfolders)) # Use extend and sort for consistency
+        print(f"✅ Found music types: {music_Type}")
+    else:
+        print(f"⚠️  Warning: Music base folder not found at '{music_Basefolder}'")
+    # --- END: Dynamically find music types ---
+
     # Create database tables
     Base.metadata.create_all(bind=engine)
     # Connect to the MPD server before the application starts
@@ -119,31 +104,68 @@ async def lifespan(app: FastAPI):
 
     if not mpd_player.is_connected:
         raise HTTPException(status_code=503, detail="MPD is not connected")
-   #Update the music database and save to playlist
+    
+    # Update the music database and create a playlist for each music type
+    print("Updating MPD database and creating playlists...")
     mpd_player.update()
+    
+    # Use a loop to handle all found music types
+    for folder_name in music_Type:
+        print(f"  -> Processing and creating playlist for: '{folder_name}'")
+        mpd_player.queue_clear()
+        mpd_player.queue_add_folder(folder_name)
+        mpd_player.queue_saveto_playlist(folder_name)
+    
+    # Clear the queue one last time after processing all folders
     mpd_player.queue_clear()
-    mpd_player.queue_add_folder(music_Type[0])
-    mpd_player.queue_saveto_playlist(music_Type[0])
-    mpd_player.queue_clear()
-    mpd_player.queue_add_folder(music_Type[1])
-    mpd_player.queue_saveto_playlist(music_Type[1])
-    mpd_player.queue_clear()
-    mpd_player.queue_add_folder(music_Type[2])
-    mpd_player.queue_saveto_playlist(music_Type[2])
-    mpd_player.queue_clear()
-    mpd_player.queue_add_folder(music_Type[3])
-    mpd_player.queue_saveto_playlist(music_Type[3])
-    mpd_player.queue_clear()
-    mpd_player.queue_add_folder(music_Type[4])
-    mpd_player.queue_saveto_playlist(music_Type[4])
-    mpd_player.queue_clear()
-    mpd_player.queue_load_radiostreams(RADIO_STREAMS)
-    mpd_player.queue_saveto_playlist("廣播")
+    print("✅ Playlist creation complete.")
+
 
     #When fastapi starts,  it generate pc_playist_ALL
-    pc_ALLFILES = genFilelist("")
+    pc_ALLFILES = genFilelist("") 
     print(f"--- Found {len(pc_ALLFILES)} songs for PC ALLFILEs.")
-    ####print("ALL songs in Music_BaseFolder_Pc:"+str(pc_PLAYLIST_ALL))
+
+    # Update or create the "ALLFILES" playlist for every registered user
+    print("Updating 'ALLFILES' playlist for all users...")
+    db = SessionLocal()
+    try:
+        # Get all users from the database
+        users = db.query(User).all()
+        # Convert the file list to a JSON string for storage
+        playlist_data_json = json.dumps(pc_ALLFILES)
+
+        for user in users:
+            # Check if an "ALLFILES" playlist already exists for the user
+            existing_playlist = db.query(UserPlaylist).filter(
+                UserPlaylist.user_id == user.id,
+                UserPlaylist.playlist_name == "ALLFILES"
+            ).first()
+
+            if existing_playlist:
+                # If it exists, overwrite its data
+                print(f"Overwriting 'ALLFILES' for user '{user.username}'.")
+                existing_playlist.playlist_data = playlist_data_json
+            else:
+                # If it does not exist, create a new playlist entry
+                print(f"Creating 'ALLFILES' for user '{user.username}'.")
+                new_playlist = UserPlaylist(
+                    user_id=user.id,
+                    playlist_name="ALLFILES",
+                    playlist_data=playlist_data_json
+                )
+                db.add(new_playlist)
+
+        # Commit the changes (updates and new entries) to the database
+        db.commit()
+        print("'ALLFILES' playlist update process completed.")
+
+    except Exception as e:
+        print(f"An error occurred while updating 'ALLFILES' playlists: {e}")
+        db.rollback() # Rollback the transaction in case of an error
+    finally:
+        # Ensure the database session is closed
+        db.close()
+
     try:
         # The `yield` statement indicates that the application is ready to serve requests
         yield
@@ -262,20 +284,17 @@ async def index_post():
     global cron_Min
     global cron_pi_Index
     return JSONResponse({
-        "pc_Playlist" : pc_ALLFILES,
-        "pi_Playlist" : pi_ALLFILES,
         "pi_Index" : pi_Index,
         "pi_Playing" : pi_Playing,
         "pi_Playmopde" : pi_Playmode,
-        "pi_RadioNo" : pi_RadioNo,
         "pi_Volume" : pi_Volume,
         "pi_Mute" : pi_Mute,
         "pi_Playrate" : pi_Playrate,
         "pi_Duration" : pi_Duration,
-        "cronStatus" : cron_Status,
-        "cronTimeHour" : cron_Hour,
-        "cronTimeMin" : cron_Min,
-        "cronIndexPi" : cron_pi_Index
+        "pi_cronStatus" : cron_Status,
+        "pi_cronTimeHour" : cron_Hour,
+        "pi_cronTimeMin" : cron_Min,
+        "pi_cronIndexPi" : cron_pi_Index
          })
 
 @app.get("/status")
@@ -374,6 +393,22 @@ async def get_playlists_list():
         return pi_playlists_list 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting playlists list: {e}")    
+
+@app.delete("/pi_delete_playlist_list/{pi_plname}")
+async def pi_delete_playlist_list(pi_plname: str):
+    """
+    Deletes a specific playlist from MPD.
+    - pi_plname: The name of the playlist to delete.
+    """
+    if not mpd_player.is_connected:
+        raise HTTPException(status_code=503, detail="MPD is not connected")
+    
+    try:
+        # The underlying python-mpd2 command to remove a playlist is 'rm'
+        mpd_player.client.rm(pi_plname)
+        return {"message": f"Playlist '{pi_plname}' deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting playlist: {e}")
 
 @app.post("/pi_play")
 async def pi_play():
