@@ -113,6 +113,26 @@
 
           <div class="flex items-center space-x-2">
             <button
+              @click="togglePlaybackRate"
+              class="p-2 rounded w-16 text-center transition-colors duration-200 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 font-semibold"
+              title="Toggle Playback Speed"
+            >
+              {{ playbackRate.toFixed(2) }}x
+            </button>
+            
+            <button
+              @click="cycleSleepTimer"
+              :class="['p-2 rounded w-28 text-center transition-colors duration-200 font-semibold', activeSleepDuration ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200']"
+              title="Cycle Sleep Timer"
+            >
+              <div class="flex items-center justify-center">
+                <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <span v-if="sleepTimeRemaining !== null">{{ formatTime(sleepTimeRemaining) }}</span>
+                <span v-else>Sleep</span>
+              </div>
+            </button>
+
+            <button
               @click="toggleShuffle"
               :class="['p-2 rounded transition-colors duration-200', shuffleMode ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800']"
             ><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732L14.146 12.8l-1.179 4.456a1 1 0 01-1.856-.288L12.382 12H10a1 1 0 110-2h2.382l-.271-4.968A1 1 0 0112 2z" clip-rule="evenodd"></path></svg></button>
@@ -181,7 +201,7 @@
         </div>
       </div>
 
-      <radiocard 
+      <pc_radiocard 
         :loadingStreamTitle="loadingStreamTitle"
         :isPlayingLiveStream="isPlayingLiveStream"
         :currentStreamInfo="currentStreamInfo"
@@ -220,6 +240,10 @@ const isMuted = ref(false);
 const previousVolume = ref(0.7);
 const autoPlayOnLoad = ref(true);
 
+// NEW: State for playback speed
+const playbackRate = ref(1.0);
+const availableRates = [0.75, 1.0, 1.25, 1.5, 2.0, 2.5];
+
 // HLS.js instance
 let hls = null;
 
@@ -237,6 +261,12 @@ const currentStreamInfo = ref(null);
 const loadingStreamTitle = ref(null);
 let loadingTimer = null;
 const LOADING_TIMEOUT = 15000;
+
+// ==== NEW: SLEEP TIMER STATE ====
+const sleepDurations = [5,10, 15, 20, 25, 30, 35, 40, 50, 60];
+const activeSleepDuration = ref(null); // The currently set duration in minutes
+const sleepTimeRemaining = ref(null); // The countdown time in seconds
+const sleepTimerId = ref(null); // To store the setInterval ID
 
 // Computed property to check if a live stream is playing
 const isPlayingLiveStream = computed(() => {
@@ -373,9 +403,12 @@ onMounted(async () => {
   }
 });
 
-// Clean up HLS instance on unmount
+// Clean up HLS instance and timers on unmount
 onBeforeUnmount(() => {
   destroyHLS();
+  if (sleepTimerId.value) {
+    clearInterval(sleepTimerId.value);
+  }
 });
 
 // NEW: Function to load tracks from a selected playlist
@@ -430,6 +463,13 @@ watch(volume, (newVolume) => {
     if (newVolume > 0 && isMuted.value) {
       isMuted.value = false;
     }
+  }
+});
+
+// NEW: Watch for playback rate changes
+watch(playbackRate, (newRate) => {
+  if (audioPlayer.value) {
+    audioPlayer.value.playbackRate = newRate;
   }
 });
 
@@ -620,6 +660,7 @@ const onLoadedMetadata = () => {
     const newDuration = audioPlayer.value.duration;
     duration.value = isFinite(newDuration) ? newDuration : 0;
     audioPlayer.value.volume = volume.value;
+    audioPlayer.value.playbackRate = playbackRate.value; // NEW: Ensure rate is set on new track
   }
 };
 
@@ -725,8 +766,62 @@ const toggleRepeat = () => {
   repeatMode.value = modes[(currentIndex + 1) % modes.length];
 };
 
+// NEW: Function to toggle playback speed
+const togglePlaybackRate = () => {
+  const currentIndex = availableRates.indexOf(playbackRate.value);
+  const nextIndex = (currentIndex + 1) % availableRates.length;
+  playbackRate.value = availableRates[nextIndex];
+};
+
+// ==== NEW: SLEEP TIMER FUNCTION ====
+const cycleSleepTimer = () => {
+  // 1. Clear any existing interval to reset the timer
+  if (sleepTimerId.value) {
+    clearInterval(sleepTimerId.value);
+    sleepTimerId.value = null;
+  }
+
+  // 2. Find the index of the current duration and determine the next one
+  let nextIndex;
+  if (activeSleepDuration.value === null) {
+    // If timer is off, start with the first duration (e.g., 10 minutes)
+    nextIndex = 0;
+  } else {
+    const currentIndex = sleepDurations.indexOf(activeSleepDuration.value);
+    nextIndex = currentIndex + 1;
+  }
+
+  // 3. If we've cycled past the last duration, turn the timer off
+  if (nextIndex >= sleepDurations.length) {
+    activeSleepDuration.value = null;
+    sleepTimeRemaining.value = null;
+    return; // Exit function, timer is now off
+  }
+
+  // 4. Set the new active duration and start the countdown
+  activeSleepDuration.value = sleepDurations[nextIndex];
+  sleepTimeRemaining.value = activeSleepDuration.value * 60;
+
+  // 5. Start the countdown interval
+  sleepTimerId.value = setInterval(() => {
+    if (sleepTimeRemaining.value > 0) {
+      sleepTimeRemaining.value--;
+    } else {
+      // Timer finished: pause the audio and reset timer state
+      if (audioPlayer.value) {
+        audioPlayer.value.pause();
+        isPlaying.value = false;
+      }
+      clearInterval(sleepTimerId.value);
+      sleepTimerId.value = null;
+      activeSleepDuration.value = null;
+      sleepTimeRemaining.value = null;
+    }
+  }, 1000); // Ticks every second
+};
+
 const formatTime = (seconds) => {
-  if (isNaN(seconds) || seconds === 0) return '0:00';
+  if (isNaN(seconds) || seconds < 0) return '0:00';
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, '0')}`;

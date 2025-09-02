@@ -311,8 +311,8 @@ async def get_pi_status():
     
     return status
 
-@app.get("/pi_get_playlist/")
-async def pi_get_playlist():
+@app.get("/pi_queue_files/")
+async def pi_queue_files():
     """
     Get playlist in Queue
     """
@@ -322,20 +322,6 @@ async def pi_get_playlist():
             
         playlist = mpd_player.get_playlist()
         return playlist
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error saving playplaylist: {e}") 
-
-@app.get("/pi_get_playlistid/")
-async def pi_get_playlistid():
-    """
-    Get playlist in Queue
-    """
-    if not mpd_player.is_connected:
-        raise HTTPException(status_code=503, detail="MPD is not connected")
-    try:
-            
-        playlistid = mpd_player.get_playlisid()
-        return playlistid
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error saving playplaylist: {e}") 
 
@@ -354,8 +340,8 @@ async def pi_gen_playlist(folder_name:str):
         raise HTTPException(status_code=500, detail=f"Error saving playplaylist: {e}") 
     
 #TTTok
-@app.get("/pi_load_from_playlist/{pi_plname}")
-async def pi_load_from_playlist(pi_plname:str):
+@app.get("/pi_load_playlist_to_queue/{pi_plname}")
+async def pi_load_playlist_to_queue(pi_plname:str):
     """
     Find if pi_plname in playlists list, and load to Queue
     """
@@ -369,8 +355,8 @@ async def pi_load_from_playlist(pi_plname:str):
         raise HTTPException(status_code=500, detail=f"Error loading playlist: {e}")
     
 #TTT
-@app.get("/pi_save_to_playlist/{pi_plname}")
-async def save_pi_playlist_current(pi_plname:str):
+@app.get("/pi_queue_save_to_playlist/{pi_plname}")
+async def pi_queue_save_to_playlist(pi_plname:str):
     """
     Save current Queue to mpd playlist
     """
@@ -384,7 +370,7 @@ async def save_pi_playlist_current(pi_plname:str):
         raise HTTPException(status_code=500, detail=f"Error saving playplaylist: {e}")
 #    
 @app.get("/pi_get_playlists_list")
-async def get_playlists_list():
+async def pi_get_playlists_list():
     """
     Get  playlists list.
     """
@@ -495,7 +481,7 @@ async def pi_prev():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error skipping to previous song: {e}")
 
-@app.put("/pi_setvolume/{volume}")
+@app.put("/pi_setvol/{volume}")
 async def pi_setvol(volume: int):
     """
     Sets the volume of the MPD player.
@@ -572,8 +558,8 @@ async def pc_get_playlist_files(
     # If no playlist is found, return an empty list
     return []
 
-@app.post("/pc_save_playlists_tolist/{pc_plname}")
-async def pc_save_playlist_files(
+@app.post("/pc_save_playlists_to_list/{pc_plname}")
+async def pc_save_playlist_to_list(
     pc_plname: str, # Captures the playlist name from the URL path
     payload: PlaylistPayload, # Uses the Pydantic model for the request body
     db: Session = Depends(get_db),

@@ -407,7 +407,7 @@ const updatePlaylistContent = async (playlistName, content) => {
       throw new Error("Authentication token is not available. Please log in.");
     }
 
-    const response = await fetch(`${apiBase}/pc_save_playlists_tolist/${encodeURIComponent(playlistName)}`,
+    const response = await fetch(`${apiBase}/pc_save_playlists_to_list/${encodeURIComponent(playlistName)}`,
     {
       method: 'POST',
       headers: {
@@ -443,7 +443,7 @@ const savePlaylist = async () => {
       throw new Error("Authentication token is not available. Please log in.");
     }
 
-    const response = await fetch(`${apiBase}/pc_save_playlists_tolist/${encodeURIComponent(newPlaylistName.value)}`,
+    const response = await fetch(`${apiBase}/pc_save_playlists_to_list/${encodeURIComponent(newPlaylistName.value)}`,
     {
       method: 'POST',
       headers: {
