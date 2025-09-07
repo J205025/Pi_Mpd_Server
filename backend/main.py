@@ -653,14 +653,17 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     if user.code != DESIGNATED_CODE:
         raise HTTPException(status_code=400, detail="Invalid registration code")
     
-    # Check if the username is already registered
-    db_user = db.query(User).filter(User.username == user.username).first()
+    # Capitalize the username before checking and saving
+    username_capitalized = user.username.upper()
+    
+    # Check if the capitalized username is already registered
+    db_user = db.query(User).filter(User.username == username_capitalized).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
     
-    # Proceed with user creation
+    # Proceed with user creation using the capitalized username
     hashed_password = get_password_hash(user.password)
-    db_user = User(username=user.username, hashed_password=hashed_password)
+    db_user = User(username=username_capitalized, hashed_password=hashed_password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

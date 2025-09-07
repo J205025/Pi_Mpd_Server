@@ -88,7 +88,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, watch } from 'vue';
 
 // Get runtime config
 const config = useRuntimeConfig();
@@ -99,6 +99,15 @@ const form = reactive({
   name: '',
   password: '',
   remember: false
+});
+
+watch(() => form.name, (newName) => {
+  if (newName && newName.length > 0) {
+    const capitalized = newName.charAt(0).toUpperCase() + newName.slice(1);
+    if (form.name !== capitalized) {
+      form.name = capitalized;
+    }
+  }
 });
 
 // Form state
