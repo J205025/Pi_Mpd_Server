@@ -138,19 +138,19 @@ async def lifespan(app: FastAPI):
             # Check if an "ALLFILES" playlist already exists for the user
             existing_playlist = db.query(UserPlaylist).filter(
                 UserPlaylist.user_id == user.id,
-                UserPlaylist.playlist_name == "ALLFILES"
+                UserPlaylist.playlist_name == "所有歌曲(自動產生)"
             ).first()
 
             if existing_playlist:
                 # If it exists, overwrite its data
-                print(f"Overwriting 'ALLFILES' for user '{user.username}'.")
+                print(f"Overwriting '所有歌曲(自動產生)' for user '{user.username}'.")
                 existing_playlist.playlist_data = playlist_data_json
             else:
                 # If it does not exist, create a new playlist entry
                 print(f"Creating 'ALLFILES' for user '{user.username}'.")
                 new_playlist = UserPlaylist(
                     user_id=user.id,
-                    playlist_name="ALLFILES",
+                    playlist_name="所有歌曲(自動產生)",
                     playlist_data=playlist_data_json
                 )
                 db.add(new_playlist)
