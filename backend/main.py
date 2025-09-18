@@ -671,7 +671,9 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
 @app.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == form_data.username).first()
+    # Capitalize the username to match the stored format
+    username_capitalized = form_data.username.upper()
+    user = db.query(User).filter(User.username == username_capitalized).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

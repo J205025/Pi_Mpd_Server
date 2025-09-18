@@ -67,12 +67,12 @@
 
       <!-- Playlist List Section -->
       <div class="bg-white p-6 rounded-lg shadow-xl mt-12">
-        <h2 class="text-2xl font-bold mb-4 text-gray-800">你的歌單</h2>
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">你的歌單:(點歌單名字可編輯曲目)</h2>
         <div v-if="playlistsList.length > 0">
           <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
             <li v-for="(playlistName, index) in playlistsList" :key="index"
                 class="flex justify-between items-center text-gray-700 p-2 border-b border-gray-200 last:border-b-0">
-              <span class="cursor-pointer hover:text-blue-600 font-medium" @click="getPlaylistFiles(playlistName)">
+              <span class="cursor-pointer hover:text-blue-600 font-medium" @click="getPlaylistFiles(playlistName)" :class="{ 'bg-blue-200': playlistName === currentSelectedPlaylist }">
                 {{ playlistName }}
               </span>
               <button @click="deletePlaylist(playlistName)" class="bg-red-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-red-600 transition duration-300">
@@ -90,7 +90,7 @@
           
           <div class="mb-4">
             <button 
-              @click="editModeForPlaylist = !editModeForPlaylist; selectedFilesForDeletion = []"
+              @click="editModeForPlaylist = !editModeForPlaylist; selectedFilesInEditMode = []"
               class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 mr-2"
             >
               {{ editModeForPlaylist ? '離開編輯' : '編輯' }}
@@ -98,18 +98,26 @@
             <button 
               v-if="editModeForPlaylist"
               @click="deleteSelectedFilesFromPlaylist"
-              :disabled="selectedFilesForDeletion.length === 0"
+              :disabled="selectedFilesInEditMode.length === 0"
               class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition duration-300"
             >
               刪除
+            </button>
+            <button 
+              v-if="editModeForPlaylist"
+              @click="promptToSaveSelection"
+              :disabled="selectedFilesInEditMode.length === 0"
+              class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition duration-300 ml-2"
+            >
+              儲存
             </button>
           </div>
 
           <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
             <li v-for="(file, index) in selectedPlaylistFiles" :key="index" 
                 class="text-gray-700 p-1 truncate"
-                :class="{ 'bg-red-300 cursor-pointer': editModeForPlaylist && selectedFilesForDeletion.includes(file), 'cursor-pointer': editModeForPlaylist && !selectedFilesForDeletion.includes(file), 'cursor-default': !editModeForPlaylist }"
-                @click="editModeForPlaylist ? toggleSelectedPlaylistFileForDeletion(file) : null">
+                :class="{ 'bg-red-300 cursor-pointer': editModeForPlaylist && selectedFilesInEditMode.includes(file), 'cursor-pointer': editModeForPlaylist && !selectedFilesInEditMode.includes(file), 'cursor-default': !editModeForPlaylist }"
+                @click="editModeForPlaylist ? toggleFileSelectionInEditMode(file) : null">
               {{ file }}
             </li>
           </ul>
@@ -135,18 +143,19 @@
 
       <div class="grid md:grid-cols-3 gap-8 mt-12">
         <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-bold mb-2 text-gray-800">類型</h2>
+          <h2 class="text-2xl font-bold mb-2 text-gray-800">類型:</h2>
           <p class="text-gray-700">古典  台語  國語  播客  日語  有聲書  英語  輕音樂  韓語 </p>
         </div>
 
         <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-bold mb-2 text-gray-800">歌手</h2>
-          <p class="text-gray-700">張學友 劉德華 </p>
+          <h2 class="text-2xl font-bold mb-2 text-gray-800">歌手:</h2>
+          <p class="text-gray-700">張學友 劉德華 原子邦尼 秀蘭瑪雅 AKB48 </p>
         </div>
 
         <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-bold mb-2 text-gray-800">Feature Three</h2>
-          <p class="text-gray-700">Our third feature is revolutionary, providing insights and capabilities you won't find anywhere else.</p>
+          <h2 class="text-2xl font-bold mb-2 text-gray-800">如何搜尋檔案:</h2>
+          <p class="text-gray-700">-- 找類型:「國語」，歌手:「張學友」，則輸入「國語 張學友」，再按搜尋會搜尋「國語\張學友」資料夾中的所有歌曲. </p>
+          <p class="text-gray-700">-- 也可只輸入「國語」會搜尋「國語\」資料夾下的所有歌曲 </p>
         </div>
       </div>
 
@@ -176,7 +185,7 @@ const newPlaylistName = ref('');
 const playlistsList = ref([]);
 const selectedPlaylistFiles = ref([]);
 const currentSelectedPlaylist = ref('');
-const selectedFilesForDeletion = ref([]); // To track files selected for deletion from an opened playlist
+const selectedFilesInEditMode = ref([]); // To track files selected for deletion from an opened playlist
 const editModeForPlaylist = ref(false); // To enable/disable editing mode for playlist files
 
 
@@ -220,7 +229,7 @@ const getPlaylistFiles = async (playlistName) => {
   errorMessage.value = '';
   selectedPlaylistFiles.value = [];
   currentSelectedPlaylist.value = playlistName;
-  selectedFilesForDeletion.value = []; // Clear selections for deletion when new playlist is loaded
+  selectedFilesInEditMode.value = []; // Clear selections for deletion when new playlist is loaded
   editModeForPlaylist.value = false; // Exit edit mode when new playlist is loaded
 
   try {
@@ -285,7 +294,7 @@ const deletePlaylist = async (playlistName) => {
     await getPlaylistsList(); // Refresh the playlist list
     selectedPlaylistFiles.value = []; // Clear displayed files if the deleted playlist was selected
     currentSelectedPlaylist.value = '';
-    selectedFilesForDeletion.value = [];
+    selectedFilesInEditMode.value = [];
     editModeForPlaylist.value = false;
 
   } catch (error) {
@@ -360,18 +369,18 @@ const deselectAllFolderFiles = () => {
 
 
 // Toggle selection for files within a saved playlist (for deletion)
-const toggleSelectedPlaylistFileForDeletion = (file) => {
-  const index = selectedFilesForDeletion.value.indexOf(file);
+const toggleFileSelectionInEditMode = (file) => {
+  const index = selectedFilesInEditMode.value.indexOf(file);
   if (index > -1) {
-    selectedFilesForDeletion.value.splice(index, 1);
+    selectedFilesInEditMode.value.splice(index, 1);
   } else {
-    selectedFilesForDeletion.value.push(file);
+    selectedFilesInEditMode.value.push(file);
   }
 };
 
 // Function to delete selected files from the currently viewed playlist
 const deleteSelectedFilesFromPlaylist = async () => {
-  if (!confirm(`Are you sure you want to delete the selected ${selectedFilesForDeletion.value.length} file(s) from "${currentSelectedPlaylist.value}"?`)) {
+  if (!confirm(`Are you sure you want to delete the selected ${selectedFilesInEditMode.value.length} file(s) from "${currentSelectedPlaylist.value}"?`)) {
     return;
   }
 
@@ -381,7 +390,7 @@ const deleteSelectedFilesFromPlaylist = async () => {
   try {
     // Filter out the files marked for deletion
     const updatedFiles = selectedPlaylistFiles.value.filter(
-      file => !selectedFilesForDeletion.value.includes(file)
+      file => !selectedFilesInEditMode.value.includes(file)
     );
 
     await updatePlaylistContent(currentSelectedPlaylist.value, updatedFiles);
@@ -389,11 +398,39 @@ const deleteSelectedFilesFromPlaylist = async () => {
     
     // Refresh the displayed files and exit edit mode
     await getPlaylistFiles(currentSelectedPlaylist.value);
-    selectedFilesForDeletion.value = [];
+    selectedFilesInEditMode.value = [];
     editModeForPlaylist.value = false;
 
   } catch (error) {
     console.error('Failed to delete files from playlist:', error);
+    errorMessage.value = error.message;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const promptToSaveSelection = () => {
+  const newPlaylistName = prompt('Enter a name for the new playlist:');
+  if (newPlaylistName && newPlaylistName.trim()) {
+    saveSelectedFilesAsNewPlaylist(newPlaylistName.trim());
+  }
+};
+
+const saveSelectedFilesAsNewPlaylist = async (playlistName) => {
+  isLoading.value = true;
+  errorMessage.value = '';
+
+  try {
+    await updatePlaylistContent(playlistName, selectedFilesInEditMode.value);
+    alert(`Selected files saved to new playlist "${playlistName}" successfully!`);
+    
+    // Refresh the playlist list and exit edit mode
+    await getPlaylistsList();
+    selectedFilesInEditMode.value = [];
+    editModeForPlaylist.value = false;
+
+  } catch (error) {
+    console.error('Failed to save selected files to new playlist:', error);
     errorMessage.value = error.message;
   } finally {
     isLoading.value = false;

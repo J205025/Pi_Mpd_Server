@@ -7,10 +7,10 @@
       
       <div class="hidden md:flex items-center space-x-6">
         <!--NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">Home</NuxtLink-->
-        <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">A.電腦播放</NuxtLink>
-        <NuxtLink :to="isLoggedIn ? '/pc_playlist' : '/'" class="text-gray-300 hover:text-white transition duration-300">-歌單編輯</NuxtLink>
-        <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">B.音響播放</NuxtLink>
-        <NuxtLink :to="isLoggedIn ? '/pi_playlist' : '/'" class="text-gray-300 hover:text-white transition duration-300">-歌單編輯</NuxtLink>
+        <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">A1.電腦播放</NuxtLink>
+        <NuxtLink :to="isLoggedIn ? '/pc_playlist' : '/'" class="text-gray-300 hover:text-white transition duration-300">A2.歌單編輯</NuxtLink>
+        <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">B1.音響播放</NuxtLink>
+        <NuxtLink :to="isLoggedIn ? '/pi_playlist' : '/'" class="text-gray-300 hover:text-white transition duration-300">B2.歌單編輯</NuxtLink>
         <div class="flex-grow"></div>
 
         <template v-if="isLoggedIn">
@@ -30,10 +30,10 @@
     
     <div :class="{ 'hidden': !isMobileMenuOpen }" class="md:hidden mt-4">
       <!--NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">Home</NuxtLink-->
-      <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">A.電腦播放</NuxtLink>
-      <NuxtLink :to="isLoggedIn ? '/pc_playlist' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">-電腦單編輯</NuxtLink> 
-      <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">B.音響播放</NuxtLink>
-      <NuxtLink :to="isLoggedIn ? '/pi_playlist' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">-音響歌單編輯</NuxtLink>      
+      <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">A1.電腦播放</NuxtLink>
+      <NuxtLink :to="isLoggedIn ? '/pc_playlist' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">A2.電腦單編輯</NuxtLink> 
+      <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">B1.音響播放</NuxtLink>
+      <NuxtLink :to="isLoggedIn ? '/pi_playlist' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">B2.音響歌單編輯</NuxtLink>      
       <template v-if="isLoggedIn">
         <span class="block text-gray-300 py-2 px-4">Welcome, {{ currentUser.toUpperCase() }}</span>
         <button @click="handleLogout" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
