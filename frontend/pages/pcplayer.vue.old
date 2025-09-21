@@ -154,13 +154,30 @@
         </div>
       </div>
 
-      <!-- Lyrics Display Component -->
-      <lyricdisplay 
-        :trackPath="selectedTrack"
-        :currentTime="currentTime"
-        :isLiveStream="isPlayingLiveStream"
-        :apiBase="apiBase"
-      />
+      <!-- Lyrics Display Section -->
+      <div v-if="lyrics.length > 0 && !isPlayingLiveStream" class="bg-white p-6 rounded-lg shadow-xl mt-6">
+        <h3 class="text-xl font-bold mb-4 text-gray-800 text-center">Lyrics</h3>
+        <div class="lyrics-container max-h-96 overflow-y-auto">
+          <div 
+            v-for="(line, index) in lyrics" 
+            :key="index"
+            :class="[
+              'lyrics-line py-2 px-4 rounded transition-all duration-300 text-center',
+              line.isActive ? 'bg-blue-100 text-blue-800 font-semibold transform scale-105' : 'text-gray-600'
+            ]"
+            :ref="line.isActive ? 'activeLyricLine' : null"
+          >
+            {{ line.text }}
+          </div>
+        </div>
+        <div v-if="!lyricsLoaded && lyricsChecked" class="text-center text-gray-500 py-4">
+          No lyrics file found for this track
+        </div>
+        <div v-if="!lyricsChecked" class="text-center text-gray-500 py-4">
+          Checking for lyrics...
+        </div>
+      </div>
+
 
       <div class="bg-white p-6 rounded-lg shadow-xl mt-12">
         <label for="load-playlist-select" class="block text-xl font-bold mb-3 text-gray-800">選擇歌單:</label>
@@ -224,7 +241,6 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
-import LyricDisplay from '~/components/lyricdisplay.vue';
 
 // Get runtime config
 const config = useRuntimeConfig();
@@ -235,7 +251,7 @@ const selectedTrack = ref('');
 const loading = ref(false);
 const error = ref(null);
 
-// State for playlist names
+// NEW: State for playlist names
 const playlistNames = ref([]);
 
 // Audio player state
@@ -249,7 +265,7 @@ const isMuted = ref(false);
 const previousVolume = ref(0.7);
 const autoPlayOnLoad = ref(true);
 
-// State for playback speed
+// NEW: State for playback speed
 const playbackRate = ref(1.0);
 const availableRates = [0.75, 1.0, 1.25, 1.5, 2.0, 2.5];
 
@@ -265,17 +281,17 @@ const currentNumberString = ref('');
 let inputTimer = null;
 const INPUT_TIMEOUT = 4000;
 
-// State for stream metadata
+// ==== NEW STATE FOR STREAM METADATA ====
 const currentStreamInfo = ref(null);
 const loadingStreamTitle = ref(null);
 let loadingTimer = null;
 const LOADING_TIMEOUT = 15000;
 
-// Sleep timer state
+// ==== NEW: SLEEP TIMER STATE ====
 const sleepDurations = [5,10, 15, 20, 25, 30, 35, 40, 50, 60];
-const activeSleepDuration = ref(null);
-const sleepTimeRemaining = ref(null);
-const sleepTimerId = ref(null);
+const activeSleepDuration = ref(null); // The currently set duration in minutes
+const sleepTimeRemaining = ref(null); // The countdown time in seconds
+const sleepTimerId = ref(null); // To store the setInterval ID
 
 // Computed property to check if a live stream is playing
 const isPlayingLiveStream = computed(() => {
@@ -311,27 +327,26 @@ const getTrackArtist = (fullPath) => {
   return parts.length > 2 ? parts[parts.length - 3] : '';
 };
 
-// Computed properties for display
+// ==== MODIFIED COMPUTED PROPERTIES FOR DISPLAY ====
 const trackTitle = computed(() => {
     if (selectedTrack.value === 'LIVE_STREAM' && currentStreamInfo.value) {
         return currentStreamInfo.value.title;
     }
     return getTrackTitle(selectedTrack.value);
 });
-
 const trackAlbum = computed(() => {
     if (selectedTrack.value === 'LIVE_STREAM') {
         return '';
     }
     return getTrackAlbum(selectedTrack.value);
 });
-
 const trackArtist = computed(() => {
     if (selectedTrack.value === 'LIVE_STREAM' && currentStreamInfo.value) {
         return currentStreamInfo.value.artist;
     }
     return getTrackArtist(selectedTrack.value);
 });
+// ===============================================
 
 // Helper function to check if URL is an HLS stream
 const isHLSStream = (url) => {
@@ -392,7 +407,7 @@ onMounted(async () => {
       console.error('Invalid format for all files list:', allFilesResponse);
     }
 
-    // Fetch the list of user-saved playlist names
+    // NEW: Fetch the list of user-saved playlist names
     const playlistNamesResponse = await $fetch(`${apiBase}/pc_get_playlist_List`, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -421,7 +436,7 @@ onBeforeUnmount(() => {
   }
 });
 
-// Function to load tracks from a selected playlist
+// NEW: Function to load tracks from a selected playlist
 const loadPlaylist = async (playlistName) => {
   if (!playlistName) return;
 
@@ -476,14 +491,14 @@ watch(volume, (newVolume) => {
   }
 });
 
-// Watch for playback rate changes
+// NEW: Watch for playback rate changes
 watch(playbackRate, (newRate) => {
   if (audioPlayer.value) {
     audioPlayer.value.playbackRate = newRate;
   }
 });
 
-// Watcher for source control
+// ==== MODIFIED WATCHER FOR SOURCE CONTROL ====
 watch(selectedTrack, (newTrack) => {
   if (!audioPlayer.value) return;
   
@@ -497,8 +512,9 @@ watch(selectedTrack, (newTrack) => {
     audioPlayer.value.load(); // Tell the browser to load the new source
   }
 });
+// ======================================
 
-// Function to play streams with HLS support
+// ==== MODIFIED FUNCTION TO PLAY STREAMS WITH HLS SUPPORT ====
 const playStream = async (streamUrl, streamTitle, streamArtist) => {
   if (!audioPlayer.value) return;
 
@@ -621,8 +637,9 @@ const playStream = async (streamUrl, streamTitle, streamArtist) => {
     alert(`Failed to connect to ${streamTitle}. The station may be offline or your connection may be blocked.`);
   }
 };
+// =========================================
 
-// Event handler for the child component's event
+// NEW: Event handler for the child component's event
 const handlePlayStream = (streamData) => {
   playStream(streamData.url, streamData.title, streamData.artist);
 };
@@ -668,7 +685,7 @@ const onLoadedMetadata = () => {
     const newDuration = audioPlayer.value.duration;
     duration.value = isFinite(newDuration) ? newDuration : 0;
     audioPlayer.value.volume = volume.value;
-    audioPlayer.value.playbackRate = playbackRate.value;
+    audioPlayer.value.playbackRate = playbackRate.value; // NEW: Ensure rate is set on new track
   }
 };
 
@@ -774,14 +791,14 @@ const toggleRepeat = () => {
   repeatMode.value = modes[(currentIndex + 1) % modes.length];
 };
 
-// Function to toggle playback speed
+// NEW: Function to toggle playback speed
 const togglePlaybackRate = () => {
   const currentIndex = availableRates.indexOf(playbackRate.value);
   const nextIndex = (currentIndex + 1) % availableRates.length;
   playbackRate.value = availableRates[nextIndex];
 };
 
-// Sleep timer function
+// ==== NEW: SLEEP TIMER FUNCTION ====
 const cycleSleepTimer = () => {
   // 1. Clear any existing interval to reset the timer
   if (sleepTimerId.value) {
