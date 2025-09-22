@@ -15,7 +15,9 @@
           </a>
         </template>
       </div>
-
+    <div class="wallpaper">
+      <img :src="wallpaperSrc" alt="Wallpaper" class="w-full h-auto mt-10 rounded-lg shadow-lg">
+    </div>
     </main>
 
     
@@ -28,10 +30,24 @@
 import { ref, onMounted } from 'vue';
 
 const isLoggedIn = ref(false);
+const wallpaperSrc = ref('');
 
-onMounted(() => {
+onMounted(async () => {
   const token = localStorage.getItem('authToken');
   isLoggedIn.value = !!token;
+
+  try {
+    const response = await fetch('http://localhost:8001/api/wallpaper-images');
+    const images = await response.json();
+    if (images.length > 0) {
+      const randomIndex = Math.floor(Math.random() * images.length);
+      wallpaperSrc.value = images[randomIndex];
+    }
+  } catch (error) {
+    console.error('Error fetching wallpaper images:', error);
+    // Fallback to a default image in case of an error
+    wallpaperSrc.value = '/images/home_picture/01.jpg';
+  }
 });
 </script>
 

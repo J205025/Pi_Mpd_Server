@@ -691,6 +691,19 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 
+@app.get("/api/wallpaper-images")
+async def get_wallpaper_images():
+    """
+    Returns a list of wallpaper image filenames.
+    """
+    image_dir = Path("../frontend/public/images/home_picture/")
+    if not image_dir.is_dir():
+        raise HTTPException(status_code=404, detail="Wallpaper image directory not found")
+    
+    images = [f"/images/home_picture/{p.name}" for p in image_dir.iterdir() if p.is_file()]
+    return images
+
+
 # IMPORTANT: This catch-all route MUST be the LAST route defined
 # It handles all SPA routes that don't match API endpoints or static files
 @app.get("/{full_path:path}")
