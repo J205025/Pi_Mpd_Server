@@ -16,7 +16,7 @@
         </template>
       </div>
     <div class="wallpaper">
-      <img :src="wallpaperSrc" alt="Wallpaper" class="w-full h-auto mt-10 rounded-lg shadow-lg">
+      <img :src="wallpaperSrc" alt="Wallpaper" class="w-full max-h-[70vh] mt-10 rounded-lg shadow-lg">
     </div>
     </main>
 
