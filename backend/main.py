@@ -696,7 +696,8 @@ async def get_wallpaper_images():
     """
     Returns a list of wallpaper image filenames.
     """
-    image_dir = Path("../frontend/public/images/home_picture/")
+    #image_dir = Path("../frontend/public/images/home_picture/")
+    image_dir = NUXT_DIST_PATH / "images" / "home_picture"   
     if not image_dir.is_dir():
         raise HTTPException(status_code=404, detail="Wallpaper image directory not found")
     

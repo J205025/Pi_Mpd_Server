@@ -31,13 +31,14 @@ import { ref, onMounted } from 'vue';
 
 const isLoggedIn = ref(false);
 const wallpaperSrc = ref('');
+const apiBase = useRuntimeConfig().public.apiBase;
 
 onMounted(async () => {
   const token = localStorage.getItem('authToken');
   isLoggedIn.value = !!token;
 
   try {
-    const response = await fetch('http://localhost:8001/api/wallpaper-images');
+    const response = await fetch(`${apiBase}/api/wallpaper-images`);
     const images = await response.json();
     if (images.length > 0) {
       const randomIndex = Math.floor(Math.random() * images.length);
