@@ -32,9 +32,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/tailwind.css'],
   
   // Modules
-  modules: [
-    '@nuxtjs/tailwindcss'
-  ],
+  modules: ['@nuxtjs/tailwindcss', '@nuxt/image'],
   
   // Development server configuration
   devtools: { enabled: true },
