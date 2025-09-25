@@ -12,7 +12,6 @@ export default defineNuxtConfig({
   experimental: {
     payloadExtraction: false
   },
-  
   // Configure the app for SPA deployment
   app: {
     // Base URL if serving from a subdirectory
