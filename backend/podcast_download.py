@@ -86,9 +86,10 @@ for podcast_name, feed_url in podcast_rss.items():
         # If an audio link is found, download the file
         if audio_link:
             title = entry.title
-            # Sanitize the title to create a valid filename
+            # Sanitize the title and prepend the publication date
+            pub_date_str = pub_date.strftime('%Y-%m-%d')
             sanitized_title = re.sub(r'[\\/:*?"<>|]', '', title)
-            file_name = f"{sanitized_title}.mp3"
+            file_name = f"{pub_date_str} - {sanitized_title}.mp3"
             file_path = os.path.join(podcast_dir, file_name)
             
             # Check if the file already exists to avoid re-downloading

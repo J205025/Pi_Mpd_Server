@@ -28,6 +28,9 @@ BBC HLS streams
 
 
 https://vvlyrics.com/
+https://www.lyricsify.com/artists/akb48
+https://vvlyrics.com/artist/akb48
+
 
 
 1. Wallpapers 
