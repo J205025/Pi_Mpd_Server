@@ -20,7 +20,7 @@ from my_package.mpd_controller import MPDClientController
 from my_package.database import get_db, SessionLocal 
 from my_package.models import User, UserPlaylist # Added UserPlaylist
 # Updated imports to include PlaylistPayload
-from my_package.schemas import UserCreate, UserResponse, Token, UserPlaylistCreate, UserPlaylistResponse, PlaylistPayload, PlaylistsListResponse
+from my_package.schemas import UserCreate, UserResponse, Token, UserPlaylistCreate, UserPlaylistResponse, PlaylistPayload, PlaylistsListResponse, UserPasswordChange
 from my_package.auth import get_password_hash, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user
 import uvicorn
 from contextlib import asynccontextmanager
@@ -694,6 +694,39 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 @app.get("/users/me/", response_model=UserResponse)
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+@app.put("/users/password")
+async def change_password(
+    password_data: UserPasswordChange,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Changes the password for the currently authenticated user.
+    """
+    # Verify the current password
+    if not verify_password(password_data.current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect"
+        )
+    
+    # Validate new password (you can add more validation here)
+    if len(password_data.new_password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be at least 8 characters long"
+        )
+    
+    # Hash the new password and update the user
+    new_hashed_password = get_password_hash(password_data.new_password)
+    current_user.hashed_password = new_hashed_password
+    
+    # Save the changes to the database
+    db.commit()
+    db.refresh(current_user)
+    
+    return {"message": "Password changed successfully"}
 
 
 @app.get("/api/wallpaper-images")

@@ -31,6 +31,10 @@ https://vvlyrics.com/
 https://www.lyricsify.com/artists/akb48
 https://vvlyrics.com/artist/akb48
 
+#ImageMagicK Tools:
+convert input.jpg -resize 1920x -quality 85 output.jpg
+
+
 
 
 1. Wallpapers 
