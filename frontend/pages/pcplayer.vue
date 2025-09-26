@@ -92,7 +92,7 @@
           </button>
         </div>
 
-        <div class="flex items-center justify-between">
+        <div class="flex flex-wrap items-center justify-between">
           <div class="flex items-center space-x-2">
             <button @click="toggleMute" class="text-gray-600 hover:text-gray-800">
               <svg v-if="isMuted || volume === 0" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
@@ -111,7 +111,7 @@
             <span class="text-sm text-gray-600 w-8">{{ Math.round(volume * 100) }}</span>
           </div>
 
-          <div class="flex items-center space-x-2">
+          <div class="flex flex-wrap justify-center items-center space-x-2">
             <button
               @click="togglePlaybackRate"
               class="p-2 rounded w-16 text-center transition-colors duration-200 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 font-semibold"
@@ -190,7 +190,7 @@
           </option>
         </select>
         
-        <div class="mt-4">
+        <div id="keypad" class="mt-4 md:block hidden">
             <p class="text-lg font-bold mb-2 text-gray-800">Enter Track Index:</p>
             <div class="flex flex-wrap gap-2 justify-center">
                 <button
@@ -207,6 +207,7 @@
                 Current Number: <span class="font-bold">{{ currentNumberString }}</span>
             </div>
         </div>
+
       </div>
 
       <pc_radiocard 

@@ -66,7 +66,7 @@
       </div>
 
       <!-- Playlist List Section -->
-      <div class="bg-white p-6 rounded-lg shadow-xl mt-12">
+      <div class="bg-white p-6 rounded-lg shadow-xl mt-6">
         <h2 class="text-2xl font-bold mb-4 text-gray-800">你的歌單:(點歌單名字可編輯曲目)</h2>
         <div v-if="playlistsList.length > 0">
           <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
@@ -141,10 +141,30 @@
         </div>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-8 mt-12">
+      <div class="grid md:grid-cols-4 gap-6 mt-6">
+<div class="bg-white p-6 rounded-lg shadow-lg">
+  <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單:</h2>
+  <div class="grid grid-cols-3 gap-4">
+    <button @click="autoSavePcPlaylist('播客 BBC')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">BBC</button>
+    <button @click="autoSavePcPlaylist('國語')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">國語</button>
+    <button @click="autoSavePcPlaylist('台語')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">台語</button>
+    <button @click="autoSavePcPlaylist('日語')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">日語</button>
+    <button @click="autoSavePcPlaylist('英語')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">英語</button>
+    <button @click="autoSavePcPlaylist('古典')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">古典</button>
+    <button @click="autoSavePcPlaylist('英語')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">英語</button>
+    <button @click="autoSavePcPlaylist('輕音樂')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">輕音樂</button>
+    <button @click="autoSavePcPlaylist('有聲書')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">有聲書</button>
+    <button @click="autoSavePcPlaylist('國語 張學友')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友</button>
+    <button @click="autoSavePcPlaylist('國語 張學友-演唱會')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-演唱會</button>
+  </div>
+</div>
         <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-bold mb-2 text-gray-800">類型:</h2>
-          <p class="text-gray-700">古典  台語  國語  播客  日語  有聲書  英語  輕音樂  韓語 </p>
+          
+          <h2 class="text-2xl font-bold mb-2 text-gray-800">手動下載最新播客:</h2>
+          <div class="grid grid-cols-3 gap-4">
+          <button @click="autoDownloadPodcast()" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">播客</button>
+          </div>
+
         </div>
 
         <div class="bg-white p-6 rounded-lg shadow-lg">
@@ -504,6 +524,63 @@ const savePlaylist = async () => {
   } catch (error) {
     console.error('Failed to save playlist:', error);
     errorMessage.value = error.message;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const autoSavePcPlaylist = async (folder) => {
+  isLoading.value = true;
+  errorMessage.value = '';
+  try {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error("Authentication token is not available. Please log in.");
+    }
+
+    // 1. Get file list
+    const genFilesResponse = await fetch(`${apiBase}/pc_gen_fileslist/${encodeURIComponent(folder)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!genFilesResponse.ok) {
+      const errorData = await genFilesResponse.json().catch(() => null);
+      throw new Error(errorData?.detail || `Server responded with status: ${genFilesResponse.status}`);
+    }
+
+    const files = await genFilesResponse.json();
+
+    if (files.length === 0) {
+      alert(`No files found in folder "${folder}". Playlist not created.`);
+      return;
+    }
+
+    // 2. Save playlist
+    const savePlaylistResponse = await fetch(`${apiBase}/pc_save_playlists_to_list/${encodeURIComponent(folder)}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ songs: files })
+    });
+
+    if (!savePlaylistResponse.ok) {
+      const errorData = await savePlaylistResponse.json().catch(() => null);
+      throw new Error(errorData?.detail || `Server responded with status: ${savePlaylistResponse.status}`);
+    }
+
+    alert(`Playlist "${folder}" created/updated successfully!`);
+    await getPlaylistsList(); // Refresh the playlist list
+
+  } catch (error) {
+    console.error(`Failed to auto save playlist for folder ${folder}:`, error);
+    errorMessage.value = error.message;
+    alert(`Failed to auto save playlist: ${error.message}`);
   } finally {
     isLoading.value = false;
   }

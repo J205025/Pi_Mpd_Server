@@ -121,10 +121,13 @@ async def lifespan(app: FastAPI):
     print("✅ Playlist creation complete.")
 
 
-    #When fastapi starts,  it generate pc_playist_ALL
+    #When fastapi starts,  it generate pc_ALLFILES
     pc_ALLFILES = genFilelist("") 
     print(f"--- Found {len(pc_ALLFILES)} songs for PC ALLFILEs.")
-
+    podcast_BBC= genFilelist("播客/BBC")   
+    print(f"--- Found {len(podcast_BBC)} songs for BBC Podcast.")
+    podcast_Daily= genFilelist("播客/Daily")
+    print(f"--- Found {len(podcast_Daily)} songs for Daily Podcast.")
     # Update or create the "ALLFILES" playlist for every registered user
     print("Updating 'ALLFILES' playlist for all users...")
     db = SessionLocal()
