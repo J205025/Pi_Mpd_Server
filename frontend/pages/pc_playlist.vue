@@ -141,11 +141,11 @@
         </div>
       </div>
 
-      <div class="grid md:grid-cols-4 gap-6 mt-6">
-<div class="bg-white p-6 rounded-lg shadow-lg">
-  <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單:</h2>
-  <div class="grid grid-cols-3 gap-4">
-    <button @click="autoSavePcPlaylist('播客 BBC')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">BBC</button>
+    <div class="grid md:grid-cols-4 gap-6 mt-6">
+
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+    <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單:</h2>
+    <div class="grid grid-cols-3 gap-4">
     <button @click="autoSavePcPlaylist('國語')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">國語</button>
     <button @click="autoSavePcPlaylist('台語')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">台語</button>
     <button @click="autoSavePcPlaylist('日語')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">日語</button>
@@ -156,27 +156,31 @@
     <button @click="autoSavePcPlaylist('有聲書')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">有聲書</button>
     <button @click="autoSavePcPlaylist('國語 張學友')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友</button>
     <button @click="autoSavePcPlaylist('國語 張學友-演唱會')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-演唱會</button>
-  </div>
-</div>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          
-          <h2 class="text-2xl font-bold mb-2 text-gray-800">手動下載最新播客:</h2>
-          <div class="grid grid-cols-3 gap-4">
-          <button @click="autoDownloadPodcast()" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">播客</button>
-          </div>
-
-        </div>
-
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-bold mb-2 text-gray-800">歌手:</h2>
-          <p class="text-gray-700">張學友 劉德華 原子邦尼 秀蘭瑪雅 AKB48 </p>
-        </div>
+    </div>
+    </div>
 
         <div class="bg-white p-6 rounded-lg shadow-lg">
           <h2 class="text-2xl font-bold mb-2 text-gray-800">如何搜尋檔案:</h2>
-          <p class="text-gray-700">-- 找類型:「國語」，歌手:「張學友」，則輸入「國語 張學友」，再按搜尋會搜尋「國語\張學友」資料夾中的所有歌曲. </p>
-          <p class="text-gray-700">-- 也可只輸入「國語」會搜尋「國語\」資料夾下的所有歌曲 </p>
+          <p class="text-gray-700">「國語 張學友」會搜尋「國語\張學友」資料夾內的所有歌曲.</p>
+          <p>      </p>
+          <p class="text-gray-700">「國語」會搜尋「國語」資料夾內的所有歌曲.</p>
         </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h2 class="text-2xl font-bold mb-2 text-gray-800">下載最新播客:</h2>
+          <div class="grid grid-cols-3 gap-4">
+          <button @click="autoDownloadPodcast()" class="bg-purple-500 text-white py-4 px-4 rounded-lg text-m hover:bg-purple-600 transition duration-300">下載播客</button>
+          </div>
+        </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+    <h2 class="text-2xl font-bold mb-2 text-gray-800">更新播客歌單:</h2>
+    <div class="grid grid-cols-3 gap-4">
+    <button @click="autoSavePcPlaylist('播客 BBC')" class="bg-purple-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-purple-600 transition duration-300">BBC</button>
+    <button @click="autoSavePcPlaylist('播客 Daily')" class="bg-purple-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-purple-600 transition duration-300">Daily</button>
+    </div>
+    </div>
+
       </div>
 
     </main>
@@ -590,6 +594,40 @@ const autoSavePcPlaylist = async (folder) => {
 onMounted(() => {
   getPlaylistsList();
 });
+
+const autoDownloadPodcast = async () => {
+  isLoading.value = true;
+  errorMessage.value = '';
+  try {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error("Authentication token is not available. Please log in.");
+    }
+
+    const response = await fetch(`${apiBase}/download_podcast`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.detail || `Server responded with status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    alert(data.message || 'Podcast download process completed.');
+
+  } catch (error) {
+    console.error('Failed to start podcast download:', error);
+    errorMessage.value = error.message;
+    alert(`Failed to start podcast download: ${error.message}`);
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 </script>
 

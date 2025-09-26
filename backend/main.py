@@ -25,6 +25,8 @@ from my_package.auth import get_password_hash, verify_password, create_access_to
 import uvicorn
 from contextlib import asynccontextmanager
 from my_package.database import Base, engine
+import subprocess
+import asyncio
 # ----------------------------------------------
 music_Basefolder = "/home/ubuntu/Music/"
 music_Type = [] # Will be populated at startup
@@ -706,6 +708,26 @@ async def get_wallpaper_images():
     
     images = [f"/images/home_picture/{p.name}" for p in image_dir.iterdir() if p.is_file()]
     return images
+
+
+@app.post("/download_podcast")
+async def download_podcast(current_user: User = Depends(get_current_user)):
+    """
+    Triggers the podcast download script asynchronously.
+    """
+    try:
+        python_executable = os.path.join(os.path.dirname(__file__), ".venv/bin/python")
+        script_path = os.path.join(os.path.dirname(__file__), "podcast_download.py")
+
+        # Run the script as a background process
+        await asyncio.create_subprocess_exec(python_executable, script_path)
+        
+        return {"message": "Podcast download started in the background."}
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail=f"Python executable not found at {python_executable}. Please check the path.")
+    except Exception as e:
+        # Handle other potential errors, such as issues with creating the subprocess
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
 
 
 # IMPORTANT: This catch-all route MUST be the LAST route defined
