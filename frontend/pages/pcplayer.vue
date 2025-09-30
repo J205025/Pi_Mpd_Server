@@ -3,12 +3,12 @@
     
     <navbar />
 
-    <main class="container mx-auto mt-10 mb-10 p-6 min-h-screen">
+    <main class="container mx-auto mt-4 mb-4 p-6 min-h-screen">
       <div class="bg-white p-2 rounded-lg shadow-xl text-center">
         <h1 class="text-5xl font-extrabold text-gray-900 mb-4">Pc Audio Player</h1>
       </div>
 
-      <div  class="bg-white p-6 rounded-lg shadow-xl mt-8">
+      <div  class="bg-white p-6 rounded-lg shadow-xl mt-4">
         <div class="text-center mb-4">
           <p class="text-gray-600 font-bold">{{ trackTitle }}</p>
           <p class="text-gray-500 text-sm mt-1">
@@ -162,7 +162,7 @@
         :apiBase="apiBase"
       />
 
-      <div class="bg-white p-6 rounded-lg shadow-xl mt-12">
+      <div class="bg-white p-6 rounded-lg shadow-xl mt-4">
         <label for="load-playlist-select" class="block text-xl font-bold mb-3 text-gray-800">選擇歌單:</label>
         <select
           id="load-playlist-select"

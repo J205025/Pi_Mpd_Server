@@ -124,52 +124,52 @@ async def lifespan(app: FastAPI):
 
 
     #When fastapi starts,  it generate pc_ALLFILES
-    pc_ALLFILES = genFilelist("") 
-    print(f"--- Found {len(pc_ALLFILES)} songs for PC ALLFILEs.")
-    podcast_BBC= genFilelist("播客/BBC")   
-    print(f"--- Found {len(podcast_BBC)} songs for BBC Podcast.")
-    podcast_Daily= genFilelist("播客/Daily")
-    print(f"--- Found {len(podcast_Daily)} songs for Daily Podcast.")
-    # Update or create the "ALLFILES" playlist for every registered user
-    print("Updating 'ALLFILES' playlist for all users...")
-    db = SessionLocal()
-    try:
-        # Get all users from the database
-        users = db.query(User).all()
-        # Convert the file list to a JSON string for storage
-        playlist_data_json = json.dumps(pc_ALLFILES)
+    #pc_ALLFILES = genFilelist("") 
+    #print(f"--- Found {len(pc_ALLFILES)} songs for PC ALLFILEs.")
+    #podcast_BBC= genFilelist("播客/BBC")   
+    #print(f"--- Found {len(podcast_BBC)} songs for BBC Podcast.")
+    #podcast_Daily= genFilelist("播客/Daily")
+    #print(f"--- Found {len(podcast_Daily)} songs for Daily Podcast.")
+    ## Update or create the "ALLFILES" playlist for every registered user
+    #print("Updating 'ALLFILES' playlist for all users...")
+    #db = SessionLocal()
+    #try:
+    #    # Get all users from the database
+    #    users = db.query(User).all()
+    #    # Convert the file list to a JSON string for storage
+    #    playlist_data_json = json.dumps(pc_ALLFILES)
 
-        for user in users:
-            # Check if an "ALLFILES" playlist already exists for the user
-            existing_playlist = db.query(UserPlaylist).filter(
-                UserPlaylist.user_id == user.id,
-                UserPlaylist.playlist_name == "所有歌曲(自動產生)"
-            ).first()
+    #    for user in users:
+    #        # Check if an "ALLFILES" playlist already exists for the user
+    #        existing_playlist = db.query(UserPlaylist).filter(
+    #            UserPlaylist.user_id == user.id,
+    #            UserPlaylist.playlist_name == "所有歌曲(自動產生)"
+    #        ).first()
 
-            if existing_playlist:
-                # If it exists, overwrite its data
-                print(f"Overwriting '所有歌曲(自動產生)' for user '{user.username}'.")
-                existing_playlist.playlist_data = playlist_data_json
-            else:
-                # If it does not exist, create a new playlist entry
-                print(f"Creating 'ALLFILES' for user '{user.username}'.")
-                new_playlist = UserPlaylist(
-                    user_id=user.id,
-                    playlist_name="所有歌曲(自動產生)",
-                    playlist_data=playlist_data_json
-                )
-                db.add(new_playlist)
+    #        if existing_playlist:
+    #            # If it exists, overwrite its data
+    #            print(f"Overwriting '所有歌曲(自動產生)' for user '{user.username}'.")
+    #            existing_playlist.playlist_data = playlist_data_json
+    #        else:
+    #            # If it does not exist, create a new playlist entry
+    #            print(f"Creating 'ALLFILES' for user '{user.username}'.")
+    #            new_playlist = UserPlaylist(
+    #                user_id=user.id,
+    #                playlist_name="所有歌曲(自動產生)",
+    #                playlist_data=playlist_data_json
+    #            )
+    #            db.add(new_playlist)
 
-        # Commit the changes (updates and new entries) to the database
-        db.commit()
-        print("'ALLFILES' playlist update process completed.")
+    #    # Commit the changes (updates and new entries) to the database
+    #    db.commit()
+    #    print("'ALLFILES' playlist update process completed.")
 
-    except Exception as e:
-        print(f"An error occurred while updating 'ALLFILES' playlists: {e}")
-        db.rollback() # Rollback the transaction in case of an error
-    finally:
-        # Ensure the database session is closed
-        db.close()
+    #except Exception as e:
+    #    print(f"An error occurred while updating 'ALLFILES' playlists: {e}")
+    #    db.rollback() # Rollback the transaction in case of an error
+    #finally:
+    #    # Ensure the database session is closed
+    #    db.close()
 
     try:
         # The `yield` statement indicates that the application is ready to serve requests

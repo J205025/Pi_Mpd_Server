@@ -1,5 +1,5 @@
 <template>
-  <div id="radioCard" class="grid md:grid-cols-5 gap-4 mt-12">
+  <div id="radioCard" class="grid md:grid-cols-8 gap-4 mt-4">
     
     <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
       <img 

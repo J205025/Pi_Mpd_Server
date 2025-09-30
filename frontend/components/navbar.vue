@@ -6,11 +6,29 @@
       </NuxtLink>
       
       <div class="hidden md:flex items-center space-x-6">
-        <!--NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">Home</NuxtLink-->
-        <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">A1.電腦播放</NuxtLink>
-        <NuxtLink :to="isLoggedIn ? '/pc_playlist' : '/'" class="text-gray-300 hover:text-white transition duration-300">A2.歌單編輯</NuxtLink>
-        <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="text-gray-300 hover:text-white transition duration-300">B1.音響播放</NuxtLink>
-        <NuxtLink :to="isLoggedIn ? '/pi_playlist' : '/'" class="text-gray-300 hover:text-white transition duration-300">B2.歌單編輯</NuxtLink>
+        
+        <div class="relative">
+          <button @click="togglePcDropdown" class="text-gray-300 hover:text-white transition duration-300 flex items-center">
+            電腦播放
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <div v-if="isPcDropdownOpen" @mouseleave="closeDropdowns" class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-gray-700 z-10">
+            <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="block px-4 py-2 text-gray-300 hover:bg-gray-600 hover:text-white transition duration-300" @click="closeDropdowns">A1.電腦播放</NuxtLink>
+            <NuxtLink :to="isLoggedIn ? '/pc_playlist' : '/'" class="block px-4 py-2 text-gray-300 hover:bg-gray-600 hover:text-white transition duration-300" @click="closeDropdowns">A2.歌單編輯</NuxtLink>
+          </div>
+        </div>
+
+        <div class="relative">
+          <button @click="togglePiDropdown" class="text-gray-300 hover:text-white transition duration-300 flex items-center">
+            音響播放
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <div v-if="isPiDropdownOpen" @mouseleave="closeDropdowns" class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-gray-700 z-10">
+            <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="block px-4 py-2 text-gray-300 hover:bg-gray-600 hover:text-white transition duration-300" @click="closeDropdowns">B1.音響播放</NuxtLink>
+            <NuxtLink :to="isLoggedIn ? '/pi_playlist' : '/'" class="block px-4 py-2 text-gray-300 hover:bg-gray-600 hover:text-white transition duration-300" @click="closeDropdowns">B2.歌單編輯</NuxtLink>
+          </div>
+        </div>
+        
         <div class="flex-grow"></div>
 
         <template v-if="isLoggedIn">
@@ -29,9 +47,8 @@
     </div>
     
     <div :class="{ 'hidden': !isMobileMenuOpen }" class="md:hidden mt-4">
-      <!--NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">Home</NuxtLink-->
       <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">A1.電腦播放</NuxtLink>
-      <NuxtLink :to="isLoggedIn ? '/pc_playlist' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">A2.電腦單編輯</NuxtLink> 
+      <NuxtLink :to="isLoggedIn ? '/pc_playlist' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">A2.電腦歌單編輯</NuxtLink> 
       <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">B1.音響播放</NuxtLink>
       <NuxtLink :to="isLoggedIn ? '/pi_playlist' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">B2.音響歌單編輯</NuxtLink>      
       <template v-if="isLoggedIn">
@@ -53,6 +70,9 @@ const apiBase = config.public.apiBase;
 
 // Mobile menu state
 const isMobileMenuOpen = ref(false);
+// New state for dropdowns
+const isPcDropdownOpen = ref(false);
+const isPiDropdownOpen = ref(false);
 
 // Authentication state
 const isLoggedIn = ref(false);
@@ -61,6 +81,25 @@ const currentUser = ref('');
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value;
 };
+
+// New functions to toggle dropdowns
+const closeDropdowns = () => {
+  isPcDropdownOpen.value = false;
+  isPiDropdownOpen.value = false;
+}
+
+const togglePcDropdown = () => {
+  isPcDropdownOpen.value = !isPcDropdownOpen.value;
+  // Close the other dropdown when this one opens
+  isPiDropdownOpen.value = false;
+};
+
+const togglePiDropdown = () => {
+  isPiDropdownOpen.value = !isPiDropdownOpen.value;
+  // Close the other dropdown when this one opens
+  isPcDropdownOpen.value = false;
+};
+
 
 // Check authentication status
 const checkAuthStatus = async () => {

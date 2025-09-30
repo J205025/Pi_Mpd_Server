@@ -9,8 +9,7 @@
       </div>
 
       <div class="bg-white p-6 rounded-lg shadow-xl mt-12">
-        <h2 class="text-2xl font-bold text-gray-800">建立歌單</h2>
-        <p class="text-s mb-1 text-gray-800">輸入「國語 張學友」會搜尋「國語\張學友」資料夾內的所有歌曲.輸入「國語」會搜尋「國語」資料夾內的所有歌曲.</p>
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">建立歌單</h2>
         <div class="flex flex-col sm:flex-row gap-4">
           <input 
             type="text"
@@ -67,13 +66,13 @@
       </div>
 
       <!-- Playlist List Section -->
-      <div class="bg-white p-6 rounded-lg shadow-xl mt-6">
-        <h2 class="text-2xl font-bold mb-4 text-gray-800">你的歌單:(點歌單名字可編輯曲目)</h2>
+      <div class="bg-white p-6 rounded-lg shadow-xl mt-12">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">你的歌單</h2>
         <div v-if="playlistsList.length > 0">
           <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
             <li v-for="(playlistName, index) in playlistsList" :key="index"
                 class="flex justify-between items-center text-gray-700 p-2 border-b border-gray-200 last:border-b-0">
-              <span class="cursor-pointer hover:text-blue-600 font-medium" @click="getPlaylistFiles(playlistName)" :class="{ 'bg-blue-200': playlistName === currentSelectedPlaylist }">
+              <span class="cursor-pointer hover:text-blue-600 font-medium" @click="getPlaylistFiles(playlistName)">
                 {{ playlistName }}
               </span>
               <button @click="deletePlaylist(playlistName)" class="bg-red-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-red-600 transition duration-300">
@@ -91,7 +90,7 @@
           
           <div class="mb-4">
             <button 
-              @click="editModeForPlaylist = !editModeForPlaylist; selectedFilesInEditMode = []"
+              @click="editModeForPlaylist = !editModeForPlaylist; selectedFilesForDeletion = []"
               class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 mr-2"
             >
               {{ editModeForPlaylist ? '離開編輯' : '編輯' }}
@@ -99,26 +98,18 @@
             <button 
               v-if="editModeForPlaylist"
               @click="deleteSelectedFilesFromPlaylist"
-              :disabled="selectedFilesInEditMode.length === 0"
+              :disabled="selectedFilesForDeletion.length === 0"
               class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition duration-300"
             >
               刪除
-            </button>
-            <button 
-              v-if="editModeForPlaylist"
-              @click="promptToSaveSelection"
-              :disabled="selectedFilesInEditMode.length === 0"
-              class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition duration-300 ml-2"
-            >
-              儲存
             </button>
           </div>
 
           <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
             <li v-for="(file, index) in selectedPlaylistFiles" :key="index" 
                 class="text-gray-700 p-1 truncate"
-                :class="{ 'bg-red-300 cursor-pointer': editModeForPlaylist && selectedFilesInEditMode.includes(file), 'cursor-pointer': editModeForPlaylist && !selectedFilesInEditMode.includes(file), 'cursor-default': !editModeForPlaylist }"
-                @click="editModeForPlaylist ? toggleFileSelectionInEditMode(file) : null">
+                :class="{ 'bg-red-300 cursor-pointer': editModeForPlaylist && selectedFilesForDeletion.includes(file), 'cursor-pointer': editModeForPlaylist && !selectedFilesForDeletion.includes(file), 'cursor-default': !editModeForPlaylist }"
+                @click="editModeForPlaylist ? toggleSelectedPlaylistFileForDeletion(file) : null">
               {{ file }}
             </li>
           </ul>
@@ -142,67 +133,21 @@
         </div>
       </div>
 
-    <div class="grid md:grid-cols-4 gap-6 mt-6">
-
-    <div class="bg-white p-6 rounded-lg shadow-lg">
-    <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單-類型:</h2>
-    <div class="grid grid-cols-3 gap-4">
-    <button @click="autoSavePcPlaylist('國語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">國語</button>
-    <button @click="autoSavePcPlaylist('台語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">台語</button>
-    <button @click="autoSavePcPlaylist('日語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">日語</button>
-    <button @click="autoSavePcPlaylist('英語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">英語</button>
-    <button @click="autoSavePcPlaylist('古典')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">古典</button>
-    <button @click="autoSavePcPlaylist('英語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">英語</button>
-    <button @click="autoSavePcPlaylist('輕音樂')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">輕音樂</button>
-    <button @click="autoSavePcPlaylist('有聲書')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">有聲書</button>
-    <button @click="autoSavePcPlaylist('播客')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">播客</button>
-    </div>
-
-    </div>
-    <div class="bg-white p-6 rounded-lg shadow-lg">
-    <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單-歌手:</h2>
-    <div class="grid grid-cols-3 gap-4">
-    <button @click="autoSavePcPlaylist('國語 張學友')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友</button>
-    <button @click="autoSavePcPlaylist('國語 張學友-演唱會')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-演唱會</button>
-    <button @click="autoSavePcPlaylist('國語 張學友-精選輯')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-精選輯</button>
-    <button @click="autoSavePcPlaylist('國語 劉德華')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">劉德華</button>
-    <button @click="autoSavePcPlaylist('國語 孫燕姿')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">孫燕姿</button>
-    <button @click="autoSavePcPlaylist('國語 弦子')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">弦子</button>
-    <button @click="autoSavePcPlaylist('國語 原子邦妮')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">原子邦妮</button>
-    <button @click="autoSavePcPlaylist('英語 Lady_Gaga')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Lady Gaga</button>
-    <button @click="autoSavePcPlaylist('台語 鄭進一')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">鄭進一</button>
-    <button @click="autoSavePcPlaylist('英語 Regine')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Regine</button>
-    <button @click="autoSavePcPlaylist('英語 Bryan_Adams')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Bryan Adams</button>
-    <button @click="autoSavePcPlaylist('國語 萬芳')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">萬芳</button>
-    <button @click="autoSavePcPlaylist('日語 AKB48')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">AKB48</button>
-    <button @click="autoSavePcPlaylist('台語 黃乙玲')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">黃乙玲</button>
-    <button @click="autoSavePcPlaylist('國語 張韶涵')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張韶涵</button>
-    <button @click="autoSavePcPlaylist('國語 張惠妺')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張惠妹</button>
-    <button @click="autoSavePcPlaylist('國語 任賢齊')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">任賢齊</button>
-    <button @click="autoSavePcPlaylist('國語 蔡健雅')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">蔡健雅</button>
-    <button @click="autoSavePcPlaylist('國語 伍佰')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">伍佰</button>
-    </div>
-
-    </div>
-    <div class="bg-white p-6 rounded-lg shadow-lg">
-    <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單-專輯:</h2>
-    <div class="grid grid-cols-3 gap-4">
-    <button @click="autoSavePcPlaylist('國語 張學友 天下第一流')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">天下第一流</button>
-    <button @click="autoSavePcPlaylist('國語 張學友 吻別')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">吻別</button>
-    <button @click="autoSavePcPlaylist('國語 張學友-演唱會 2003音樂之旅Live演唱會')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">音樂之旅演唱會</button>
-    <button @click="autoSavePcPlaylist('播客 BBC')" class="bg-purple-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-purple-600 transition duration-300">BBC</button>
-    <button @click="autoSavePcPlaylist('播客 Daily')" class="bg-purple-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-purple-600 transition duration-300">Daily</button>
-    </div>
-
-    </div>
-
+      <div class="grid md:grid-cols-3 gap-8 mt-12">
         <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-bold mb-2 text-gray-800">下載最新播客:</h2>
-          <div class="grid grid-cols-3 gap-4">
-          <button @click="autoDownloadPodcast()" class="bg-purple-600 text-white py-4 px-4 rounded-lg text-m hover:bg-purple-700 transition duration-300">下載播客</button>
-          </div>
+          <h2 class="text-2xl font-bold mb-2 text-gray-800">類型</h2>
+          <p class="text-gray-700">古典  台語  國語  播客  日語  有聲書  英語  輕音樂  韓語 </p>
         </div>
 
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h2 class="text-2xl font-bold mb-2 text-gray-800">歌手</h2>
+          <p class="text-gray-700">張學友 劉德華 </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h2 class="text-2xl font-bold mb-2 text-gray-800">Feature Three</h2>
+          <p class="text-gray-700">Our third feature is revolutionary, providing insights and capabilities you won't find anywhere else.</p>
+        </div>
       </div>
 
     </main>
@@ -231,7 +176,7 @@ const newPlaylistName = ref('');
 const playlistsList = ref([]);
 const selectedPlaylistFiles = ref([]);
 const currentSelectedPlaylist = ref('');
-const selectedFilesInEditMode = ref([]); // To track files selected for deletion from an opened playlist
+const selectedFilesForDeletion = ref([]); // To track files selected for deletion from an opened playlist
 const editModeForPlaylist = ref(false); // To enable/disable editing mode for playlist files
 
 
@@ -275,7 +220,7 @@ const getPlaylistFiles = async (playlistName) => {
   errorMessage.value = '';
   selectedPlaylistFiles.value = [];
   currentSelectedPlaylist.value = playlistName;
-  selectedFilesInEditMode.value = []; // Clear selections for deletion when new playlist is loaded
+  selectedFilesForDeletion.value = []; // Clear selections for deletion when new playlist is loaded
   editModeForPlaylist.value = false; // Exit edit mode when new playlist is loaded
 
   try {
@@ -340,7 +285,7 @@ const deletePlaylist = async (playlistName) => {
     await getPlaylistsList(); // Refresh the playlist list
     selectedPlaylistFiles.value = []; // Clear displayed files if the deleted playlist was selected
     currentSelectedPlaylist.value = '';
-    selectedFilesInEditMode.value = [];
+    selectedFilesForDeletion.value = [];
     editModeForPlaylist.value = false;
 
   } catch (error) {
@@ -415,18 +360,18 @@ const deselectAllFolderFiles = () => {
 
 
 // Toggle selection for files within a saved playlist (for deletion)
-const toggleFileSelectionInEditMode = (file) => {
-  const index = selectedFilesInEditMode.value.indexOf(file);
+const toggleSelectedPlaylistFileForDeletion = (file) => {
+  const index = selectedFilesForDeletion.value.indexOf(file);
   if (index > -1) {
-    selectedFilesInEditMode.value.splice(index, 1);
+    selectedFilesForDeletion.value.splice(index, 1);
   } else {
-    selectedFilesInEditMode.value.push(file);
+    selectedFilesForDeletion.value.push(file);
   }
 };
 
 // Function to delete selected files from the currently viewed playlist
 const deleteSelectedFilesFromPlaylist = async () => {
-  if (!confirm(`Are you sure you want to delete the selected ${selectedFilesInEditMode.value.length} file(s) from "${currentSelectedPlaylist.value}"?`)) {
+  if (!confirm(`Are you sure you want to delete the selected ${selectedFilesForDeletion.value.length} file(s) from "${currentSelectedPlaylist.value}"?`)) {
     return;
   }
 
@@ -436,7 +381,7 @@ const deleteSelectedFilesFromPlaylist = async () => {
   try {
     // Filter out the files marked for deletion
     const updatedFiles = selectedPlaylistFiles.value.filter(
-      file => !selectedFilesInEditMode.value.includes(file)
+      file => !selectedFilesForDeletion.value.includes(file)
     );
 
     await updatePlaylistContent(currentSelectedPlaylist.value, updatedFiles);
@@ -444,39 +389,11 @@ const deleteSelectedFilesFromPlaylist = async () => {
     
     // Refresh the displayed files and exit edit mode
     await getPlaylistFiles(currentSelectedPlaylist.value);
-    selectedFilesInEditMode.value = [];
+    selectedFilesForDeletion.value = [];
     editModeForPlaylist.value = false;
 
   } catch (error) {
     console.error('Failed to delete files from playlist:', error);
-    errorMessage.value = error.message;
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const promptToSaveSelection = () => {
-  const newPlaylistName = prompt('Enter a name for the new playlist:');
-  if (newPlaylistName && newPlaylistName.trim()) {
-    saveSelectedFilesAsNewPlaylist(newPlaylistName.trim());
-  }
-};
-
-const saveSelectedFilesAsNewPlaylist = async (playlistName) => {
-  isLoading.value = true;
-  errorMessage.value = '';
-
-  try {
-    await updatePlaylistContent(playlistName, selectedFilesInEditMode.value);
-    alert(`Selected files saved to new playlist "${playlistName}" successfully!`);
-    
-    // Refresh the playlist list and exit edit mode
-    await getPlaylistsList();
-    selectedFilesInEditMode.value = [];
-    editModeForPlaylist.value = false;
-
-  } catch (error) {
-    console.error('Failed to save selected files to new playlist:', error);
     errorMessage.value = error.message;
   } finally {
     isLoading.value = false;
@@ -490,7 +407,7 @@ const updatePlaylistContent = async (playlistName, content) => {
       throw new Error("Authentication token is not available. Please log in.");
     }
 
-    const response = await fetch(`${apiBase}/pc_save_playlists_to_list/${encodeURIComponent(playlistName)}`,
+    const response = await fetch(`${apiBase}/pc_save_playlists_tolist/${encodeURIComponent(playlistName)}`,
     {
       method: 'POST',
       headers: {
@@ -526,7 +443,7 @@ const savePlaylist = async () => {
       throw new Error("Authentication token is not available. Please log in.");
     }
 
-    const response = await fetch(`${apiBase}/pc_save_playlists_to_list/${encodeURIComponent(newPlaylistName.value)}`,
+    const response = await fetch(`${apiBase}/pc_save_playlists_tolist/${encodeURIComponent(newPlaylistName.value)}`,
     {
       method: 'POST',
       headers: {
@@ -555,113 +472,10 @@ const savePlaylist = async () => {
   }
 };
 
-const autoSavePcPlaylist = async (folder) => {
-  isLoading.value = true;
-  errorMessage.value = '';
-  try {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      throw new Error("Authentication token is not available. Please log in.");
-    }
-
-    // --- Start of new logic to determine playlistName ---
-    let playlistName = folder;
-    const firstSpaceIndex = folder.indexOf(' ');
-    
-    if (firstSpaceIndex !== -1) {
-        // If a space is found, take the substring after the first space.
-        playlistName = folder.substring(firstSpaceIndex + 1);
-    }
-    // --- End of new logic ---
-
-
-    // 1. Get file list
-    const genFilesResponse = await fetch(`${apiBase}/pc_gen_fileslist/${encodeURIComponent(folder)}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!genFilesResponse.ok) {
-      const errorData = await genFilesResponse.json().catch(() => null);
-      throw new Error(errorData?.detail || `Server responded with status: ${genFilesResponse.status}`);
-    }
-
-    const files = await genFilesResponse.json();
-
-    if (files.length === 0) {
-      alert(`No files found in folder "${folder}". Playlist not created.`);
-      return;
-    }
-
-    // 2. Save playlist
-    // Use the derived playlistName for saving
-    const savePlaylistResponse = await fetch(`${apiBase}/pc_save_playlists_to_list/${encodeURIComponent(playlistName)}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ songs: files })
-    });
-
-    if (!savePlaylistResponse.ok) {
-      const errorData = await savePlaylistResponse.json().catch(() => null);
-      throw new Error(errorData?.detail || `Server responded with status: ${savePlaylistResponse.status}`);
-    }
-
-    alert(`Playlist "${playlistName}" created/updated successfully!`);
-    await getPlaylistsList(); // Refresh the playlist list
-
-  } catch (error) {
-    console.error(`Failed to auto save playlist for folder ${folder}:`, error);
-    errorMessage.value = error.message;
-    alert(`Failed to auto save playlist: ${error.message}`);
-  } finally {
-    isLoading.value = false;
-  }
-};
-
 // Fetch playlists on component mount
 onMounted(() => {
   getPlaylistsList();
 });
-
-const autoDownloadPodcast = async () => {
-  isLoading.value = true;
-  errorMessage.value = '';
-  try {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      throw new Error("Authentication token is not available. Please log in.");
-    }
-
-    const response = await fetch(`${apiBase}/download_podcast`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.detail || `Server responded with status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    alert(data.message || 'Podcast download process completed.');
-
-  } catch (error) {
-    console.error('Failed to start podcast download:', error);
-    errorMessage.value = error.message;
-    alert(`Failed to start podcast download: ${error.message}`);
-  } finally {
-    isLoading.value = false;
-  }
-};
 
 </script>
 

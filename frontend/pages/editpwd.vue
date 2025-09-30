@@ -108,7 +108,7 @@ const validateForm = () => {
 
   if (!form.new_password) {
     newErrors.new_password = 'New password is required';
-  } else if (form.new_password.length < 8) {
+  } else if (form.new_password.length < 6) {
     newErrors.new_password = 'Password must be at least 8 characters long';
   }
 

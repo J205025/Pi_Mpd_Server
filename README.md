@@ -26,7 +26,9 @@ https://garfnet.org.uk/download/radio/bbc-radio.txt
 BBC DASH streams
 BBC HLS streams
 
+https://pan.quark.cn/
 
+https://www.gequbao.com/ 歌曲寶
 https://vvlyrics.com/
 https://www.lyricsify.com/artists/akb48
 https://vvlyrics.com/artist/akb48
