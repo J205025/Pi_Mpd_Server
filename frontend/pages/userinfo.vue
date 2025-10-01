@@ -1,0 +1,127 @@
+<template>
+  <div>
+    <navbar />
+    <main class="container mx-auto mt-4 mb-4 p-6 min-h-screen">
+      <div class="bg-white p-6 rounded-lg shadow-xl">
+
+        <div class="flex items-center space-x-6">
+
+          <div class="relative flex-shrink-0">
+            <img :src="pictureUrl" @error="onImageError" alt="User Picture" class="w-32 h-32 rounded-full object-cover">
+            <label for="pictureUpload" class="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full cursor-pointer hover:bg-blue-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            </label>
+            <input id="pictureUpload" type="file" @change="onFileChange" class="hidden">
+          </div>
+          <div>
+            <h2 class="text-2xl font-semibold">Hi, {{ user.username }}</h2>
+          </div>
+
+        </div>
+        <div v-if="selectedFile" class="mt-6">
+          <img :src="previewUrl" alt="New Picture Preview" class="w-48 h-48 rounded-lg object-cover">
+          <button @click="uploadPicture" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Save Picture</button>
+        </div>
+
+        <div class="mt-6">
+          <button 
+            @click="showPasswordModal = true"
+            class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300"
+          >
+            Change Password
+          </button>
+        </div>
+      </div>
+      <div id="aaa">
+        
+      </div>
+      
+    </main>
+    <footer />
+
+    <PasswordChangeModal 
+      :show="showPasswordModal" 
+      @close="showPasswordModal = false"
+    />
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, computed } from 'vue';
+import PasswordChangeModal from '~/components/PasswordChangeModal.vue';
+
+const config = useRuntimeConfig();
+const apiBase = config.public.apiBase;
+
+const user = ref({ username: '' });
+const selectedFile = ref(null);
+const previewUrl = ref('');
+const cacheBuster = ref('');
+const showPasswordModal = ref(false);
+
+const pictureUrl = computed(() => {
+  if (user.value.username) {
+    const url = `${apiBase}/images/user_picture/${user.value.username}.jpg`;
+    return cacheBuster.value ? `${url}?t=${cacheBuster.value}` : url;
+  }
+  return `${apiBase}/images/user_picture/default.jpg`;
+});
+
+onMounted(async () => {
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+    window.location.href = '/login';
+    return;
+  }
+
+  try {
+    const response = await $fetch(`${apiBase}/users/me/`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    user.value = response;
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+  }
+});
+
+const onFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    selectedFile.value = file;
+    previewUrl.value = URL.createObjectURL(file);
+  }
+};
+
+const onImageError = (event) => {
+  event.target.src = `${apiBase}/images/user_picture/default.jpg`;
+};
+
+const uploadPicture = async () => {
+  if (!selectedFile.value) return;
+
+  const token = localStorage.getItem('authToken');
+  if (!token) return;
+
+  const formData = new FormData();
+  formData.append('file', selectedFile.value);
+
+  try {
+    await $fetch(`${apiBase}/upload_user_picture`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+    cacheBuster.value = new Date().getTime();
+    selectedFile.value = null;
+    previewUrl.value = '';
+    alert('Picture updated successfully!');
+  } catch (error) {
+    console.error('Error uploading picture:', error);
+    alert('Error uploading picture.');
+  }
+};
+</script>1000

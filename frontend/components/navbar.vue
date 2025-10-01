@@ -32,7 +32,7 @@
         <div class="flex-grow"></div>
 
         <template v-if="isLoggedIn">
-          <NuxtLink to="/editpwd" class="text-gray-300 hover:text-white transition duration-300">Hi, {{ currentUser.toUpperCase() }}</NuxtLink>
+          <NuxtLink to="/userinfo" class="text-gray-300 hover:text-white transition duration-300">Hi, {{ currentUser.toUpperCase() }}</NuxtLink>
           <button @click="handleLogout" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
             Logout
           </button>
@@ -52,7 +52,7 @@
       <NuxtLink :to="isLoggedIn ? '/piplayer' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">B1.音響播放</NuxtLink>
       <NuxtLink :to="isLoggedIn ? '/pi_playlist' : '/'" class="block text-gray-300 hover:text-white py-2 px-4">B2.音響歌單編輯</NuxtLink>      
       <template v-if="isLoggedIn">
-        <NuxtLink to="/editpwd" class="block text-gray-300 hover:text-white py-2 px-4">Welcome, {{ currentUser.toUpperCase() }}</NuxtLink>
+        <NuxtLink to="/userinfo" class="block text-gray-300 hover:text-white py-2 px-4">Welcome, {{ currentUser.toUpperCase() }}</NuxtLink>
         <button @click="handleLogout" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
           Logout
         </button>

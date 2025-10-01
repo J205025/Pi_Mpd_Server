@@ -1,6 +1,6 @@
 <template>
   <div class="bg-gray-100 font-sans leading-normal tracking-normal min-h-screen">
-    <navbar />
+
 
     <main class="container mx-auto mt-10 mb-10 p-6 flex items-center justify-center">
       <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
@@ -75,7 +75,7 @@
       </div>
     </main>
 
-    <footer />
+
   </div>
 </template>
 

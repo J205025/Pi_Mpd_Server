@@ -723,10 +723,10 @@ async def change_password(
         )
     
     # Validate new password (you can add more validation here)
-    if len(password_data.new_password) < 8:
+    if len(password_data.new_password) < 6:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="New password must be at least 8 characters long"
+            detail="New password must be at least 6 characters long"
         )
     
     # Hash the new password and update the user
@@ -738,6 +738,42 @@ async def change_password(
     db.refresh(current_user)
     
     return {"message": "Password changed successfully"}
+
+
+from fastapi import UploadFile, File
+from PIL import Image
+import io
+
+@app.post("/upload_user_picture")
+async def upload_user_picture(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Uploads a new profile picture for the current user.
+    """
+    # Define the path to save the image
+    save_path = Path(f"../frontend/public/images/user_picture/{current_user.username}.jpg")
+    
+    # Ensure the directory exists
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        # Read the image file
+        image_data = await file.read()
+        
+        # Open the image with Pillow
+        with Image.open(io.BytesIO(image_data)) as img:
+            # Convert to RGB if it has an alpha channel (like PNGs)
+            if img.mode in ('RGBA', 'P'):
+                img = img.convert('RGB')
+            
+            # Save the image as JPEG
+            img.save(save_path, 'jpeg')
+
+        return {"message": "Picture uploaded successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error uploading picture: {e}")
 
 
 @app.get("/api/wallpaper-images")
