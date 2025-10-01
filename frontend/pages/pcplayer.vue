@@ -90,6 +90,16 @@
               <path d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L10 11.202V14a1 1 0 001.555.832l6-4a1 1 0 000-1.664l-6-4A1 1 0 0010 6v2.798l-5.445-3.63z"/>
             </svg>
           </button>
+
+          <!-- Favorite Button -->
+          <button @click="toggleFavorite" :disabled="!selectedTrack || selectedTrack === 'LIVE_STREAM'" class="p-3 rounded-full transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg v-if="isFavorite" class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+            </svg>
+            <svg v-else class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 20 20">
+              <path d="M17.5 9.16666C17.5 12.5 14.1667 15.8333 10 17.5C5.83333 15.8333 2.5 12.5 2.5 9.16666C2.5 7.04738 4.21401 5.33333 6.33333 5.33333C7.53594 5.33333 8.6425 5.84196 9.39999 6.69433L10 7.35766L10.6 6.69433C11.3575 5.84196 12.4641 5.33333 13.6667 5.33333C15.786 5.33333 17.5 7.04738 17.5 9.16666Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
 
         <div class="flex flex-wrap items-center justify-between">
@@ -283,6 +293,13 @@ const isPlayingLiveStream = computed(() => {
   return isPlaying.value && selectedTrack.value === 'LIVE_STREAM';
 });
 
+const favoritePlaylist = ref([]);
+const isFavorite = computed(() => {
+  if (!selectedTrack.value || selectedTrack.value === 'LIVE_STREAM' || !favoritePlaylist.value) return false;
+  return favoritePlaylist.value.includes(selectedTrack.value);
+});
+
+
 // Computed properties
 const currentTrackIndex = computed(() => {
   if (selectedTrack.value === 'LIVE_STREAM') return -1;
@@ -406,6 +423,19 @@ onMounted(async () => {
       console.error('Invalid format for playlist names:', playlistNamesResponse);
     }
 
+    // Fetch the "我的收藏" playlist
+    const favPlaylistResponse = await $fetch(`${apiBase}/pc_get_playlist_files/我的收藏`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (Array.isArray(favPlaylistResponse)) {
+      favoritePlaylist.value = favPlaylistResponse;
+      console.log('Favorite playlist loaded:', favoritePlaylist.value);
+    } else {
+      console.error('Invalid format for favorite playlist:', favPlaylistResponse);
+    }
+
   } catch (err) {
     console.error('Error fetching initial data:', err);
     error.value = `Failed to fetch data: ${err.message || 'Unknown error'}`;
@@ -448,6 +478,10 @@ const loadPlaylist = async (playlistName) => {
       pc_playlist_all.value = response;
       console.log('Tracks for', playlistName, 'loaded:', pc_playlist_all.value);
       
+      if (playlistName === '我的收藏') {
+        favoritePlaylist.value = [...response]; // Create a copy
+      }
+
       // Automatically select the first track of the new playlist
       if (pc_playlist_all.value.length > 0) {
         selectedTrack.value = pc_playlist_all.value[0];
@@ -827,6 +861,39 @@ const cycleSleepTimer = () => {
       sleepTimeRemaining.value = null;
     }
   }, 1000); // Ticks every second
+};
+
+const toggleFavorite = async () => {
+  if (!selectedTrack.value || selectedTrack.value === 'LIVE_STREAM' || !favoritePlaylist.value) return;
+
+  const track = selectedTrack.value;
+  const index = favoritePlaylist.value.indexOf(track);
+
+  if (index > -1) {
+    favoritePlaylist.value.splice(index, 1);
+  } else {
+    favoritePlaylist.value.push(track);
+  }
+
+  await updateFavoritePlaylist();
+};
+
+const updateFavoritePlaylist = async () => {
+  const token = localStorage.getItem('authToken');
+  if (!token) return;
+
+  try {
+    await $fetch(`${apiBase}/pc_save_playlists_to_list/我的收藏`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ songs: favoritePlaylist.value })
+    });
+  } catch (err) {
+    console.error('Error updating favorite playlist:', err);
+  }
 };
 
 const formatTime = (seconds) => {

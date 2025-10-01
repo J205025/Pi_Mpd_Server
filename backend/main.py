@@ -672,6 +672,17 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+
+    # Create an empty playlist "我的收藏" for the new user
+    # The playlist_data is an empty JSON array string.
+    new_playlist = UserPlaylist(
+        user_id=db_user.id,
+        playlist_name="我的收藏",
+        playlist_data=json.dumps([])
+    )
+    db.add(new_playlist)
+    db.commit()
+
     return db_user
 
 @app.post("/token", response_model=Token)
