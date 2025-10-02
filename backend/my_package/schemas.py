@@ -1,5 +1,12 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
+
+class Settings(BaseModel):
+    show_lyrics: bool
+    show_radio_card: bool
+    sleeping_time: int
+    spare_setting1: bool
+    spare_setting2: bool
 
 class UserCreate(BaseModel):
     username: str
@@ -8,6 +15,7 @@ class UserCreate(BaseModel):
 class UserResponse(BaseModel):
     id: int
     username: str
+    settings: Optional[Settings]
 
     class Config:
         orm_mode = True

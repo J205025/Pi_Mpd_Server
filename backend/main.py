@@ -20,7 +20,7 @@ from my_package.mpd_controller import MPDClientController
 from my_package.database import get_db, SessionLocal 
 from my_package.models import User, UserPlaylist # Added UserPlaylist
 # Updated imports to include PlaylistPayload
-from my_package.schemas import UserCreate, UserResponse, Token, UserPlaylistCreate, UserPlaylistResponse, PlaylistPayload, PlaylistsListResponse, UserPasswordChange
+from my_package.schemas import UserCreate, UserResponse, Token, UserPlaylistCreate, UserPlaylistResponse, PlaylistPayload, PlaylistsListResponse, UserPasswordChange, Settings
 from my_package.auth import get_password_hash, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user
 import uvicorn
 from contextlib import asynccontextmanager
@@ -668,7 +668,18 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     
     # Proceed with user creation using the capitalized username
     hashed_password = get_password_hash(user.password)
-    db_user = User(username=username_capitalized, hashed_password=hashed_password)
+    default_settings = {
+        "show_lyrics": True,
+        "show_radio_card": True,
+        "sleeping_time": 20,
+        "spare_setting1": True,
+        "spare_setting2": True
+    }
+    db_user = User(
+        username=username_capitalized,
+        hashed_password=hashed_password,
+        settings=json.dumps(default_settings)
+    )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -683,7 +694,12 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.add(new_playlist)
     db.commit()
 
-    return db_user
+    settings_dict = json.loads(db_user.settings) if db_user.settings else None
+    return UserResponse(
+        id=db_user.id,
+        username=db_user.username,
+        settings=settings_dict
+    )
 
 @app.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -704,7 +720,26 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 @app.get("/users/me/", response_model=UserResponse)
 async def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
+    settings_dict = json.loads(current_user.settings) if current_user.settings else None
+    user_data = UserResponse(
+        id=current_user.id,
+        username=current_user.username,
+        settings=settings_dict
+    )
+    return user_data
+
+from my_package.schemas import Settings
+
+@app.put("/users/me/settings")
+async def update_user_settings(
+    settings: Settings,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    current_user.settings = json.dumps(settings.dict())
+    db.commit()
+    db.refresh(current_user)
+    return {"message": "Settings updated successfully"}
 
 @app.put("/users/password")
 async def change_password(

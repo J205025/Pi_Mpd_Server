@@ -9,6 +9,7 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
+    settings = Column(String)
 
     playlists = relationship("UserPlaylist", back_populates="owner")
 

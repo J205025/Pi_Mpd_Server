@@ -1,4 +1,4 @@
-<template>
+'''<template>
   <div>
     <navbar />
     <main class="container mx-auto mt-4 mb-4 p-6 min-h-screen">
@@ -32,6 +32,34 @@
           </button>
         </div>
       </div>
+      <div class="bg-white p-6 rounded-lg shadow-xl mt-6">
+        <h3 class="text-xl font-semibold mb-4">Settings</h3>
+        <div class="space-y-4">
+          <div class="flex items-center">
+            <input type="checkbox" id="showLyrics" v-model="settings.show_lyrics" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <label for="showLyrics" class="ml-2 block text-sm text-gray-900">Show Lyrics</label>
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="showRadioCard" v-model="settings.show_radio_card" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <label for="showRadioCard" class="ml-2 block text-sm text-gray-900">Show Radio Card</label>
+          </div>
+          <div class="flex items-center">
+            <label for="sleepingTime" class="block text-sm text-gray-900">Sleeping Time (minutes)</label>
+            <input type="number" id="sleepingTime" v-model.number="settings.sleeping_time" class="ml-2 block w-24 text-sm text-gray-900 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="spareSetting1" v-model="settings.spare_setting1" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <label for="spareSetting1" class="ml-2 block text-sm text-gray-900">Spare Setting 1</label>
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="spareSetting2" v-model="settings.spare_setting2" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <label for="spareSetting2" class="ml-2 block text-sm text-gray-900">Spare Setting 2</label>
+          </div>
+        </div>
+        <div class="mt-6">
+          <button @click="saveSettings" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Save Settings</button>
+        </div>
+      </div>
       <div id="aaa">
         
       </div>
@@ -54,6 +82,13 @@ const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
 
 const user = ref({ username: '' });
+const settings = ref({
+  show_lyrics: true,
+  show_radio_card: true,
+  sleeping_time: 20,
+  spare_setting1: true,
+  spare_setting2: true
+});
 const selectedFile = ref(null);
 const previewUrl = ref('');
 const cacheBuster = ref('');
@@ -81,6 +116,9 @@ onMounted(async () => {
       }
     });
     user.value = response;
+    if (response.settings) {
+      settings.value = response.settings;
+    }
   } catch (error) {
     console.error('Error fetching user data:', error);
   }
@@ -124,4 +162,29 @@ const uploadPicture = async () => {
     alert('Error uploading picture.');
   }
 };
-</script>1000
+
+const saveSettings = async () => {
+  const token = localStorage.getItem('authToken');
+  if (!token) return;
+
+  try {
+    await $fetch(`${apiBase}/users/me/settings`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: settings.value
+    });
+    alert('Settings updated successfully!');
+  } catch (error) {
+    console.error('Error updating settings:', error);
+    alert('Error updating settings.');
+  }
+};
+</script>
+
+<style scoped>
+/* Add any additional styling here */
+</style>
+''
