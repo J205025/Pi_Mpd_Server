@@ -24,8 +24,10 @@
         </div>
 
       </div>
+
+
       <div class="bg-white p-6 rounded-lg shadow-xl mt-6">
-        <h3 class="text-xl font-semibold mb-4">Settings</h3>
+        <h3 class="text-xl font-semibold mb-4">Settings:</h3>
         <div class="space-y-4">
           <div class="flex items-center">
             <input type="checkbox" id="showLyrics" v-model="settings.show_lyrics" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
@@ -36,39 +38,36 @@
             <label for="showRadioCard" class="ml-2 block text-sm text-gray-900">顯示廣播頻道</label>
           </div>
           <div class="flex items-center">
-            <input type="checkbox" id="spareSetting1" v-model="settings.spare_setting1" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-            <label for="spareSetting1" class="ml-2 block text-sm text-gray-900">Spare Setting 1</label>
-          </div>
-          <div class="flex items-center">
             <input type="checkbox" id="spareSetting2" v-model="settings.spare_setting2" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
             <label for="spareSetting2" class="ml-2 block text-sm text-gray-900">顯示數字按鍵</label>
           </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="spareSetting1" v-model="settings.spare_setting1" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <label for="spareSetting1" class="ml-2 block text-sm text-gray-900">Spare Setting 1</label>
+          </div>
             <div class="flex items-center">
-            <label for="sleepingTime" class="block text-sm text-gray-900">Sleeping Time (Min)</label>
-            <input type="number" id="sleepingTime" v-model.number="settings.sleeping_time" class="ml-2 block w-24 text-sm text-gray-900 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <label for="sleepingTime" class="block text-sm text-gray-890">-- Default Sleeping Time(Min): </label>
+            <input type="number" id="sleepingTime" v-model.number="settings.sleeping_time" class="ml-2 block w-24 text-sm text-blue-500 border-blue-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
           </div>
 
         </div>
         <div class="mt-6">
           <button @click="saveSettings" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Save Settings</button>
         </div>
+      </div>
 
-        <div class="mt-6">
+      <div class="bg-white p-6 rounded-lg shadow-xl mt-3">
+        <div class="mt-2">
           <button 
             @click="showPasswordModal = true"
             class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition duration-300"
           >
             修改密碼
           </button>
-        </div>
-
+        </div> 
       </div>
 
 
-      <div id="aaa">
-        
-      </div>
-      
     </main>
     <footer />
 

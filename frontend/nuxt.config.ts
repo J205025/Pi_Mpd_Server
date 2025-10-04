@@ -45,7 +45,7 @@ export default defineNuxtConfig({
     public: {
       apiBase: process.env.NODE_ENV === 'production' 
         ? 'https://music.j205025.org'  // Production: Use HTTPS with your Cloudflare tunnel domain
-        : process.env.NUXT_PUBLIC_API_BASE || 'http://192.168.190.129:8001'  // Development: Use env var or fallback
+        : process.env.NUXT_PUBLIC_API_BASE || 'http://192.168.2.118:8001'  // Development: Use env var or fallback
     }
   }
   

@@ -1,7 +1,7 @@
 <template>
   <nav class="bg-gray-800 p-4 shadow-lg">
     <div class="container mx-auto flex justify-between items-center">
-      <NuxtLink :to="isLoggedIn ? '/pcplayer' : '/'" class="text-white text-2xl font-bold">
+      <NuxtLink :to="'/'" class="text-white text-2xl font-bold">
         My Media Player
       </NuxtLink>
       
