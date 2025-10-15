@@ -176,23 +176,35 @@
     <button @click="autoSavePcPlaylist('國語 萬芳')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">萬芳</button>
     <button @click="autoSavePcPlaylist('日語 AKB48')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">AKB48</button>
     <button @click="autoSavePcPlaylist('台語 黃乙玲')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">黃乙玲</button>
+    <button @click="autoSavePcPlaylist('台語 秀蘭瑪雅')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">秀蘭瑪雅</button>
+    <button @click="autoSavePcPlaylist('台語 蘇宥蓉')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">蘇宥蓉</button>
+    <button @click="autoSavePcPlaylist('台語 玖壹壹')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">玖壹壹</button>
+    <button @click="autoSavePcPlaylist('國語 張韶涵')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張韶涵</button>
     <button @click="autoSavePcPlaylist('國語 張韶涵')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張韶涵</button>
     <button @click="autoSavePcPlaylist('國語 張惠妺')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張惠妹</button>
     <button @click="autoSavePcPlaylist('國語 任賢齊')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">任賢齊</button>
+    <button @click="autoSavePcPlaylist('國語 鄭中基')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">鄭中基</button>
     <button @click="autoSavePcPlaylist('國語 蔡健雅')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">蔡健雅</button>
     <button @click="autoSavePcPlaylist('國語 伍佰')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">伍佰</button>
     <button @click="autoSavePcPlaylist('國語 張靚穎')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張靚穎</button>
     <button @click="autoSavePcPlaylist('國語 梁靜茹')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">梁靜茹</button>
+    <button @click="autoSavePcPlaylist('國語 蘇打綠')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">蘇打綠</button>
+    <button @click="autoSavePcPlaylist('國語 高慧君')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">高慧君</button>
+    <button @click="autoSavePcPlaylist('國語 張棟樑')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張棟樑</button>
+    <button @click="autoSavePcPlaylist('國語 郁可唯')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">郁可唯</button>
+    <button @click="autoSavePcPlaylist('國語 楊丞琳')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">楊丞琳</button>
+    <button @click="autoSavePcPlaylist('國語 王心凌')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">王心凌</button>
+    <button @click="autoSavePcPlaylist('國語 王傑')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">王傑</button>
     </div>
 
     </div>
     <div class="bg-white p-6 rounded-lg shadow-lg">
     <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單-專輯:</h2>
     <div class="grid grid-cols-3 gap-4">
-    <button @click="autoSavePcPlaylist('國語 張學友 天下第一流')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友天下第一流</button>
-    <button @click="autoSavePcPlaylist('國語 張學友 吻別')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友吻別</button>
+    <button @click="autoSavePcPlaylist('國語 張學友 天下第一流')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友 天下第一流</button>
+    <button @click="autoSavePcPlaylist('國語 張學友 吻別')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友 吻別</button>
     <button @click="autoSavePcPlaylist('國語 張學友-演唱會 2003音樂之旅Live演唱會')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友2003音樂之旅演唱會</button>
-    <button @click="autoSavePcPlaylist('國語 張惠妹 你在看我嗎')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張惠妹 你在看我嗎</button>
+    <button @click="autoSavePcPlaylist('國語 張惠妺 你在看我嗎')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張惠妹 你在看我嗎</button>
     <button @click="autoSavePcPlaylist('播客 BBC')" class="bg-purple-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-purple-600 transition duration-300">BBC</button>
     <button @click="autoSavePcPlaylist('播客 Daily')" class="bg-purple-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-purple-600 transition duration-300">Daily</button>
     </div>

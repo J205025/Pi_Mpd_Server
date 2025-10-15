@@ -203,7 +203,6 @@ if not NUXT_DIST_PATH.exists():
 # Mount static files - ORDER MATTERS!
 # 1. Mount your backend static files first with a specific prefix
 app.mount("/static", StaticFiles(directory="static"), name="backend_static")  # Your backend static files
-
 # 2. Mount Nuxt assets and the entire public directory
 app.mount("/_nuxt", StaticFiles(directory=NUXT_DIST_PATH / "_nuxt"), name="nuxt_assets")
 # 3. Mount music files
