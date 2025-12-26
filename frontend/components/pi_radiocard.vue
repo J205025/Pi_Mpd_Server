@@ -1,0 +1,284 @@
+<template>
+  <div id="radioCard" class="grid md:grid-cols-8 gap-4 mt-4">
+    
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/BBC_World_Service.png" 
+        alt="BBC World Service logo" 
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_world_service&bitrate=320000', 'BBC World Service', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/BBC_Asian_Network.png" 
+        alt="BBC Asian Network logo" 
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_asian_network&bitrate=320000', 'BBC Asian Network', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/BBC_Radio_London.png" 
+        alt="BBC Radio London logo" 
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_london&bitrate=320000', 'BBC Radio London', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/LBC_News.png" 
+        alt="LBC_News logo" 
+        @click="onPlayStream('https://media-ice.musicradio.com/LBC1152', 'LBC_News', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/LBC_London.png" 
+        alt="LBC_London logo" 
+        @click="onPlayStream('https://media-ssl.musicradio.com/LBCLondon', 'LBC_London', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/Classical_FM.png" 
+        alt="Classical_FM logo" 
+        @click="onPlayStream('https://media-the.musicradio.com/ClassicFM', 'Classical FM', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+    
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/Gold.jpg" 
+        alt="Gold logo" 
+        @click="onPlayStream('https://media-ssl.musicradio.com/Gold', 'Gold', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/icrt.jpg" 
+        alt="Icrt logo" 
+        @click="onPlayStream('https://stream.rcs.revma.com/nkdfurztxp3vv', 'Icrt', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/BBC_Radio_1.png" 
+        alt="BBC_Radio_1 logo" 
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_radio_one&bitrate=320000', 'BBC Radio 1', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/BBC_Radio_2.png" 
+        alt="BBC_Radio_2 logo" 
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_radio_two&bitrate=320000', 'BBC Radio 2', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/BBC_Radio_3.png" 
+        alt="BBC_Radio_3 logo" 
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_radio_three&bitrate=320000', 'BBC Radio 3', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/BBC_Radio_4.png" 
+        alt="BBC_Radio_4 logo" 
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_radio_fourfm&bitrate=320000', 'BBC Radio 4', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/BBC_Radio_5.png" 
+        alt="BBC_Radio_5 logo" 
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_radio_five_live&bitrate=320000', 'BBC Radio 5 Live', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/BBC_Radio_6.png" 
+        alt="BBC_Radio_6 logo" 
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_6music&bitrate=320000', 'BBC Radio 6 Live', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/Classical_Hits_1000.jpg" 
+        alt="Classical_Hits_1000 logo" 
+        @click="onPlayStream('https://radio2.vip-radios.fm:18042/stream-128kmp3-HitsClassical', 'Classical Hits', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/Classical_Mozart.jpg" 
+        alt="Classical_Mozart logo" 
+        @click="onPlayStream('https://stream.klassikradio.de/mozart/mp3-192/mytune', 'Classical Mozart', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/SKY_News.png" 
+        alt="SKY_News logo" 
+        @click="onPlayStream('https://video.news.sky.com/snr/news/snrnews.mp3', 'Sky News', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/TIMES_Radio.png" 
+        alt="TIMES_Radio logo" 
+        @click="onPlayStream('https://timesradio.wireless.radio/stream?aw_0_1st.platform=website&aw_0_1st.playerid=wireless-website', 'Times Radio', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/BBC_Radio_Wales.png" 
+        alt="BBC_Radio_Wales logo" 
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_radio_wales_fm&bitrate=320000', 'BBC Radio Wales', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/BBC_Radio_Leeds.png" 
+        alt="BBC_Radio_Leeds logo" 
+        @click="onPlayStream('https://lsn.lv/bbcradio.m3u8?station=bbc_radio_leeds&bitrate=320000', 'BBC Radio Leeds', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/TW_FM96.jpg" 
+        alt="TW FM96 logo" 
+        @click="onPlayStream('https://stream.rcs.revma.com/ndk05tyy2tzuv', 'TW FM96', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/TW_FM103.jpg" 
+        alt="TW FM103 logo" 
+        @click="onPlayStream('https://stream.rcs.revma.com/aw9uqyxy2tzuv', 'TW FM103', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/ASIAFM_927.jpg" 
+        alt="ASIAFM 927 logo" 
+        @click="onPlayStream('https://stream.rcs.revma.com/xpgtqc74hv8uv', 'ASIAFM 927', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/UFO_Network.jpg" 
+        alt="UFO Network logo" 
+        @click="onPlayStream('https://n17a-eu.rcs.revma.com/em90w4aeewzuv?rj-tok=AAABmP7objYAlBv1a7_GA_pPZw&rj-ttl=5', 'UFO Network', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/Hits_Radio.jpg" 
+        alt="Hits Radio logo" 
+        @click="onPlayStream('https://18853.live.streamtheworld.com/977_HITS_SC', 'Hits Radio', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+    </div>
+
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+
+// Get runtime config for the API base URL
+const config = useRuntimeConfig();
+const apiBase = config.public.apiBase;
+
+const loading = ref(false);
+const error = ref(null);
+
+const onPlayStream = async (url, title, artist) => {
+  loading.value = true;
+  error.value = null;
+
+  console.log(`Requesting to play stream: ${title} from ${url}`);
+
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+    // Redirect to login or handle error
+    window.location.href = '/login';
+    return;
+  }
+
+  try {
+    const response = await $fetch(`${apiBase}/pi_add_and_play_stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        stream_url: url,
+        title: title,
+        artist: artist
+      })
+    });
+
+    if (response.status === 'success') {
+      console.log('Stream added and is now playing.');
+      // Optionally, you can emit an event to the parent to refresh its status
+    } else {
+      throw new Error(response.message || 'Failed to play stream');
+    }
+  } catch (err) {
+    console.error('Error playing stream via MPD:', err);
+    error.value = `Failed to play stream: ${err.message || 'Unknown error'}`;
+    alert(`Error: ${error.value}`);
+  } finally {
+    loading.value = false;
+  }
+};
+</script>
