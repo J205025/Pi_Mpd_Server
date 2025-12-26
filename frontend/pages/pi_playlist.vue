@@ -74,9 +74,15 @@
         </button>
         <div v-if="playlistsList.length > 0">
           <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
-            <li v-for="playlist in playlistsList" :key="playlist.playlist"
+            <li v-for="playlist in sortedPlaylists" :key="playlist.playlist"
                 class="flex items-center text-gray-700 p-2 border-b border-gray-200 last:border-b-0">
-              <span class="cursor-pointer hover:text-blue-600 font-medium" @click="pi_getPlaylistSongs(playlist.playlist)" :class="{ 'bg-blue-200': playlist.playlist === currentSelectedPlaylist }">
+              <span class="cursor-pointer hover:text-blue-600 font-medium" 
+                    @click="pi_getPlaylistSongs(playlist.playlist)" 
+                    :class="{ 
+                      'bg-blue-200': playlist.playlist === currentSelectedPlaylist,
+                      'text-red-600': playlist.playlist === '我的最愛',
+                      'text-green-600': playlist.playlist === '定期播放'
+                    }">
                 {{ playlist.playlist }}
               </span>
               <div class="flex ml-auto">
@@ -196,6 +202,38 @@ let pollInterval;
 
 const isMpdNormal = computed(() => {
   return mpdStatus.value && Object.keys(mpdStatus.value).length > 0 && mpdStatus.value.state !== undefined;
+});
+
+const sortedPlaylists = computed(() => {
+  const playlists = [...playlistsList.value];
+  const favoriteName = '我的最愛';
+  const regularPlayName = '定期播放';
+
+  let favoritePlaylist = null;
+  let regularPlaylist = null;
+  const otherPlaylists = [];
+
+  // Separate special playlists and collect others
+  playlists.forEach(p => {
+    if (p.playlist === favoriteName) {
+      favoritePlaylist = p;
+    } else if (p.playlist === regularPlayName) {
+      regularPlaylist = p;
+    } else {
+      otherPlaylists.push(p);
+    }
+  });
+
+  const result = [];
+  if (favoritePlaylist) {
+    result.push(favoritePlaylist);
+  }
+  if (regularPlaylist) {
+    result.push(regularPlaylist);
+  }
+  result.push(...otherPlaylists);
+  
+  return result;
 });
 
 const fetchMpdStatus = async () => {

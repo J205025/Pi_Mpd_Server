@@ -138,7 +138,10 @@
               class="block w-full p-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
             >
               <option disabled selected value="">-- Choose a playlist --</option>
-              <option v-for="name in storedPlaylists" :key="name.playlist" :value="name.playlist">
+              <option v-for="name in sortedStoredPlaylists" 
+                      :key="name.playlist" 
+                      :value="name.playlist"
+                      :style="{ color: name.playlist === '我的最愛' ? 'red' : (name.playlist === '定期播放' ? 'green' : 'black') }">
                 {{ name.playlist }}
               </option>
             </select>
@@ -249,6 +252,36 @@ const isMpdNormal = computed(() => {
   return mpdStatus.value && Object.keys(mpdStatus.value).length > 0 && mpdStatus.value.state !== undefined;
 });
 
+const sortedStoredPlaylists = computed(() => {
+  const playlists = [...storedPlaylists.value];
+  const favoriteName = '我的最愛';
+  const regularPlayName = '定期播放';
+
+  let favoritePlaylist = null;
+  let regularPlaylist = null;
+  const otherPlaylists = [];
+
+  playlists.forEach(p => {
+    if (p.playlist === favoriteName) {
+      favoritePlaylist = p;
+    } else if (p.playlist === regularPlayName) {
+      regularPlaylist = p;
+    } else {
+      otherPlaylists.push(p);
+    }
+  });
+
+  const result = [];
+  if (favoritePlaylist) {
+    result.push(favoritePlaylist);
+  }
+  if (regularPlaylist) {
+    result.push(regularPlaylist);
+  }
+  result.push(...otherPlaylists);
+  
+  return result;
+});
 const isLiveStream = computed(() => {
   return currentSong.value.file && (currentSong.value.file.startsWith('http://') || currentSong.value.file.startsWith('https://'));
 });

@@ -71,9 +71,15 @@
         <h2 class="text-2xl font-bold mb-4 text-gray-800">你的歌單:(點歌單名字可編輯曲目)</h2>
         <div v-if="playlistsList.length > 0">
           <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
-            <li v-for="(playlistName, index) in playlistsList" :key="index"
+            <li v-for="(playlistName, index) in sortedPlaylists" :key="index"
                 class="flex items-center text-gray-700 p-2 border-b border-gray-200 last:border-b-0">
-              <span class="cursor-pointer hover:text-blue-600 font-medium" @click="getPlaylistFiles(playlistName)" :class="{ 'bg-blue-200': playlistName === currentSelectedPlaylist }">
+              <span
+                class="cursor-pointer hover:text-blue-600 font-medium"
+                @click="getPlaylistFiles(playlistName)"
+                :class="{
+                  'bg-blue-200': playlistName === currentSelectedPlaylist,
+                  'text-red-600': playlistName === '我的最愛'
+                }">
                 {{ playlistName }}
               </span>
               <div class="flex ml-auto">
@@ -249,7 +255,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 
 // Get runtime config
 const config = useRuntimeConfig();
@@ -273,6 +279,15 @@ const currentSelectedPlaylist = ref('');
 const selectedFilesInEditMode = ref([]); // To track files selected for deletion from an opened playlist
 const editModeForPlaylist = ref(false); // To enable/disable editing mode for playlist files
 
+const sortedPlaylists = computed(() => {
+  const playlists = [...playlistsList.value];
+  const favorite = '我的最愛';
+  
+  const favoritePlaylist = playlists.filter(p => p === favorite);
+  const otherPlaylists = playlists.filter(p => p !== favorite);
+  
+  return [...favoritePlaylist, ...otherPlaylists];
+});
 
 // Function to fetch the list of playlist names
 const getPlaylistsList = async () => {

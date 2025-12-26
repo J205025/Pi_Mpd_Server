@@ -575,7 +575,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
     new_playlist = UserPlaylist(
         user_id=db_user.id,
-        playlist_name="我的收藏",
+        playlist_name="我的最愛",
         playlist_data=json.dumps([])
     )
     db.add(new_playlist)

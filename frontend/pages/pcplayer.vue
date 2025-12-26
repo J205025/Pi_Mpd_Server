@@ -182,7 +182,7 @@
           class="block w-full p-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
         >
           <option disabled selected value="">-- Choose a playlist --</option>
-          <option v-for="name in playlistNames" :key="name" :value="name">
+          <option v-for="name in sortedPlaylistNames" :key="name" :value="name" :class="{ 'text-red-600': name === '我的最愛' }">
             {{ name }}
           </option>
         </select>
@@ -250,6 +250,16 @@ const error = ref(null);
 
 // State for playlist names
 const playlistNames = ref([]);
+
+const sortedPlaylistNames = computed(() => {
+  const names = [...playlistNames.value];
+  const favorite = '我的最愛';
+  
+  const favoritePlaylist = names.filter(p => p === favorite);
+  const otherPlaylists = names.filter(p => p !== favorite);
+  
+  return [...favoritePlaylist, ...otherPlaylists];
+});
 
 // Audio player state
 const audioPlayer = ref(null);
@@ -425,8 +435,8 @@ onMounted(async () => {
       console.error('Invalid format for playlist names:', playlistNamesResponse);
     }
 
-    // Fetch the "我的收藏" playlist
-    const favPlaylistResponse = await $fetch(`${apiBase}/pc_playlist_files/我的收藏`, {
+    // Fetch the "我的最愛" playlist
+    const favPlaylistResponse = await $fetch(`${apiBase}/pc_playlist_files/我的最愛`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -480,7 +490,7 @@ const loadPlaylist = async (playlistName) => {
       pc_playlist_all.value = response;
       console.log('Tracks for', playlistName, 'loaded:', pc_playlist_all.value);
       
-      if (playlistName === '我的收藏') {
+      if (playlistName === '我的最愛') {
         favoritePlaylist.value = [...response]; // Create a copy
       }
 
@@ -885,7 +895,7 @@ const updateFavoritePlaylist = async () => {
   if (!token) return;
 
   try {
-    await $fetch(`${apiBase}/pc_playlists_saveto_list/我的收藏`, {
+    await $fetch(`${apiBase}/pc_playlist_saveto_list/我的最愛`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
