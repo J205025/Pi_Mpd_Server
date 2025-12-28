@@ -87,6 +87,16 @@
               <path d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L10 11.202V14a1 1 0 001.555.832l6-4a1 1 0 000-1.664l-6-4A1 1 0 0010 6v2.798l-5.445-3.63z"/>
             </svg>
           </button>
+          
+          <!-- Favorite Button -->
+          <button @click="toggleFavorite" :disabled="!currentSong.file || isLiveStream" class="p-3 rounded-full transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg v-if="isCurrentSongFavorite" class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+            </svg>
+            <svg v-else class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 20 20">
+              <path d="M17.5 9.16666C17.5 12.5 14.1667 15.8333 10 17.5C5.83333 15.8333 2.5 12.5 2.5 9.16666C2.5 7.04738 4.21401 5.33333 6.33333 5.33333C7.53594 5.33333 8.6425 5.84196 9.39999 6.69433L10 7.35766L10.6 6.69433C11.3575 5.84196 12.4641 5.33333 13.6667 5.33333C15.786 5.33333 17.5 7.04738 17.5 9.16666Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
 
         <div class="flex items-center justify-between">
@@ -237,6 +247,7 @@ const cronHour = ref(0);
 const cronMinute = ref(0);
 const cronDayOfWeek = ref([]); // 0=Sunday, 1=Monday, ..., 6=Saturday
 const daysOfWeek = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+const favoritePlaylistSongs = ref([]);
 
 const sleepDurations = [5, 10, 15, 20, 25, 30, 35, 40, 50, 60];
 const activeSleepDuration = ref(null);
@@ -337,6 +348,16 @@ const fetchStoredPlaylists = async () => {
   }
 };
 
+const fetchPlaylistSongs = async (playlistName) => {
+  try {
+    const response = await $fetch(`${apiBase}/pi_playlist_songs/${encodeURIComponent(playlistName)}`);
+    return response; 
+  } catch (error) {
+    console.error(`Error fetching songs for playlist ${playlistName}:`, error);
+    return [];
+  }
+};
+
 const fetchCronJobs = async () => {
   try {
     const response = await $fetch(`${apiBase}/api/cron`);
@@ -411,6 +432,11 @@ const formatCronSchedule = (schedule) => {
 
   return `${days} ${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
 };
+
+const isCurrentSongFavorite = computed(() => {
+  if (!currentSong.value.file) return false;
+  return favoritePlaylistSongs.value.includes(currentSong.value.file);
+});
 
 const togglePlayPause = async () => {
   try {
@@ -555,6 +581,43 @@ const cycleSleepTimer = () => {
   }, 1000);
 };
 
+const toggleFavorite = async () => {
+  if (!currentSong.value || !currentSong.value.file || isLiveStream.value) {
+    alert('No song selected or it is a live stream.');
+    return;
+  }
+
+  const playlistName = '我的最愛';
+  const songFile = currentSong.value.file;
+
+  try {
+    // Refresh the playlist songs before checking
+    favoritePlaylistSongs.value = await fetchPlaylistSongs(playlistName);
+    const songIndex = favoritePlaylistSongs.value.indexOf(songFile);
+
+    if (songIndex !== -1) {
+      // Song is in favorites, so remove it
+      await $fetch(`${apiBase}/pi_playlistdeletesong`, {
+        method: 'POST',
+        body: { pi_plname: playlistName, songpos: songIndex }
+      });
+      alert('Song removed from "我的最愛" playlist.');
+    } else {
+      // Song is not in favorites, so add it
+      await $fetch(`${apiBase}/pi_playlist_adduri/${encodeURIComponent(playlistName)}/${encodeURIComponent(songFile)}`, {
+        method: 'POST',
+      });
+      alert('Song added to "我的最愛" playlist.');
+    }
+
+    // Refresh favorite songs list to update UI
+    favoritePlaylistSongs.value = await fetchPlaylistSongs(playlistName);
+  } catch (error) {
+    console.error('Error toggling favorite status:', error);
+    alert('Failed to update favorites.');
+  }
+};
+
 
 const formatTime = (seconds) => {
   if (isNaN(seconds) || seconds < 0) return '0:00';
@@ -563,16 +626,17 @@ const formatTime = (seconds) => {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
-onMounted(() => {
+onMounted(async () => {
     const token = localStorage.getItem('authToken');
     if (!token) {
         router.push('/login');
         return;
     }
-    fetchMpdStatus();
+    await fetchMpdStatus();
     fetchQueue();
     fetchStoredPlaylists();
     fetchCronJobs();
+    favoritePlaylistSongs.value = await fetchPlaylistSongs('我的最愛'); // Fetch favorite songs on mount
     pollInterval = setInterval(() => {
         fetchMpdStatus();
         fetchQueue(); // To keep queue updated

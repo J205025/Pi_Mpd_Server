@@ -380,9 +380,31 @@ class MPDClientController:
         
     def playlist_add_song(self, pi_plname, uri):
         try:
+            # Check if the playlist exists
+            playlists = self._execute_safe(self.client.listplaylists)
+            playlist_exists = any(p['playlist'] == pi_plname for p in playlists)
+
+            if not playlist_exists:
+                # If playlist doesn't exist, create it (playlistadd does this implicitly but good to be explicit)
+                # It's better to add a dummy song and then remove it to truly "create" an empty playlist,
+                # as playlistadd will just create it when the first song is added.
+                # However, for simply adding, playlistadd handles creation.
+                print(f"Playlist '{pi_plname}' does not exist. It will be created.")
+
+            # Get current songs in the playlist to check for duplicates
+            current_playlist_songs = self._execute_safe(self.client.listplaylist, pi_plname)
+            
+            # Check if the song URI is already in the playlist
+            if uri in current_playlist_songs:
+                print(f"Song '{uri}' is already in playlist '{pi_plname}'. Not adding duplicate.")
+                return {"message": f"Song '{uri}' is already in playlist '{pi_plname}'. Not adding duplicate."}
+            
+            # If not a duplicate, add the song
             self._execute_safe(self.client.playlistadd, pi_plname, uri)
+            print(f"URI '{uri}' added to playlist '{pi_plname}'.")
+            return {"message": f"URI '{uri}' added to playlist '{pi_plname}'."}
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error adding URI to playlist: {e}")
             raise e 
                
     def playlist_add_folder(self, pi_plname, foldername):

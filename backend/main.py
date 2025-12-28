@@ -70,6 +70,10 @@ class StreamRequest(BaseModel):
     title: str
     artist: str
 
+class PlaylistDeleteSongPayload(BaseModel):
+    pi_plname: str
+    songpos: int
+
 # Generate filespath base from music_Basefolder
 def genFilelist(subfolder):
     global pc_Indexmax
@@ -409,6 +413,14 @@ async def pi_playlist_deletesong(pi_plname: str, songpos: int):
         # Assuming the user provides a 0-based index for now.
         mpd_player.playlist_deletesong(pi_plname, songpos)
         return {"message": f"Song at position {songpos} deleted from playlist '{pi_plname}'."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting song from playlist: {e}")
+
+@app.post("/pi_playlistdeletesong")
+async def pi_playlistdeletesong_post(payload: PlaylistDeleteSongPayload):
+    try:
+        mpd_player.playlist_deletesong(payload.pi_plname, payload.songpos)
+        return {"message": f"Song at position {payload.songpos} deleted from playlist '{payload.pi_plname}'."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting song from playlist: {e}")
 
