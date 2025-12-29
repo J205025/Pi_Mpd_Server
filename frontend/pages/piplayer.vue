@@ -88,6 +88,16 @@
             </svg>
           </button>
           
+          <!-- Regular Playlist Button -->
+          <button @click="toggleRegularPlaylist" :disabled="!currentSong.file || isLiveStream" class="p-3 rounded-full transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg v-if="isCurrentSongInRegularPlaylist" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.539 1.118l-3.975-2.888a1 1 0 00-1.175 0l-3.976 2.888c-.783.57-1.838-.197-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+            </svg>
+          </button>
+          
           <!-- Favorite Button -->
           <button @click="toggleFavorite" :disabled="!currentSong.file || isLiveStream" class="p-3 rounded-full transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
             <svg v-if="isCurrentSongFavorite" class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
@@ -145,6 +155,7 @@
             <select
               id="load-playlist-select"
               v-model="selectedStoredPlaylist"
+              @change="clearQueueAndLoadPlaylist"
               class="block w-full p-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
             >
               <option disabled selected value="">-- Choose a playlist --</option>
@@ -155,8 +166,25 @@
                 {{ name.playlist }}
               </option>
             </select>
-            <button @click="loadPlaylistToQueue" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">載入歌單到播放佇列</button>
         </div>
+      </div>
+
+
+      <!-- Current Playing Queue -->
+      <div class="bg-white p-6 rounded-lg shadow-xl mt-6">
+        <h2 class="text-xl font-bold mb-3 text-gray-800">播放佇列:</h2>
+        <button @click="clearQueue" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-2">清空佇列</button>
+        <div v-if="queue.length > 0" class="max-h-96 overflow-y-auto">
+          <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg">
+            <li v-for="song in queue" :key="song.id" 
+                @click="playSongById(song.id)"
+                class="text-gray-700 p-1 truncate cursor-pointer hover:bg-blue-100"
+                :class="{ 'bg-blue-200': song.id == mpdStatus.songid }">
+              {{ song.pos }} - {{ song.file }}
+            </li>
+          </ul>
+        </div>
+        <div v-else class="text-gray-500">Queue is empty.</div>
       </div>
 
       <!-- Cron Job Section -->
@@ -203,23 +231,6 @@
         <p class="text-sm text-gray-500 mt-2">"定期播放" 歌單會被自動載入及播放. 如果 "定期播放" 歌單不存在, 將會已 "Cron_Folder" folder 內的歌曲自動建立.</p>
       </div>
 
-      <!-- Current Playing Queue -->
-      <div class="bg-white p-6 rounded-lg shadow-xl mt-6">
-        <h2 class="text-xl font-bold mb-3 text-gray-800">播放佇列:</h2>
-        <button @click="clearQueue" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-2">清空佇列</button>
-        <div v-if="queue.length > 0" class="max-h-96 overflow-y-auto">
-          <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg">
-            <li v-for="song in queue" :key="song.id" 
-                @click="playSongById(song.id)"
-                class="text-gray-700 p-1 truncate cursor-pointer hover:bg-blue-100"
-                :class="{ 'bg-blue-200': song.id == mpdStatus.songid }">
-              {{ song.pos }} - {{ song.file }}
-            </li>
-          </ul>
-        </div>
-        <div v-else class="text-gray-500">Queue is empty.</div>
-      </div>
-
       <pi_radiocard />
 
     </main>
@@ -248,6 +259,7 @@ const cronMinute = ref(0);
 const cronDayOfWeek = ref([]); // 0=Sunday, 1=Monday, ..., 6=Saturday
 const daysOfWeek = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
 const favoritePlaylistSongs = ref([]);
+const regularPlaylistSongs = ref([]);
 
 const sleepDurations = [5, 10, 15, 20, 25, 30, 35, 40, 50, 60];
 const activeSleepDuration = ref(null);
@@ -438,6 +450,11 @@ const isCurrentSongFavorite = computed(() => {
   return favoritePlaylistSongs.value.includes(currentSong.value.file);
 });
 
+const isCurrentSongInRegularPlaylist = computed(() => {
+  if (!currentSong.value.file) return false;
+  return regularPlaylistSongs.value.includes(currentSong.value.file);
+});
+
 const togglePlayPause = async () => {
   try {
     await $fetch(`${apiBase}/pi_pause`, { method: 'POST' });
@@ -507,16 +524,22 @@ const clearQueue = async () => {
     }
 }
 
-const loadPlaylistToQueue = async () => {
+const clearQueueAndLoadPlaylist = async () => {
     if (!selectedStoredPlaylist.value) {
-        alert('Please select a playlist to load.');
         return;
     }
     try {
+        // 1. Clear the queue (without confirmation)
+        await $fetch(`${apiBase}/pi_queue_clearsongs`, { method: 'DELETE' });
+
+        // 2. Load the new playlist
         await $fetch(`${apiBase}/pi_queue_loadfrom_playlist/${selectedStoredPlaylist.value}`, { method: 'GET' });
+
+        // 3. Refresh queue and status
         fetchQueue();
+        fetchMpdStatus();
     } catch (error) {
-        console.error('Error loading playlist to queue:', error);
+        console.error('Error clearing queue and loading playlist:', error);
     }
 }
 
@@ -618,6 +641,43 @@ const toggleFavorite = async () => {
   }
 };
 
+const toggleRegularPlaylist = async () => {
+  if (!currentSong.value || !currentSong.value.file || isLiveStream.value) {
+    alert('No song selected or it is a live stream.');
+    return;
+  }
+
+  const playlistName = '定期播放';
+  const songFile = currentSong.value.file;
+
+  try {
+    // Refresh the playlist songs before checking
+    regularPlaylistSongs.value = await fetchPlaylistSongs(playlistName);
+    const songIndex = regularPlaylistSongs.value.indexOf(songFile);
+
+    if (songIndex !== -1) {
+      // Song is in playlist, so remove it
+      await $fetch(`${apiBase}/pi_playlistdeletesong`, {
+        method: 'POST',
+        body: { pi_plname: playlistName, songpos: songIndex }
+      });
+      alert('Song removed from "定期播放" playlist.');
+    } else {
+      // Song is not in playlist, so add it
+      await $fetch(`${apiBase}/pi_playlist_adduri/${encodeURIComponent(playlistName)}/${encodeURIComponent(songFile)}`, {
+        method: 'POST',
+      });
+      alert('Song added to "定期播放" playlist.');
+    }
+
+    // Refresh regular playlist songs list to update UI
+    regularPlaylistSongs.value = await fetchPlaylistSongs(playlistName);
+  } catch (error) {
+    console.error('Error toggling regular playlist status:', error);
+    alert('Failed to update regular playlist.');
+  }
+};
+
 
 const formatTime = (seconds) => {
   if (isNaN(seconds) || seconds < 0) return '0:00';
@@ -637,6 +697,7 @@ onMounted(async () => {
     fetchStoredPlaylists();
     fetchCronJobs();
     favoritePlaylistSongs.value = await fetchPlaylistSongs('我的最愛'); // Fetch favorite songs on mount
+    regularPlaylistSongs.value = await fetchPlaylistSongs('定期播放');
     pollInterval = setInterval(() => {
         fetchMpdStatus();
         fetchQueue(); // To keep queue updated

@@ -117,18 +117,18 @@ async def lifespan(app: FastAPI):
     mpd_player.connect()
 
     if mpd_player.is_connected:
-        print("Updating MPD database and creating playlists...")
+        print("MPD is connected Updating MPD database...")
         mpd_player.update()
         
         # Create playlists based on folder names
-        for folder_name in music_Type:
-            print(f"  -> Processing and creating playlist for: '{folder_name}'")
-            mpd_player.queue_clearsongs()
-            mpd_player.queue_add_folder(folder_name)
-            mpd_player.queue_saveto_playlist(folder_name)
+        #for folder_name in music_Type:
+        #    print(f"  -> Processing and creating playlist for: '{folder_name}'")
+        #    mpd_player.queue_clearsongs()
+        #    mpd_player.queue_add_folder(folder_name)
+        #    mpd_player.queue_saveto_playlist(folder_name)
         
-        mpd_player.queue_clearsongs()
-        print("✅ Playlist creation complete.")
+        #mpd_player.queue_clearsongs()
+        #print("✅ Playlist creation complete.")
     else:
         print("⚠️  MPD not connected at startup. Features will activate when MPD becomes available.")
 
@@ -206,23 +206,6 @@ async def serve_dynamic_payload(path: str):
     return JSONResponse({})
 
 # --- State Endpoint ---
-@app.post('/')
-async def index_post():
-    # Note: These globals are not currently updated by MPD status automatically
-    # You might want to update them via mpd_player.get_status() here
-    return JSONResponse({
-        "pi_Index" : pi_Index,
-        "pi_Playing" : pi_Playing,
-        "pi_Playmopde" : pi_Playmode,
-        "pi_Volume" : pi_Volume,
-        "pi_Mute" : pi_Mute,
-        "pi_Playrate" : pi_Playrate,
-        "pi_Duration" : pi_Duration,
-        "pi_cronStatus" : cron_Status,
-        "pi_cronTimeHour" : cron_Hour,
-        "pi_cronTimeMin" : cron_Min,
-        "pi_cronIndexPi" : cron_pi_Index
-         })
 
 @app.post("/pi_mpd_connect")
 async def pi_mpd_connect():
