@@ -150,7 +150,7 @@
       
       <!-- Stored Playlists Section -->
       <div class="bg-white p-6 rounded-lg shadow-xl mt-4">
-        <label for="load-playlist-select" class="block text-xl font-bold mb-3 text-gray-800">選擇預存歌單:</label>
+        <label for="load-playlist-select" class="block text-xl font-bold mb-3 text-gray-800">選擇歌單:</label>
         <div class="flex space-x-2">
             <select
               id="load-playlist-select"
@@ -624,13 +624,13 @@ const toggleFavorite = async () => {
         method: 'POST',
         body: { pi_plname: playlistName, songpos: songIndex }
       });
-      alert('Song removed from "我的最愛" playlist.');
+
     } else {
       // Song is not in favorites, so add it
       await $fetch(`${apiBase}/pi_playlist_adduri/${encodeURIComponent(playlistName)}/${encodeURIComponent(songFile)}`, {
         method: 'POST',
       });
-      alert('Song added to "我的最愛" playlist.');
+
     }
 
     // Refresh favorite songs list to update UI
@@ -661,13 +661,13 @@ const toggleRegularPlaylist = async () => {
         method: 'POST',
         body: { pi_plname: playlistName, songpos: songIndex }
       });
-      alert('Song removed from "定期播放" playlist.');
+
     } else {
       // Song is not in playlist, so add it
       await $fetch(`${apiBase}/pi_playlist_adduri/${encodeURIComponent(playlistName)}/${encodeURIComponent(songFile)}`, {
         method: 'POST',
       });
-      alert('Song added to "定期播放" playlist.');
+
     }
 
     // Refresh regular playlist songs list to update UI

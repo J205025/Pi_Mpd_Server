@@ -189,37 +189,15 @@
       </div>
 
       <div v-if="pc_playlist_all.length > 0" class="bg-white p-6 rounded-lg shadow-xl mt-6">
-        <label for="playlist-select" class="block text-xl font-bold mb-3 text-gray-800">選擇歌曲:</label>
-        <select 
-          id="playlist-select" 
-          v-model="selectedTrack" 
-          @change="onTrackChange"
-          class="block w-full p-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option disabled value="">-- Choose a track --</option>
-          <option v-for="(track, index) in pc_playlist_all" :key="track" :value="track">
-            {{ index + 1 }} - {{ getTrackArtist(track) }} - {{ getTrackAlbum(track) }} - {{ getTrackTitle(track) }}
-          </option>
-        </select>
-        
-        <div id="keypad" class="mt-4 md:block hidden">
-            <p class="text-lg font-bold mb-2 text-gray-800">Enter Track Index:</p>
-            <div class="flex flex-wrap gap-2 justify-center">
-                <button
-                    v-for="number in 10"
-                    :key="number - 1"
-                    @click="handleNumberPress(number - 1)"
-                    class="bg-gradient-to-r from-blue-400 to-blue-600 text-white p-4 rounded-lg w-[120px] h-20 flex items-center justify-center text-3xl font-bold
-                           hover:from-blue-500 hover:to-blue-700 hover:shadow-lg transition-transform hover:scale-105"
-                >
-                    {{ number - 1 }}
-                </button>
-            </div>
-            <div class="mt-2 text-center text-gray-600">
-                Current Number: <span class="font-bold">{{ currentNumberString }}</span>
-            </div>
-        </div>
-
+        <h3 class="text-xl font-semibold text-gray-800 mb-3">播放佇列:</h3>
+        <ul class="list-none bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
+          <li v-for="(track, index) in pc_playlist_all" :key="index"
+              @click="playTrack(track)"
+              class="text-gray-700 p-1 truncate cursor-pointer hover:bg-blue-100"
+              :class="{ 'bg-blue-200': track === selectedTrack }">
+            {{ index + 1 }}. {{ getTrackArtist(track) }} - {{ getTrackAlbum(track) }} - {{ getTrackTitle(track) }}
+          </li>
+        </ul>
       </div>
 
       <pc_radiocard 
@@ -282,11 +260,6 @@ let hls = null;
 // Play modes
 const shuffleMode = ref(false);
 const repeatMode = ref('none'); // 'none', 'all', 'one'
-
-// State for button-based number input
-const currentNumberString = ref('');
-let inputTimer = null;
-const INPUT_TIMEOUT = 4000;
 
 // State for stream metadata
 const currentStreamInfo = ref(null);
@@ -675,7 +648,8 @@ const handlePlayStream = (streamData) => {
 };
 
 // Audio player methods
-const onTrackChange = () => {
+const playTrack = (track) => {
+  selectedTrack.value = track;
   autoPlayOnLoad.value = true;
 };
 
@@ -913,37 +887,6 @@ const formatTime = (seconds) => {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, '0')}`;
-};
-
-const handleNumberPress = (number) => {
-    clearTimeout(inputTimer);
-    let newNumberString = currentNumberString.value + String(number);
-    if (newNumberString.length > 4) {
-        newNumberString = newNumberString.substring(newNumberString.length - 4);
-    }
-    currentNumberString.value = newNumberString;
-    inputTimer = setTimeout(playTrackFromInput, INPUT_TIMEOUT);
-};
-
-const playTrackFromInput = () => {
-    clearTimeout(inputTimer);
-    const maxIndex = pc_playlist_all.value.length;
-    let index = parseInt(currentNumberString.value, 10);
-    if (isNaN(index) || index === 0) {
-        alert('Invalid index. Please enter a number between 1 and ' + maxIndex);
-        currentNumberString.value = '';
-        return;
-    }
-    if (index > maxIndex) {
-        index = (index % maxIndex === 0) ? maxIndex : index % maxIndex;
-    }
-    
-    // Stop any HLS stream when switching to playlist tracks
-    destroyHLS();
-    
-    selectedTrack.value = pc_playlist_all.value[index - 1];
-    autoPlayOnLoad.value = true;
-    currentNumberString.value = '';
 };
 
 // Debugging event handlers
