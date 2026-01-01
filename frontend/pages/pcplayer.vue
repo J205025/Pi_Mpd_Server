@@ -136,13 +136,15 @@
               @click="toggleShuffle"
               :class="['p-2 rounded transition-colors duration-200', shuffleMode ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800']"
             ><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732L14.146 12.8l-1.179 4.456a1 1 0 01-1.856-.288L12.382 12H10a1 1 0 110-2h2.382l-.271-4.968A1 1 0 0112 2z" clip-rule="evenodd"></path></svg></button>
+
             <button
               @click="toggleRepeat"
               :class="['p-2 rounded transition-colors duration-200', repeatMode === 'none' ? 'text-gray-600 hover:text-gray-800' : 'bg-blue-100 text-blue-600']"
             >
-              <svg v-if="repeatMode === 'one'" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 12V7H3l4-4 4 4H9v5a1 1 0 01-1 1H5zm10 1v5h2l-4 4-4-4h2V8a1 1 0 011-1h3zm-5-3h2v2h-2V10z"></path></svg>
+              <svg v-if="repeatMode === 'one'" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5.05 4.05a7 7 0 000 9.9 7 7 0 009.9 0a1 1 0 111.414 1.414 9 9 0 01-12.728 0 9 9 0 010-12.728A9 9 0 0110 1.05a1 1 0 110 2 7 7 0 00-4.95 1zM14.95 15.95a7 7 0 000-9.9 7 7 0 00-9.9 0a1 1 0 11-1.414-1.414 9 9 0 0112.728 0 9 9 0 010 12.728A9 9 0 0110 18.95a1 1 0 110-2 7 7 0 004.95-1z"></path></svg>
               <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 12V7H3l4-4 4 4H9v5a1 1 0 01-1 1H5zm10 1v5h2l-4 4-4-4h2V8a1 1 0 011-1h3z"></path></svg>
             </button>
+
 
                         <button
               @click="cycleSleepTimer"

@@ -40,4 +40,5 @@ dependencies = [
     "typing-inspection==0.4.1",
     "urllib3==2.5.0",
     "uvicorn==0.35.0",
+    "yt-dlp>=2025.12.8",
 ]

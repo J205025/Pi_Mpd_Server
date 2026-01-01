@@ -123,16 +123,20 @@
             <span class="text-sm text-gray-600 w-8">{{ volume }}</span>
           </div>
           <div class="flex items-center space-x-2">
-             <button
-              @click="toggleRepeat"
-              :class="['p-2 rounded transition-colors duration-200', mpdStatus.repeat == 1 ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800']"
-            >
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 12V7H3l4-4 4 4H9v5a1 1 0 01-1 1H5zm10 1v5h2l-4 4-4-4h2V8a1 1 0 011-1h3z"></path></svg>
-            </button>
+            
             <button
               @click="toggleRandom"
               :class="['p-2 rounded transition-colors duration-200', mpdStatus.random == 1 ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800']"
             ><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732L14.146 12.8l-1.179 4.456a1 1 0 01-1.856-.288L12.382 12H10a1 1 0 110-2h2.382l-.271-4.968A1 1 0 0112 2z" clip-rule="evenodd"></path></svg></button>
+            
+            <button
+              @click="toggleRepeat"
+              :class="['p-2 rounded transition-colors duration-200', mpdStatus.repeat == 1 || mpdStatus.single == 1 ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800']"
+            >
+              <svg v-if="mpdStatus.single == 1" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5.05 4.05a7 7 0 000 9.9 7 7 0 009.9 0a1 1 0 111.414 1.414 9 9 0 01-12.728 0 9 9 0 010-12.728A9 9 0 0110 1.05a1 1 0 110 2 7 7 0 00-4.95 1zM14.95 15.95a7 7 0 000-9.9 7 7 0 00-9.9 0a1 1 0 11-1.414-1.414 9 9 0 0112.728 0 9 9 0 010 12.728A9 9 0 0110 18.95a1 1 0 110-2 7 7 0 004.95-1z"></path></svg>
+              <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 12V7H3l4-4 4 4H9v5a1 1 0 01-1 1H5zm10 1v5h2l-4 4-4-4h2V8a1 1 0 011-1h3z"></path></svg>
+            </button>
+
             <button
               @click="cycleSleepTimer"
               :class="['p-2 rounded w-28 text-center transition-colors duration-200 font-semibold', activeSleepDuration ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200']"
@@ -145,6 +149,15 @@
               </div>
             </button>
           </div>
+        </div>
+
+        <div class="mt-4 text-center text-sm text-gray-500">
+          <span v-if="mpdStatus.playlistlength > 0">
+            Track {{ parseInt(mpdStatus.song) + 1 }} of {{ mpdStatus.playlistlength }}
+          </span>
+          <span v-if="mpdStatus.random == 1" class="ml-2">(Shuffle)</span>
+          <span v-if="mpdStatus.repeat == 1 && mpdStatus.single == 0" class="ml-2">(Repeat All)</span>
+          <span v-if="mpdStatus.single == 1" class="ml-2">(Repeat One)</span>
         </div>
       </div>
       
@@ -175,12 +188,12 @@
         <h2 class="text-xl font-bold mb-3 text-gray-800">播放佇列:</h2>
         <button @click="clearQueue" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-2">清空佇列</button>
         <div v-if="queue.length > 0" class="max-h-96 overflow-y-auto">
-          <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg">
+          <ul class="list-inside bg-gray-50 p-4 rounded-lg">
             <li v-for="song in queue" :key="song.id" 
                 @click="playSongById(song.id)"
                 class="text-gray-700 p-1 truncate cursor-pointer hover:bg-blue-100"
                 :class="{ 'bg-blue-200': song.id == mpdStatus.songid }">
-              {{ song.pos }} - {{ song.file }}
+              {{ +song.pos + 1 }} - {{ song.file }}
             </li>
           </ul>
         </div>
@@ -544,12 +557,31 @@ const clearQueueAndLoadPlaylist = async () => {
 }
 
 const toggleRepeat = async () => {
-    const repeatState = mpdStatus.value.repeat == 1 ? 0 : 1;
+    const isRepeat = mpdStatus.value.repeat == 1;
+    const isSingle = mpdStatus.value.single == 1;
+
+    let nextRepeat = 0;
+    let nextSingle = 0;
+
+    if (!isRepeat && !isSingle) {
+        // From None to Repeat All
+        nextRepeat = 1;
+        nextSingle = 0;
+    } else if (isRepeat && !isSingle) {
+        // From Repeat All to Repeat One
+        nextRepeat = 1;
+        nextSingle = 1;
+    } else { // isSingle is true
+        // From Repeat One to None
+        nextRepeat = 0;
+        nextSingle = 0;
+    }
+
     try {
-        await $fetch(`${apiBase}/pi_playmode?repeat=${repeatState}`, { method: 'PUT' });
+        await $fetch(`${apiBase}/pi_playmode?repeat=${nextRepeat}&single=${nextSingle}`, { method: 'PUT' });
         fetchMpdStatus();
     } catch (error) {
-        console.error('Error toggling repeat:', error);
+        console.error('Error toggling repeat mode:', error);
     }
 }
 

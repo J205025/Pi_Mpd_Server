@@ -47,6 +47,21 @@
         <div class="flex flex-col sm:flex-row gap-4 mt-4">
           <input 
             type="text"
+            v-model="youtubeUrlToAdd"
+            placeholder="Enter YouTube URL"
+            class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button 
+            @click="pi_addYoutubeUrlToPlaylist"
+            :disabled="isLoading || !currentSelectedPlaylist"
+            class="bg-red-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-600 disabled:bg-gray-400 transition duration-300"
+          >
+            加入YouTube影片
+          </button>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-4 mt-4">
+          <input 
+            type="text"
             v-model="folderName"
             placeholder="Enter folder name (e.g., 國語)"
             class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -68,7 +83,7 @@
 
       <!-- Playlist List Section -->
       <div class="bg-white p-6 rounded-lg shadow-xl mt-6">
-        <h2 class="text-2xl font-bold mb-4 text-gray-800">MPD 歌單:(點歌單名字可編輯曲目)</h2>
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">你的歌單:(點歌單名字可編輯曲目)</h2>
         <button @click="promptForNewPlaylist" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-300 mb-4">
           新增歌單
         </button>
@@ -117,6 +132,14 @@
               class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition duration-300"
             >
               刪除選取歌曲
+            </button>
+            <button
+              v-if="editModeForPlaylist"
+              @click="promptSaveSelection"
+              :disabled="selectedSongsInEditMode.length === 0"
+              class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition duration-300 ml-2"
+            >
+              儲存選取歌曲
             </button>
             <button 
               @click="pi_clearPlaylist"
@@ -170,6 +193,22 @@
         </div>
       </div>
 
+      <div v-if="showSaveSelectionDialog" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-xl">
+          <h3 class="text-xl font-bold mb-4">Enter Name for New Playlist</h3>
+          <input
+            type="text"
+            v-model="newPlaylistFromSelectionName"
+            placeholder="My New Playlist"
+            class="w-full p-3 border border-gray-300 rounded-lg mb-4"
+          />
+          <div class="flex justify-end gap-4">
+            <button @click="showSaveSelectionDialog = false" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancel</button>
+            <button @click="pi_saveSelectedSongsToNewPlaylist" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Save</button>
+          </div>
+        </div>
+      </div>
+
     <div class="grid md:grid-cols-4 gap-6 mt-6">
 
     <div class="bg-white p-6 rounded-lg shadow-lg">
@@ -194,22 +233,13 @@
     <button @click="autoSavePiPlaylist('國語/張學友-演唱會')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-演唱會</button>
     <button @click="autoSavePiPlaylist('國語/張學友-精選輯')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-精選輯</button>
     <button @click="autoSavePiPlaylist('國語/劉德華')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">劉德華</button>
+    <button @click="autoSavePiPlaylist('國語/王傑')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">王傑</button>
     <button @click="autoSavePiPlaylist('國語/孫燕姿')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">孫燕姿</button>
     <button @click="autoSavePiPlaylist('國語/弦子')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">弦子</button>
     <button @click="autoSavePiPlaylist('國語/原子邦妮')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">原子邦妮</button>
-    <button @click="autoSavePiPlaylist('英語/Lady_Gaga')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Lady Gaga</button>
-    <button @click="autoSavePiPlaylist('台語/鄭進一')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">鄭進一</button>
-    <button @click="autoSavePiPlaylist('英語/Regine')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Regine</button>
-    <button @click="autoSavePiPlaylist('英語/Bryan_Adams')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Bryan Adams</button>
     <button @click="autoSavePiPlaylist('國語/萬芳')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">萬芳</button>
-    <button @click="autoSavePiPlaylist('日語/AKB48')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">AKB48</button>
-    <button @click="autoSavePiPlaylist('台語/黃乙玲')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">黃乙玲</button>
-    <button @click="autoSavePiPlaylist('台語/秀蘭瑪雅')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">秀蘭瑪雅</button>
-    <button @click="autoSavePiPlaylist('台語蘇宥蓉')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">蘇宥蓉</button>
-    <button @click="autoSavePiPlaylist('台語/玖壹壹')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">玖壹壹</button>
     <button @click="autoSavePiPlaylist('國語/張韶涵')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張韶涵</button>
-    <button @click="autoSavePiPlaylist('國語/張韶涵')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張韶涵</button>
-    <button @click="autoSavePiPlaylist('國語/張惠妺')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張惠妹</button>
+    <button @click="autoSavePiPlaylist('國語/張惠妹')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張惠妹</button>
     <button @click="autoSavePiPlaylist('國語/任賢齊')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">任賢齊</button>
     <button @click="autoSavePiPlaylist('國語/鄭中基')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">鄭中基</button>
     <button @click="autoSavePiPlaylist('國語/蔡健雅')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">蔡健雅</button>
@@ -222,7 +252,19 @@
     <button @click="autoSavePiPlaylist('國語/郁可唯')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">郁可唯</button>
     <button @click="autoSavePiPlaylist('國語/楊丞琳')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">楊丞琳</button>
     <button @click="autoSavePiPlaylist('國語/王心凌')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">王心凌</button>
-    <button @click="autoSavePiPlaylist('國語/王傑')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">王傑</button>
+    <button @click="autoSavePiPlaylist('國語/徐若瑄')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">王傑</button>
+    <button @click="autoSavePiPlaylist('英語/Lady_Gaga')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Lady Gaga</button>
+    <button @click="autoSavePiPlaylist('英語/Bryan_Adams')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Bryan Adams</button>
+    <button @click="autoSavePiPlaylist('英語/Regine')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Regine</button>
+    <button @click="autoSavePiPlaylist('日語/AKB48')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">AKB48</button>
+    <button @click="autoSavePiPlaylist('台語/鄭進一')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">鄭進一</button>
+    <button @click="autoSavePiPlaylist('台語/黃乙玲')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">黃乙玲</button>
+    <button @click="autoSavePiPlaylist('台語/秀蘭瑪雅')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">秀蘭瑪雅</button>
+    <button @click="autoSavePiPlaylist('台語/蘇宥蓉')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">蘇宥蓉</button>
+    <button @click="autoSavePiPlaylist('台語/玖壹壹')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">玖壹壹</button>
+    <button @click="autoSavePiPlaylist('台語/方宥心')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">方宥心</button>
+    <button @click="autoSavePiPlaylist('台語/江蕙')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">江蕙</button>
+    <button @click="autoSavePiPlaylist('台語/蕭煌奇')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">蕭煌奇</button>
     </div>
 
     </div>
@@ -261,6 +303,7 @@ const apiBase = config.public.apiBase;
 
 const folderName = ref('');
 const uriToAdd = ref('');
+const youtubeUrlToAdd = ref('');
 const isLoading = ref(false);
 const errorMessage = ref('');
 const showNewPlaylistDialog = ref(false);
@@ -273,6 +316,8 @@ const selectedPlaylistSongs = ref([]);
 const currentSelectedPlaylist = ref('');
 const selectedSongsInEditMode = ref([]);
 const editModeForPlaylist = ref(false);
+const showSaveSelectionDialog = ref(false);
+const newPlaylistFromSelectionName = ref('');
 
 const mpdStatus = ref({});
 let pollInterval;
@@ -449,6 +494,34 @@ const pi_addSongToPlaylist = async () => {
   }
 };
 
+const pi_addYoutubeUrlToPlaylist = async () => {
+  if (!youtubeUrlToAdd.value.trim() || !currentSelectedPlaylist.value) return;
+  isLoading.value = true;
+  errorMessage.value = '';
+  try {
+    const response = await fetch(`${apiBase}/playlist/add_youtube_song`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        playlist_name: currentSelectedPlaylist.value,
+        youtube_url: youtubeUrlToAdd.value,
+      }),
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: 'Failed to add YouTube video' }));
+        throw new Error(errorData.detail);
+    }
+    youtubeUrlToAdd.value = '';
+    await pi_getPlaylistSongs(currentSelectedPlaylist.value);
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 const pi_addFolderToPlaylist = async () => {
   if (!folderName.value.trim() || !currentSelectedPlaylist.value) return;
   isLoading.value = true;
@@ -514,7 +587,51 @@ const pi_clearPlaylist = async () => {
     } finally {
         isLoading.value = false;
     }
-}
+};
+
+const promptSaveSelection = () => {
+  newPlaylistFromSelectionName.value = '';
+  showSaveSelectionDialog.value = true;
+};
+
+const pi_saveSelectedSongsToNewPlaylist = async () => {
+  if (!newPlaylistFromSelectionName.value.trim()) {
+    alert('Playlist name cannot be empty.');
+    return;
+  }
+  if (selectedSongsInEditMode.value.length === 0) {
+    alert('No songs selected.');
+    return;
+  }
+
+  isLoading.value = true;
+  try {
+    const response = await fetch(`${apiBase}/pi_playlist/save_selection`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        playlist_name: newPlaylistFromSelectionName.value,
+        songs: selectedSongsInEditMode.value,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ detail: 'Failed to save playlist' }));
+      throw new Error(errorData.detail);
+    }
+
+    alert(`Playlist "${newPlaylistFromSelectionName.value}" created successfully!`);
+    showSaveSelectionDialog.value = false;
+    await pi_getPlaylistsList(); // Refresh playlists
+    editModeForPlaylist.value = false; // Exit edit mode
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 onMounted(() => {
   pi_getPlaylistsList();

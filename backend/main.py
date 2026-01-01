@@ -74,6 +74,15 @@ class PlaylistDeleteSongPayload(BaseModel):
     pi_plname: str
     songpos: int
 
+class YouTubeAddPayload(BaseModel):
+    playlist_name: str
+    youtube_url: str
+
+class SaveSelectionPayload(BaseModel):
+    playlist_name: str
+    songs: List[str]
+
+
 # Generate filespath base from music_Basefolder
 def genFilelist(subfolder):
     global pc_Indexmax
@@ -432,6 +441,43 @@ async def pi_playlist_add_folder(pi_plname: str, foldername: str):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error adding folder to playlist: {e}")
+
+@app.post("/playlist/add_youtube_song")
+async def add_youtube_song(payload: YouTubeAddPayload):
+    try:
+        # Use yt-dlp to get the direct audio URL
+        process = await asyncio.create_subprocess_exec(
+            'yt-dlp',
+            '-f', 'bestaudio',
+            '--get-url',
+            payload.youtube_url,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, stderr = await process.communicate()
+
+        if process.returncode != 0:
+            raise HTTPException(status_code=500, detail=f"yt-dlp error: {stderr.decode()}")
+
+        stream_url = stdout.decode().strip()
+
+        # Add the stream URL to the playlist
+        mpd_player.playlist_add_song(payload.playlist_name, stream_url)
+
+        return {"message": f"Successfully added video from {payload.youtube_url} to playlist {payload.playlist_name}."}
+
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="yt-dlp is not installed or not in PATH.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing YouTube URL: {e}")
+
+@app.post("/pi_playlist/save_selection")
+async def pi_playlist_save_selection(payload: SaveSelectionPayload):
+    try:
+        result = mpd_player.pi_save_selection_to_playlist(payload.playlist_name, payload.songs)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving selection to playlist: {e}")
 
 ### Cron Job APIs
 @app.get("/api/cron")

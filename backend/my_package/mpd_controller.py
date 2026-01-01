@@ -424,6 +424,34 @@ class MPDClientController:
             print(error_message)
             return {"error": error_message}
 
+    def pi_save_selection_to_playlist(self, playlist_name: str, songs: list):
+        """
+        Creates a new playlist from a list of selected songs.
+        If the playlist already exists, it will be overwritten.
+        """
+        try:
+            # Check if a playlist with the same name exists and remove it.
+            playlists = self._execute_safe(self.client.listplaylists)
+            if any(p['playlist'] == playlist_name for p in playlists):
+                self._execute_safe(self.client.rm, playlist_name)
+                print(f"Removed existing playlist '{playlist_name}'.")
+
+            # Add each song to the new playlist.
+            for song_uri in songs:
+                self._execute_safe(self.client.playlistadd, playlist_name, song_uri)
+            
+            print(f"Successfully created playlist '{playlist_name}' with {len(songs)} songs.")
+            return {"message": f"Playlist '{playlist_name}' created successfully."}
+
+        except MPDCommandError as e:
+            error_message = f"MPD command error while saving selection to playlist: {e}"
+            print(error_message)
+            raise e  # Re-raise to be caught by FastAPI handler
+        except Exception as e:
+            error_message = f"An unexpected error occurred while saving selection: {e}"
+            print(error_message)
+            raise e
+
     def create_playlist_if_not_exists(self, playlist_name, folder_name):
         """
         Checks if a playlist exists. If not, creates it from a folder.
