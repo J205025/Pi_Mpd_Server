@@ -239,10 +239,13 @@ const apiBase = config.public.apiBase;
 
 const loading = ref(false);
 const error = ref(null);
+const channelName = useState('channelName', () => '');
 
 const onPlayStream = async (url, title, artist) => {
   loading.value = true;
   error.value = null;
+
+  channelName.value = title;
 
   console.log(`Requesting to play stream: ${title} from ${url}`);
 

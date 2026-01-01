@@ -28,7 +28,7 @@
 
       <div class="bg-white p-6 rounded-lg shadow-xl mt-4">
         <div class="text-center mb-4">
-          <p v-if="isLiveStream" class="text-gray-600 font-bold">{{ currentSong.title || 'Live Radio' }}</p>
+          <p v-if="isLiveStream" class="text-gray-600 font-bold">{{ channelName || currentSong.title || 'Live Radio' }}</p>
           <p v-else class="text-gray-600 font-bold">{{ currentSong.title || 'No song playing' }}</p>
           <p v-if="isLiveStream" class="text-gray-500 text-sm mt-1">Live Radio</p>
           <p v-else class="text-gray-500 text-sm mt-1">{{ currentSong.artist || '' }}</p>
@@ -257,6 +257,7 @@ import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import pi_radiocard from '~/components/pi_radiocard.vue';
 
+const channelName = useState('channelName');
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
 const router = useRouter();

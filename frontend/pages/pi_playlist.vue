@@ -44,21 +44,7 @@
             加入路徑
           </button>
         </div>
-        <div class="flex flex-col sm:flex-row gap-4 mt-4">
-          <input 
-            type="text"
-            v-model="youtubeUrlToAdd"
-            placeholder="Enter YouTube URL"
-            class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button 
-            @click="pi_addYoutubeUrlToPlaylist"
-            :disabled="isLoading || !currentSelectedPlaylist"
-            class="bg-red-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-600 disabled:bg-gray-400 transition duration-300"
-          >
-            加入YouTube影片
-          </button>
-        </div>
+
         <div class="flex flex-col sm:flex-row gap-4 mt-4">
           <input 
             type="text"
@@ -72,6 +58,21 @@
             class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition duration-300"
           >
             加入資料夾
+          </button>
+        </div>
+                <div class="flex flex-col sm:flex-row gap-4 mt-4">
+          <input 
+            type="text"
+            v-model="youtubeUrlToAdd"
+            placeholder="Enter YouTube URL"
+            class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button 
+            @click="pi_addYoutubeUrlToPlaylist"
+            :disabled="isLoading || !currentSelectedPlaylist"
+            class="bg-red-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-600 disabled:bg-gray-400 transition duration-300"
+          >
+            加入YouTube影片
           </button>
         </div>
         <div v-if="!currentSelectedPlaylist" class="mt-2 text-sm text-red-500">Please select a playlist below first.</div>

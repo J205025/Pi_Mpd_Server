@@ -256,11 +256,22 @@ class MPDClientController:
             print(f"Error adding song: {e}")
     def queue_add_songid(self, uri, position=None):
         try:
-            song_id = self._execute_safe(self.client.addid, uri, position)
+            if position is None:
+                song_id = self._execute_safe(self.client.addid, uri)
+            else:
+                song_id = self._execute_safe(self.client.addid, uri, position)
             return song_id
         except Exception as e:
             print(f"Error: {e}")
             return None
+            
+    def add_tagid(self, songid, tag, value):
+        """Adds a tag to a song."""
+        try:
+            self._execute_safe(self.client.addtagid, songid, tag, value)
+            print(f"Added tag '{tag}: {value}' to songid {songid}")
+        except Exception as e:
+            print(f"Error adding tag to songid {songid}: {e}")
     
 
     def queue_add_folder(self, music_folder):

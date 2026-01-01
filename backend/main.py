@@ -320,7 +320,10 @@ async def pi_playmode(repeat: Optional[bool] = None, random: Optional[bool] = No
 async def pi_add_and_play_stream(payload: StreamRequest, current_user: User = Depends(get_current_user)):
     try:
         mpd_player.queue_clearsongs()
-        mpd_player.queue_add_song(payload.stream_url)
+        song_id = mpd_player.queue_add_songid(payload.stream_url)
+        if song_id:
+            mpd_player.add_tagid(song_id, "title", payload.title)
+            mpd_player.add_tagid(song_id, "artist", payload.artist)
         mpd_player.play()
         return {"status": "success", "message": "Stream added and is now playing."}
     except Exception as e:
@@ -441,15 +444,15 @@ async def pi_playlist_add_folder(pi_plname: str, foldername: str):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error adding folder to playlist: {e}")
-
 @app.post("/playlist/add_youtube_song")
 async def add_youtube_song(payload: YouTubeAddPayload):
     try:
         # Use yt-dlp to get the direct audio URL
         process = await asyncio.create_subprocess_exec(
             'yt-dlp',
-            '-f', 'bestaudio',
+            '-f', 'bestaudio/best',
             '--get-url',
+            '--no-playlist',  # <--- ADD THIS LINE HERE
             payload.youtube_url,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
