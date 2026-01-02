@@ -5,7 +5,7 @@
 
     <main class="container mx-auto mt-10 mb-10 p-6 min-h-screen">
       <div class="bg-white p-2 rounded-lg shadow-xl text-center">
-        <h1 class="text-5xl font-extrabold text-gray-900 mb-4">電腦播放-歌單編輯(PC Player)</h1>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">電腦歌單(PC Playlist)</h1>
       </div>
 
       <div class="bg-white p-6 rounded-lg shadow-xl mt-12">
@@ -169,11 +169,11 @@
         </div>
       </div>
 
-    <div class="grid md:grid-cols-4 gap-6 mt-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
 
     <div class="bg-white p-6 rounded-lg shadow-lg">
     <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單-類型:</h2>
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
     <button @click="autoSavePcPlaylist('國語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">國語</button>
     <button @click="autoSavePcPlaylist('台語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">台語</button>
     <button @click="autoSavePcPlaylist('日語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">日語</button>
@@ -188,7 +188,7 @@
     </div>
     <div class="bg-white p-6 rounded-lg shadow-lg">
     <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單-歌手:</h2>
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
     <button @click="autoSavePcPlaylist('國語 張學友')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友</button>
     <button @click="autoSavePcPlaylist('國語 張學友-演唱會')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-演唱會</button>
     <button @click="autoSavePcPlaylist('國語 張學友-精選輯')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-精選輯</button>
@@ -228,7 +228,7 @@
     </div>
     <div class="bg-white p-6 rounded-lg shadow-lg">
     <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單-專輯:</h2>
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
     <button @click="autoSavePcPlaylist('國語 張學友 天下第一流')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-天下第一流</button>
     <button @click="autoSavePcPlaylist('國語 張學友 吻別')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-吻別</button>
     <button @click="autoSavePcPlaylist('國語 張學友-演唱會 2003音樂之旅Live演唱會')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友2003音樂之旅演唱會</button>
@@ -241,7 +241,7 @@
 
         <div class="bg-white p-6 rounded-lg shadow-lg">
           <h2 class="text-2xl font-bold mb-2 text-gray-800">下載最新播客:</h2>
-          <div class="grid grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button @click="autoDownloadPodcast()" class="bg-purple-600 text-white py-4 px-4 rounded-lg text-m hover:bg-purple-700 transition duration-300">下載播客</button>
           </div>
         </div>

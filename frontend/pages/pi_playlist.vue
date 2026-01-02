@@ -4,11 +4,11 @@
     <navbar />
 
     <main class="container mx-auto mt-10 mb-10 p-6 min-h-screen">
-      <div class="bg-white p-2 rounded-lg shadow-xl flex justify-between items-center relative">
-        <div class="absolute left-1/2 -translate-x-1/2">
-            <h1 class="text-4xl font-extrabold text-gray-900">音響播放-歌單編輯(Pi Player)</h1>
+      <div class="bg-white p-4 rounded-lg shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="flex-grow text-center">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900">音響歌單(Pi Playlist)</h1>
         </div>
-        <div class="ml-6 p-2 border border-gray-300 rounded-lg text-sm bg-gray-50 shadow-inner">
+        <div class="ml-0 sm:ml-6 p-2 border border-gray-300 rounded-lg text-sm bg-gray-50 shadow-inner w-full sm:w-auto">
           <div class="grid grid-cols-2 gap-x-4">
             <div class="font-bold">MPD Status:</div>
             <div class="text-right">
@@ -101,11 +101,11 @@
                     }">
                 {{ playlist.playlist }}
               </span>
-              <div class="flex ml-auto">
+              <div class="flex flex-wrap justify-end ml-auto gap-2">
                 <button @click="promptRenamePlaylist(playlist.playlist)" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">
                   更名
                 </button>
-                <button @click="pi_deletePlaylist(playlist.playlist)" class="bg-red-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-red-600 transition duration-300 mr-2">
+                <button @click="pi_deletePlaylist(playlist.playlist)" class="bg-red-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-red-600 transition duration-300">
                   刪除
                 </button>
               </div>
@@ -210,11 +210,11 @@
         </div>
       </div>
 
-    <div class="grid md:grid-cols-4 gap-6 mt-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
 
     <div class="bg-white p-6 rounded-lg shadow-lg">
     <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單-類型:</h2>
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
     <button @click="autoSavePiPlaylist('國語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">國語</button>
     <button @click="autoSavePiPlaylist('台語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">台語</button>
     <button @click="autoSavePiPlaylist('日語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">日語</button>
@@ -229,7 +229,7 @@
     </div>
     <div class="bg-white p-6 rounded-lg shadow-lg">
     <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單-歌手:</h2>
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
     <button @click="autoSavePiPlaylist('國語/張學友')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友</button>
     <button @click="autoSavePiPlaylist('國語/張學友-演唱會')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-演唱會</button>
     <button @click="autoSavePiPlaylist('國語/張學友-精選輯')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-精選輯</button>
@@ -271,7 +271,7 @@
     </div>
     <div class="bg-white p-6 rounded-lg shadow-lg">
     <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單-專輯:</h2>
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
     <button @click="autoSavePiPlaylist('國語/張學友/天下第一流')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-天下第一流</button>
     <button @click="autoSavePiPlaylist('國語/張學友/吻別')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-吻別</button>
     <button @click="autoSavePiPlaylist('國語/張學友-演唱會/2003音樂之旅Live演唱會')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-2003音樂之旅演唱會</button>
@@ -284,7 +284,7 @@
 
         <div class="bg-white p-6 rounded-lg shadow-lg">
           <h2 class="text-2xl font-bold mb-2 text-gray-800">下載最新播客:</h2>
-          <div class="grid grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button @click="autoDownloadPodcast()" class="bg-purple-600 text-white py-4 px-4 rounded-lg text-m hover:bg-purple-700 transition duration-300">下載播客</button>
           </div>
         </div>
