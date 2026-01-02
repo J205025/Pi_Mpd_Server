@@ -3,7 +3,7 @@
     
     <navbar />
 
-    <main class="container mx-auto mt-4 mb-4 p-6 min-h-screen">
+    <main class="container mx-auto mt-4 mb-4 p-2 sm:p-4 md:p-6 min-h-screen">
       <div class="bg-white p-2 rounded-lg shadow-xl text-center">
         <h1 class="text-5xl font-extrabold text-gray-900 mb-4">電腦播放(Pc Player)</h1>
       </div>
@@ -54,13 +54,13 @@
     </div>
 </div>
 
-        <div class="flex items-center justify-center space-x-4 mb-6">
+        <div class="flex items-center justify-center space-x-4 md:space-x-6">
           <button
             @click="previousTrack"
             :disabled="pc_playlist_all.length <= 1"
-            class="bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed p-3 rounded-full transition-colors duration-200"
+            class="p-2 rounded-full transition-colors duration-200 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 20 20">
               <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z"/>
             </svg>
           </button>
@@ -68,15 +68,15 @@
           <button
             @click="togglePlayPause"
             :disabled="isLoading"
-            class="w-24 h-24 rounded-full bg-blue-500 hover:bg-blue-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors duration-200 flex items-center justify-center shadow-lg"
+            class="w-16 h-16 md:w-24 md:h-24 rounded-full bg-blue-500 hover:bg-blue-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors duration-200 flex items-center justify-center shadow-lg"
           >
-            <svg v-if="isLoading" class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+            <svg v-if="isLoading" class="w-8 h-8 md:w-12 md:h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20">
               <path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/>
             </svg>
-            <svg v-else-if="isPlaying" class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+            <svg v-else-if="isPlaying" class="w-8 h-8 md:w-12 md:h-12" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd"/>
             </svg>
-            <svg v-else class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+            <svg v-else class="w-8 h-8 md:w-12 md:h-12" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/>
             </svg>
           </button>
@@ -84,27 +84,27 @@
           <button
             @click="nextTrack"
             :disabled="pc_playlist_all.length <= 1"
-            class="bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed p-3 rounded-full transition-colors duration-200"
+            class="p-2 rounded-full transition-colors duration-200 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 20 20">
               <path d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L10 11.202V14a1 1 0 001.555.832l6-4a1 1 0 000-1.664l-6-4A1 1 0 0010 6v2.798l-5.445-3.63z"/>
             </svg>
           </button>
 
           <!-- Favorite Button -->
-          <button @click="pc_toggleFavorite" :disabled="!selectedTrack || selectedTrack === 'LIVE_STREAM'" class="p-3 rounded-full transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-            <svg v-if="isFavorite" class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+          <button @click="pc_toggleFavorite" :disabled="!selectedTrack || selectedTrack === 'LIVE_STREAM'" class="p-2 rounded-full transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed md:p-3">
+            <svg v-if="isFavorite" class="w-5 h-5 md:w-6 md:h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
             </svg>
-            <svg v-else class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 20 20">
+            <svg v-else class="w-5 h-5 md:w-6 md:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 20 20">
               <path d="M17.5 9.16666C17.5 12.5 14.1667 15.8333 10 17.5C5.83333 15.8333 2.5 12.5 2.5 9.16666C2.5 7.04738 4.21401 5.33333 6.33333 5.33333C7.53594 5.33333 8.6425 5.84196 9.39999 6.69433L10 7.35766L10.6 6.69433C11.3575 5.84196 12.4641 5.33333 13.6667 5.33333C15.786 5.33333 17.5 7.04738 17.5 9.16666Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
         </div>
 
-        <div class="flex flex-wrap items-center justify-between">
+        <div class="flex flex-col md:flex-row items-center justify-between mt-6 space-y-4 md:space-y-0">
           <div class="flex items-center space-x-2">
-            <button @click="toggleMute" class="text-gray-600 hover:text-gray-800">
+            <button @click="toggleMute" class="p-2 rounded-full text-gray-600 hover:text-gray-800">
               <svg v-if="isMuted || volume === 0" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
               <svg v-else-if="volume < 0.5" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.146 6.146a.5.5 0 01.708 0l.646.647.646-.647a.5.5 0 11.708.708L13.207 8.5l1.647 1.646a.5.5 0 01-.708.708L12.5 9.207l-.646.647a.5.5 0 11-.708-.708L12.793 7.5l-1.647-1.646a.5.5 0 010-.708z" clip-rule="evenodd"></path></svg>
               <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM15.657 6.343a1 1 0 00-1.414 1.414.5.5 0 000 .707l.707.707a1 1 0 101.414-1.414l-.707-.707a.5.5 0 000-.707zm1.414 5.657a1 1 0 01-1.414 0 .5.5 0 000-.707l-.707-.707a1 1 0 111.414-1.414l.707.707a.5.5 0 000 .707z" clip-rule="evenodd"></path></svg>
@@ -116,12 +116,12 @@
               step="0.05"
               v-model="volume"
               @input="updateVolume"
-              class="w-20 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+              class="w-24 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
             >
             <span class="text-sm text-gray-600 w-8">{{ Math.round(volume * 100) }}</span>
           </div>
 
-          <div class="flex flex-wrap justify-center items-center space-x-2">
+          <div class="flex items-center space-x-2">
             <button
               @click="togglePlaybackRate"
               class="p-2 rounded w-16 text-center transition-colors duration-200 text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 font-semibold"
@@ -129,24 +129,21 @@
             >
               {{ playbackRate.toFixed(2) }}x
             </button>
-            
-
 
             <button
               @click="toggleShuffle"
-              :class="['p-2 rounded transition-colors duration-200', shuffleMode ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800']"
+              :class="['p-2 rounded-full transition-colors duration-200', shuffleMode ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800']"
             ><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732L14.146 12.8l-1.179 4.456a1 1 0 01-1.856-.288L12.382 12H10a1 1 0 110-2h2.382l-.271-4.968A1 1 0 0112 2z" clip-rule="evenodd"></path></svg></button>
 
             <button
               @click="toggleRepeat"
-              :class="['p-2 rounded transition-colors duration-200', repeatMode === 'none' ? 'text-gray-600 hover:text-gray-800' : 'bg-blue-100 text-blue-600']"
+              :class="['p-2 rounded-full transition-colors duration-200', repeatMode === 'none' ? 'text-gray-600 hover:text-gray-800' : 'bg-blue-100 text-blue-600']"
             >
               <svg v-if="repeatMode === 'one'" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5.05 4.05a7 7 0 000 9.9 7 7 0 009.9 0a1 1 0 111.414 1.414 9 9 0 01-12.728 0 9 9 0 010-12.728A9 9 0 0110 1.05a1 1 0 110 2 7 7 0 00-4.95 1zM14.95 15.95a7 7 0 000-9.9 7 7 0 00-9.9 0a1 1 0 11-1.414-1.414 9 9 0 0112.728 0 9 9 0 010 12.728A9 9 0 0110 18.95a1 1 0 110-2 7 7 0 004.95-1z"></path></svg>
               <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 12V7H3l4-4 4 4H9v5a1 1 0 01-1 1H5zm10 1v5h2l-4 4-4-4h2V8a1 1 0 011-1h3z"></path></svg>
             </button>
 
-
-                        <button
+            <button
               @click="cycleSleepTimer"
               :class="['p-2 rounded w-28 text-center transition-colors duration-200 font-semibold', activeSleepDuration ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200']"
               title="Cycle Sleep Timer"
