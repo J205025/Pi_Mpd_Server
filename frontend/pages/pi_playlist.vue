@@ -6,7 +6,7 @@
     <main class="container mx-auto mt-10 mb-10 p-6 min-h-screen">
       <div class="bg-white p-4 rounded-lg shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4">
         <div class="flex-grow text-center">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900">音響歌單(Pi Playlist)</h1>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900">音響歌單 (Pi Playlist)</h1>
         </div>
         <div class="ml-0 sm:ml-6 p-2 border border-gray-300 rounded-lg text-sm bg-gray-50 shadow-inner w-full sm:w-auto">
           <div class="grid grid-cols-2 gap-x-4">
@@ -101,7 +101,7 @@
                     }">
                 {{ playlist.playlist }}
               </span>
-              <div class="flex flex-wrap justify-end ml-auto gap-2">
+              <div v-if="playlist.playlist !== '我的最愛' && playlist.playlist !== '定期播放'" class="flex flex-wrap justify-end ml-auto gap-2">
                 <button @click="promptRenamePlaylist(playlist.playlist)" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">
                   更名
                 </button>
@@ -215,24 +215,26 @@
     <div class="bg-white p-6 rounded-lg shadow-lg">
     <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單-類型:</h2>
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-    <button @click="autoSavePiPlaylist('國語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">國語</button>
+    <button @click="autoSavePiPlaylistyy(' ')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">全部</button>
+    <button @click="autoSavePiPlaylistyy('國語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">國語</button>
     <button @click="autoSavePiPlaylist('台語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">台語</button>
     <button @click="autoSavePiPlaylist('日語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">日語</button>
     <button @click="autoSavePiPlaylist('英語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">英語</button>
+    <button @click="autoSavePiPlaylist('韓語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">韓語</button>
     <button @click="autoSavePiPlaylist('古典')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">古典</button>
-    <button @click="autoSavePiPlaylist('英語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">英語</button>
     <button @click="autoSavePiPlaylist('輕音樂')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">輕音樂</button>
     <button @click="autoSavePiPlaylist('有聲書')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">有聲書</button>
     <button @click="autoSavePiPlaylist('播客')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">播客</button>
+    <button @click="autoSavePiPlaylist('其它')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">其它</button>
     </div>
 
     </div>
     <div class="bg-white p-6 rounded-lg shadow-lg">
     <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單-歌手:</h2>
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-    <button @click="autoSavePiPlaylist('國語/張學友')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友</button>
-    <button @click="autoSavePiPlaylist('國語/張學友-演唱會')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-演唱會</button>
-    <button @click="autoSavePiPlaylist('國語/張學友-精選輯')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-精選輯</button>
+    <button @click="autoSavePiPlaylist('國語/張學友')" class="bg-blue-500 text-white py-2 px-2 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友</button>
+    <button @click="autoSavePiPlaylist('國語/張學友-演唱會')" class="bg-blue-500 text-white py-2 px-2 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-演唱會</button>
+    <button @click="autoSavePiPlaylist('國語/張學友-精選輯')" class="bg-blue-500 text-white py-2 px-2 rounded-lg text-sm hover:bg-blue-600 transition duration-300">張學友-精選輯</button>
     <button @click="autoSavePiPlaylist('國語/劉德華')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">劉德華</button>
     <button @click="autoSavePiPlaylist('國語/王傑')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">王傑</button>
     <button @click="autoSavePiPlaylist('國語/孫燕姿')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">孫燕姿</button>
@@ -255,7 +257,10 @@
     <button @click="autoSavePiPlaylist('國語/王心凌')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">王心凌</button>
     <button @click="autoSavePiPlaylist('國語/徐若瑄')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">王傑</button>
     <button @click="autoSavePiPlaylist('英語/Lady_Gaga')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Lady Gaga</button>
+    <button @click="autoSavePiPlaylist('英語/Talyor_Swift')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Taylor Swift</button>
+    <button @click="autoSavePiPlaylist('英語/LeAnn_Rimes')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">LeAnn Rimes</button>
     <button @click="autoSavePiPlaylist('英語/Bryan_Adams')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Bryan Adams</button>
+    <button @click="autoSavePiPlaylist('英語/Bon_Jovi')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Bon Jovi</button>
     <button @click="autoSavePiPlaylist('英語/Regine')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Regine</button>
     <button @click="autoSavePiPlaylist('日語/AKB48')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">AKB48</button>
     <button @click="autoSavePiPlaylist('台語/鄭進一')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">鄭進一</button>
