@@ -1,5 +1,6 @@
 https://www.radio-uk.co.uk
 https://tunein.com/
+https://www.radio-browser.info/
 
 Classical-FM
 https://www.radio-uk.co.uk/classic-fm
@@ -52,3 +53,5 @@ https://www.gequbao.com/
 
 
 
+Find podcast rss
+https://rss.com/tools/find-my-feed/

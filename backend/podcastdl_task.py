@@ -7,9 +7,11 @@ import time
 
 # Define the podcast RSS feeds
 podcast_rss = {
-   "BBC" : "http://podcasts.files.bbci.co.uk/p02nq0gn.rss",
-   "Daily" :"https://feeds.simplecast.com/54nAGcIl"
-}
+   "BBC_GlobalNewsPodcast" : "https://podcasts.files.bbci.co.uk/p02nq0gn.rss",
+   "NewYorkTimes_TheDaily" : "https://feeds.simplecast.com/54nAGcIl"
+   #"BBC_World_BusinessReport" : "https://podcasts.files.bbci.co.uk/p02tb8vq.rss"
+   #"Economist_Economist" : "https://access.acast.com/rss/ec380acc-fe13-46a0-991f-a1e508d126f8"
+      }
 
 # Define the base directory for all podcasts
 base_dir = "/home/ubuntu/Music/播客/"

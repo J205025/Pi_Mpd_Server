@@ -122,14 +122,14 @@
     <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
       <img 
         src="/images/icrt.jpg" 
-        alt="Icrt logo" 
-        @click="onPlayStream('https://stream.rcs.revma.com/nkdfurztxp3vv', 'Icrt', 'Live Radio')"
+        alt="ICRT logo" 
+        @click="onPlayStream('https://stream.rcs.revma.com/nkdfurztxp3vv', 'ICRT', 'Live Radio')"
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
-      <div v-if="loadingStreamTitle === 'Gold'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+      <div v-if="loadingStreamTitle === 'ICRT'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
         <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
       </div>
-      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'Icrt'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'ICRT'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
       </div>
     </div>
@@ -382,6 +382,113 @@
         class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
       >
       <div v-if="loadingStreamTitle === 'Hits Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'Hits Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/RTHK_Radio1.png" 
+        alt="RTHK Radio1 logo" 
+        @click="onPlayStream('https://rthkaudio1-lh.akamaihd.net/i/radio1_1@355864/index_56_a-p.m3u8', 'RTHK Radio1', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'RTHK Radio1'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'Hits Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/RTHK_Radio2.svg" 
+        alt="RTHK Radio2 logo" 
+        @click="onPlayStream('	https://rthkaudio2-lh.akamaihd.net/i/radio2_1@355865/index_56_a-p.m3u8', 'RTHK Radio2', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'RTHK Radio2'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'Hits Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/RTHK_Radio3.webp" 
+        alt="RTHK Radio3 logo" 
+        @click="onPlayStream('https://rthkaudio3-lh.akamaihd.net/i/radio3_1@355866/index_56_a-p.m3u8', 'RTHK Radio3', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'RTHK Radio3'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'Hits Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/RTHK_Radio4.webp" 
+        alt="RTHK Radio4 logo" 
+        @click="onPlayStream('https://rthkradio4-live.akamaized.net/hls/live/2040080/radio4/master.m3u8', 'RTHK Radio4', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'RTHK Radio4'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'Hits Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/RTHK_Radio5.webp" 
+        alt="RTHK Radio5 logo" 
+        @click="onPlayStream('https://rthkaudio5-lh.akamaihd.net/i/radio5_1@355868/index_56_a-p.m3u8', 'RTHK Radio5', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'RTHK Radio5'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'Hits Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/RTHK_Putonghua_Radio.png" 
+        alt="RTHK 普通話 logo" 
+        @click="onPlayStream('https://stm.rthk.hk/radiopth', 'RTHK 普通話', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'RTHK 普通話'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
+      </div>
+      <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'Hits Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
+        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832L12 10.202V12a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2A1 1 0 0012 8v1.798l-2.445-1.63z" clipRule="evenodd"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center relative group">
+      <img 
+        src="/images/BBC_Radio_Scotland.png" 
+        alt="BBC_Radio_Scoland logo" 
+        @click="onPlayStream('https://as-hls-ww.live.cf.md.bbci.co.uk/pool_43322914/live/ww/bbc_radio_scotland_fm/bbc_radio_scotland_fm.isml/bbc_radio_scotland_fm-audio%3d96000.norewind.m3u8', 'BBC Radio Scotland', 'Live Radio')"
+        class="mx-auto h-32 w-32 object-contain cursor-pointer transition-transform duration-200 hover:scale-110"
+      >
+      <div v-if="loadingStreamTitle === 'BBC Radio Scotland'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
         <svg class="w-12 h-12 animate-spin" fill="currentColor" viewBox="0 0 20 20"><path d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4z"/></svg>
       </div>
       <div v-else-if="isPlayingLiveStream && currentStreamInfo?.title === 'Hits Radio'" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-lg">
