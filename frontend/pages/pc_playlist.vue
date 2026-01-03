@@ -18,6 +18,7 @@
           >
             瀏覽伺服器檔案
           </button>
+          <button @click="autoDownloadPodcast()" class="bg-purple-600 text-white py-3 px-6 rounded-lg text-m hover:bg-purple-700 transition duration-300">下載播客</button>
         </div>
 
         <div v-if="errorMessage" class="mt-4 text-red-600 bg-red-100 p-3 rounded-lg">
@@ -271,12 +272,7 @@
 
     </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-bold mb-2 text-gray-800">下載最新播客:</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button @click="autoDownloadPodcast()" class="bg-purple-600 text-white py-4 px-4 rounded-lg text-m hover:bg-purple-700 transition duration-300">下載播客</button>
-          </div>
-        </div>
+
 
       </div>
 
