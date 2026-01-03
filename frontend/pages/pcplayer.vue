@@ -166,7 +166,7 @@
       </div>
 
       <!-- Lyrics Display Component -->
-      <lyricdisplay 
+      <pc_LyricDisplay 
         :trackPath="selectedTrack"
         :currentTime="currentTime"
         :isLiveStream="isPlayingLiveStream"
@@ -214,7 +214,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
-import LyricDisplay from '~/components/lyricdisplay.vue';
+import pc_LyricDisplay from '~/components/pc_lyricdisplay.vue';
 
 // Get runtime config
 const config = useRuntimeConfig();
