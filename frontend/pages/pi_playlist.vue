@@ -33,24 +33,16 @@
                   <button
                     @click="openFileBrowser"
                     :disabled="isLoading"
-                    class="bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 disabled:bg-gray-400 transition duration-300"
+                    class="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 disabled:bg-gray-400 transition duration-300"
                   >
                     瀏覽伺服器檔案
                   </button>
-                </div>
-                <div class="flex flex-col sm:flex-row gap-4 mt-4">
-          <input 
-            type="text"
-            v-model="youtubeUrlToAdd"
-            placeholder="Enter YouTube URL"
-            class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
           <button 
             @click="addYoutubeUrlToGeneratedFiles"
             :disabled="isLoading"
             class="bg-red-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-600 disabled:bg-gray-400 transition duration-300"
           >
-            加入YouTube影片
+            加入YouTube網址
           </button>
         </div>
 
@@ -59,7 +51,7 @@
         </div>
 
         <div v-if="generatedFiles.length > 0" class="mt-6">
-          <h3 class="text-xl font-semibold text-gray-800 mb-3">Generated Files:</h3>
+          <h3 class="text-xl font-semibold text-gray-800 mb-3">選的歌曲:</h3>
           <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
             <li v-for="(file, index) in generatedFiles" :key="index" 
                 class="text-gray-700 p-1 truncate cursor-pointer"
@@ -369,7 +361,6 @@ const apiBase = config.public.apiBase;
 
 const folderName = ref('');
 const uriToAdd = ref('');
-const youtubeUrlToAdd = ref('');
 const isLoading = ref(false);
 const errorMessage = ref('');
 const showNewPlaylistDialog = ref(false);
@@ -554,9 +545,10 @@ const pi_confirmRename = async () => {
 };
 
 const addYoutubeUrlToGeneratedFiles = () => {
-  if (!youtubeUrlToAdd.value.trim()) return;
-  generatedFiles.value = generatedFiles.value.concat(youtubeUrlToAdd.value);
-  youtubeUrlToAdd.value = '';
+  const url = prompt("請輸入YouTube網址:");
+  if (url && url.trim()) {
+    generatedFiles.value = generatedFiles.value.concat(url.trim());
+  }
 };
 
 const openFileBrowser = () => {

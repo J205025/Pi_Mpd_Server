@@ -10,7 +10,6 @@
 
       <div class="bg-white p-6 rounded-lg shadow-xl mt-12">
         <h2 class="text-2xl font-bold text-gray-800">建立歌單:</h2>
-        <p class="text-s mb-1 text-gray-800">輸入「國語 張學友」會搜尋「國語\張學友」資料夾內的所有歌曲.輸入「國語」會搜尋「國語」資料夾內的所有歌曲.</p>
         <div class="flex flex-col sm:flex-row gap-4">
           <input 
             type="text"
