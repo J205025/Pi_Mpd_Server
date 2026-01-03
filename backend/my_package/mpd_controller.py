@@ -435,6 +435,23 @@ class MPDClientController:
             print(error_message)
             return {"error": error_message}
 
+    def browse_directory(self, path):
+        """Browses a directory in the MPD music folder."""
+        try:
+            items = self._execute_safe(self.client.lsinfo, path)
+            results = []
+            for item in items:
+                if 'directory' in item:
+                    name = os.path.basename(item['directory'])
+                    results.append({'name': name, 'type': 'directory', 'path': item['directory']})
+                elif 'file' in item:
+                    name = os.path.basename(item['file'])
+                    results.append({'name': name, 'type': 'file', 'path': item['file']})
+            return results
+        except Exception as e:
+            print(f"Error browsing directory: {e}")
+            return []
+
     def pi_save_selection_to_playlist(self, playlist_name: str, songs: list):
         """
         Creates a new playlist from a list of selected songs.

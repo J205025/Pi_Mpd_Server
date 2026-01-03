@@ -89,9 +89,12 @@ def genFilelist(subfolder):
     global music_Basefolder 
     songs = []; 
     for path, subdirs, files in os.walk(music_Basefolder + subfolder, followlinks=True):
-        path = path[(len(music_Basefolder)-1):]
+        path = path[len(music_Basefolder):]
+        if path.startswith('/'):
+            path = path[1:]
         path = path+"/"
-        path = path[1:]
+        if path == '/':
+            path = ''
         files = [path + file for file in files]
         songs = songs + files; 
     songs = [ f for f in songs if f.lower().endswith(('.mp3', '.flac'))]
@@ -329,6 +332,16 @@ async def pi_add_and_play_stream(payload: StreamRequest, current_user: User = De
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to play stream: {e}")
 
+@app.get("/pi_mpd_browse/")
+@app.get("/pi_mpd_browse/{path:path}")
+async def pi_mpd_browse(path: Optional[str] = None):
+    """Browses the MPD music directory."""
+    browse_path = path if path else ""
+    try:
+        return mpd_player.browse_directory(browse_path)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to browse directory: {e}")
+
 ### Pi MPD Queue APIs
 # Define the queue OUTSIDE the functions
 #pi_queue_songs = []
@@ -438,7 +451,10 @@ async def pi_playlist_adduri(pi_plname: str, uri: str):
 @app.post("/pi_playlist_add_folder/{pi_plname}/{foldername:path}")
 async def pi_playlist_add_folder(pi_plname: str, foldername: str):
     try:
-        result = mpd_player.playlist_add_folder(pi_plname, foldername)
+        folder_for_mpd = foldername
+        if foldername == 'ALL_FILES':
+            folder_for_mpd = '.'
+        result = mpd_player.playlist_add_folder(pi_plname, folder_for_mpd)
         if "error" in result:
              raise HTTPException(status_code=404, detail=result["error"])
         return result
@@ -584,7 +600,11 @@ async def pc_gen_fileslist(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):  
-    folderpath = foldername.replace(" ", "/")
+    path_to_scan = foldername
+    if foldername == 'ALL_FILES':
+        path_to_scan = '.'
+            
+    folderpath = path_to_scan.replace(" ", "/")
     fileslist = genFilelist(folderpath)
     return fileslist
 

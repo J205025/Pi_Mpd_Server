@@ -174,12 +174,11 @@
     <div class="bg-white p-6 rounded-lg shadow-lg">
     <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單-類型:</h2>
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-    <button @click="autoSavePcPlaylist(' ')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">全部</button>
     <button @click="autoSavePcPlaylist('國語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">國語</button>
     <button @click="autoSavePcPlaylist('台語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">台語</button>
     <button @click="autoSavePcPlaylist('日語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">日語</button>
     <button @click="autoSavePcPlaylist('英語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">英語</button>
-    <button @click="autoSavePcPlaylist('韓語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">英語</button>
+    <button @click="autoSavePcPlaylist('韓語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">韓語</button>
     <button @click="autoSavePcPlaylist('古典')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">古典</button>
     <button @click="autoSavePcPlaylist('輕音樂')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">輕音樂</button>
     <button @click="autoSavePcPlaylist('有聲書')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">有聲書</button>
@@ -214,7 +213,7 @@
     <button @click="autoSavePcPlaylist('國語 郁可唯')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">郁可唯</button>
     <button @click="autoSavePcPlaylist('國語 楊丞琳')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">楊丞琳</button>
     <button @click="autoSavePcPlaylist('國語 王心凌')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">王心凌</button>
-    <button @click="autoSavePcPlaylist('國語 徐若瑄')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">王傑</button>
+    <button @click="autoSavePcPlaylist('國語 徐若瑄')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">徐若瑄</button>
     <button @click="autoSavePcPlaylist('英語 Lady_Gaga')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Lady Gaga</button>
     <button @click="autoSavePcPlaylist('英語 Taylor_Swift')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">Taylor Swift</button>
     <button @click="autoSavePcPlaylist('英語 LeAnn_Rimes')" class="bg-blue-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-blue-600 transition duration-300">LeAnn Rimes</button>
@@ -731,11 +730,14 @@ const autoSavePcPlaylist = async (folder) => {
 
     // --- Start of new logic to determine playlistName ---
     let playlistName = folder;
-    const firstSpaceIndex = folder.indexOf(' ');
-    
-    if (firstSpaceIndex !== -1) {
-        // If a space is found, take the substring after the first space.
-        playlistName = folder.substring(firstSpaceIndex + 1);
+    if (folder === 'ALL_FILES') {
+      playlistName = '全部';
+    } else {
+      const firstSpaceIndex = folder.indexOf(' ');
+      if (firstSpaceIndex !== -1) {
+          // If a space is found, take the substring after the first space.
+          playlistName = folder.substring(firstSpaceIndex + 1);
+      }
     }
     // --- End of new logic ---
 

@@ -18,7 +18,7 @@ class UserResponse(BaseModel):
     settings: Optional[Settings]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
     
 class UserLogin(BaseModel):
     username: str
@@ -61,7 +61,7 @@ class UserPlaylistResponse(UserPlaylistBase):
     user_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class SongRequest(BaseModel):
     path: str

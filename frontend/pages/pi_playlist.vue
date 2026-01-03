@@ -29,37 +29,15 @@
       <!-- Add to Playlist Section -->
       <div class="bg-white p-6 rounded-lg shadow-xl mt-12">
         <h2 class="text-2xl font-bold text-gray-800">建立歌單:</h2>
-        <div class="flex flex-col sm:flex-row gap-4 mt-4">
-          <input 
-            type="text"
-            v-model="uriToAdd"
-            placeholder="Enter song URI"
-            class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button 
-            @click="pi_addSongToPlaylist"
-            :disabled="isLoading || !currentSelectedPlaylist"
-            class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition duration-300"
-          >
-            加入路徑
-          </button>
-        </div>
-
-        <div class="flex flex-col sm:flex-row gap-4 mt-4">
-          <input 
-            type="text"
-            v-model="folderName"
-            placeholder="Enter folder name (e.g., 國語)"
-            class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button 
-            @click="pi_addFolderToPlaylist"
-            :disabled="isLoading || !currentSelectedPlaylist"
-            class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition duration-300"
-          >
-            加入資料夾
-          </button>
-        </div>
+                <div class="flex flex-col sm:flex-row gap-4 mt-4">
+                  <button
+                    @click="openFileBrowser"
+                    :disabled="isLoading"
+                    class="bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 disabled:bg-gray-400 transition duration-300"
+                  >
+                    瀏覽伺服器檔案
+                  </button>
+                </div>
                 <div class="flex flex-col sm:flex-row gap-4 mt-4">
           <input 
             type="text"
@@ -68,17 +46,49 @@
             class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button 
-            @click="pi_addYoutubeUrlToPlaylist"
-            :disabled="isLoading || !currentSelectedPlaylist"
+            @click="addYoutubeUrlToGeneratedFiles"
+            :disabled="isLoading"
             class="bg-red-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-600 disabled:bg-gray-400 transition duration-300"
           >
             加入YouTube影片
           </button>
         </div>
-        <div v-if="!currentSelectedPlaylist" class="mt-2 text-sm text-red-500">Please select a playlist below first.</div>
 
         <div v-if="errorMessage" class="mt-4 text-red-600 bg-red-100 p-3 rounded-lg">
           {{ errorMessage }}
+        </div>
+
+        <div v-if="generatedFiles.length > 0" class="mt-6">
+          <h3 class="text-xl font-semibold text-gray-800 mb-3">Generated Files:</h3>
+          <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
+            <li v-for="(file, index) in generatedFiles" :key="index" 
+                class="text-gray-700 p-1 truncate cursor-pointer"
+                :class="{ 'bg-blue-200': filesToSave.includes(file) }"
+                @click="toggleSelectionForGeneratedFiles(file)">
+              {{ file }}
+            </li>
+          </ul>
+          <div class="mt-4 flex gap-4">
+            <button 
+              @click="selectAllGeneratedFiles"
+              class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition duration-300"
+            >
+              Select All
+            </button>
+            <button 
+              @click="deselectAllGeneratedFiles"
+              class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition duration-300"
+            >
+              Deselect All
+            </button>
+            <button 
+              @click="promptToSaveGeneratedFiles"
+              :disabled="filesToSave.length === 0"
+              class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition duration-300"
+            >
+              存入歌單
+            </button>
+          </div>
         </div>
       </div>
 
@@ -210,13 +220,63 @@
         </div>
       </div>
 
+      <div v-if="showSaveDialog" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-xl">
+          <h3 class="text-xl font-bold mb-4">Enter Playlist Name</h3>
+          <input 
+            type="text"
+            v-model="newPlaylistName"
+            placeholder="My Awesome Playlist"
+            class="w-full p-3 border border-gray-300 rounded-lg mb-4"
+          />
+          <div class="flex justify-end gap-4">
+            <button @click="showSaveDialog = false" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancel</button>
+            <button @click="saveGeneratedFilesToNewPlaylist" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- File Browser Dialog -->
+        <div v-if="showFileBrowser" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 md:w-2/3 lg:w-1/2 max-h-[80vh] flex flex-col">
+                <h3 class="text-xl font-bold mb-4">Browse MPD Files</h3>
+                <div class="mb-2 p-2 bg-gray-100 rounded-md text-sm text-gray-700 break-words">
+                    Current Path: /{{ currentPath }}
+                </div>
+                <div class="flex-grow overflow-y-auto border border-gray-200 rounded-lg p-4">
+                    <button @click="goUpDirectory" :disabled="!currentPath"
+                        class="mb-4 bg-gray-200 text-gray-700 py-1 px-3 rounded-lg hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400">
+                        ../
+                    </button>
+                    <p v-if="isLoading" class="text-gray-500">Loading files...</p>
+                    <ul v-else-if="fileBrowserItems.length > 0">
+                                                    <li v-for="item in fileBrowserItems" :key="item.path"
+                                                        class="flex items-center p-1 rounded-md"
+                                                        :class="{ 'hover:bg-gray-200': true, 'bg-blue-200': selectedFileBrowserItems.some(it => it.path === item.path) }">
+                                                        <input type="checkbox" v-model="selectedFileBrowserItems" :value="item" class="mr-3" @click.stop>
+                                                        <span @click="item.type === 'directory' ? browseDirectory(item.path) : null"
+                                                            class="flex-grow cursor-pointer">
+                                                            <span class="mr-2">{{ item.type === 'directory' ? '📁' : '🎵' }}</span>
+                                                            {{ item.name }}
+                                                        </span>
+                                                    </li>                    </ul>
+                    <p v-else class="text-gray-500">No files found or directory is empty.</p>
+                </div>
+                <div class="flex justify-end gap-4 mt-4">
+                    <button @click="showFileBrowser = false"
+                        class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancel</button>
+                    <button @click="addSelectedFilesToGeneratedList"
+                        class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Add Selected</button>
+                </div>
+            </div>
+        </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
 
     <div class="bg-white p-6 rounded-lg shadow-lg">
     <h2 class="text-2xl font-bold mb-2 text-gray-800">自動產生歌單-類型:</h2>
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-    <button @click="autoSavePiPlaylistyy(' ')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">全部</button>
-    <button @click="autoSavePiPlaylistyy('國語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">國語</button>
+    <button @click="autoSavePiPlaylist('國語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">國語</button>
     <button @click="autoSavePiPlaylist('台語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">台語</button>
     <button @click="autoSavePiPlaylist('日語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">日語</button>
     <button @click="autoSavePiPlaylist('英語')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-green-600 transition duration-300">英語</button>
@@ -324,6 +384,14 @@ const selectedSongsInEditMode = ref([]);
 const editModeForPlaylist = ref(false);
 const showSaveSelectionDialog = ref(false);
 const newPlaylistFromSelectionName = ref('');
+const showFileBrowser = ref(false);
+const fileBrowserItems = ref([]);
+const selectedFileBrowserItems = ref([]);
+const currentPath = ref('');
+
+const generatedFiles = ref([]);
+const filesToSave = ref([]);
+const showSaveDialog = ref(false);
 
 const mpdStatus = ref({});
 let pollInterval;
@@ -485,57 +553,129 @@ const pi_confirmRename = async () => {
   }
 };
 
-const pi_addSongToPlaylist = async () => {
-  if (!uriToAdd.value.trim() || !currentSelectedPlaylist.value) return;
-  isLoading.value = true;
+const addYoutubeUrlToGeneratedFiles = () => {
+  if (!youtubeUrlToAdd.value.trim()) return;
+  generatedFiles.value = generatedFiles.value.concat(youtubeUrlToAdd.value);
+  youtubeUrlToAdd.value = '';
+};
+
+const openFileBrowser = () => {
+    showFileBrowser.value = true;
+    browseDirectory('');
+};
+
+const browseDirectory = async (path) => {
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+        const response = await fetch(`${apiBase}/pi_mpd_browse/${encodeURIComponent(path)}`);
+        if (!response.ok) throw new Error('Failed to browse files');
+        fileBrowserItems.value = await response.json();
+        currentPath.value = path;
+    } catch (error) {
+        errorMessage.value = error.message;
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+const goUpDirectory = () => {
+    if (!currentPath.value) return;
+    const parentPath = currentPath.value.substring(0, currentPath.value.lastIndexOf('/'));
+    browseDirectory(parentPath);
+};
+
+const getFilesInDirectory = async (directoryPath) => {
   try {
-    const response = await fetch(`${apiBase}/pi_playlist_adduri/${encodeURIComponent(currentSelectedPlaylist.value)}/${encodeURIComponent(uriToAdd.value)}`, { method: 'POST' });
-    if (!response.ok) throw new Error('Failed to add song');
-    uriToAdd.value = '';
-    await pi_getPlaylistSongs(currentSelectedPlaylist.value);
+    const response = await fetch(`${apiBase}/pi_mpd_browse/${encodeURIComponent(directoryPath)}`);
+    if (!response.ok) throw new Error(`Failed to browse directory ${directoryPath}`);
+    const items = await response.json();
+    // Assuming 'file' type indicates a song file
+    return items.filter(item => item.type === 'file').map(item => item.path);
   } catch (error) {
+    console.error(`Error getting files from directory ${directoryPath}:`, error);
     errorMessage.value = error.message;
-  } finally {
-    isLoading.value = false;
+    return [];
   }
 };
 
-const pi_addYoutubeUrlToPlaylist = async () => {
-  if (!youtubeUrlToAdd.value.trim() || !currentSelectedPlaylist.value) return;
+const addSelectedFilesToGeneratedList = async () => {
+    if (selectedFileBrowserItems.value.length === 0) {
+        alert('No files selected.');
+        return;
+    }
+
+    const newFilesToAdd = [];
+    for (const item of selectedFileBrowserItems.value) {
+        if (item.type === 'file') {
+            newFilesToAdd.push(item.path);
+        } else if (item.type === 'directory') {
+            const filesInDir = await getFilesInDirectory(item.path);
+            newFilesToAdd.push(...filesInDir);
+        }
+    }
+    generatedFiles.value = generatedFiles.value.concat(newFilesToAdd);
+
+    showFileBrowser.value = false;
+    selectedFileBrowserItems.value = [];
+};
+
+const toggleSelectionForGeneratedFiles = (file) => {
+  const index = filesToSave.value.indexOf(file);
+  if (index > -1) {
+    filesToSave.value.splice(index, 1);
+  } else {
+    filesToSave.value.push(file);
+  }
+};
+
+const selectAllGeneratedFiles = () => {
+  filesToSave.value = [...generatedFiles.value];
+};
+
+const deselectAllGeneratedFiles = () => {
+  filesToSave.value = [];
+};
+
+const promptToSaveGeneratedFiles = () => {
+  newPlaylistName.value = '';
+  showSaveDialog.value = true;
+};
+
+const saveGeneratedFilesToNewPlaylist = async () => {
+  if (!newPlaylistName.value.trim()) {
+    alert('Playlist name cannot be empty.');
+    return;
+  }
+  if (filesToSave.value.length === 0) {
+    alert('No songs selected to save.');
+    return;
+  }
+
   isLoading.value = true;
-  errorMessage.value = '';
   try {
-    const response = await fetch(`${apiBase}/playlist/add_youtube_song`, {
+    const response = await fetch(`${apiBase}/pi_playlist/save_selection`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        playlist_name: currentSelectedPlaylist.value,
-        youtube_url: youtubeUrlToAdd.value,
+        playlist_name: newPlaylistName.value,
+        songs: filesToSave.value,
       }),
     });
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ detail: 'Failed to add YouTube video' }));
-        throw new Error(errorData.detail);
-    }
-    youtubeUrlToAdd.value = '';
-    await pi_getPlaylistSongs(currentSelectedPlaylist.value);
-  } catch (error) {
-    errorMessage.value = error.message;
-  } finally {
-    isLoading.value = false;
-  }
-};
 
-const pi_addFolderToPlaylist = async () => {
-  if (!folderName.value.trim() || !currentSelectedPlaylist.value) return;
-  isLoading.value = true;
-  try {
-    const response = await fetch(`${apiBase}/pi_playlist_add_folder/${encodeURIComponent(currentSelectedPlaylist.value)}/${encodeURIComponent(folderName.value)}`, { method: 'POST' });
-    if (!response.ok) throw new Error('Failed to add folder');
-    folderName.value = '';
-    await pi_getPlaylistSongs(currentSelectedPlaylist.value);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ detail: 'Failed to save playlist' }));
+      throw new Error(errorData.detail);
+    }
+
+    alert(`Playlist "${newPlaylistName.value}" created successfully!`);
+    showSaveDialog.value = false;
+    newPlaylistName.value = '';
+    generatedFiles.value = [];
+    filesToSave.value = [];
+    await pi_getPlaylistsList();
   } catch (error) {
     errorMessage.value = error.message;
   } finally {
@@ -556,9 +696,7 @@ const pi_deleteSelectedSongsFromPlaylist = async () => {
     if (!confirm(`Delete ${selectedSongsInEditMode.value.length} songs?`)) return;
     isLoading.value = true;
 
-    // Get song positions before deleting
     const positionsToDelete = selectedSongsInEditMode.value.map(song => selectedPlaylistSongs.value.indexOf(song));
-    // Sort positions in descending order to avoid index shifting issues
     positionsToDelete.sort((a, b) => b - a);
 
     try {
@@ -568,11 +706,10 @@ const pi_deleteSelectedSongsFromPlaylist = async () => {
                 method: 'DELETE',
             });
             if (!response.ok) {
-                // We stop on first error
                 throw new Error(`Failed to delete song at position ${pos}`);
             }
         }
-        await pi_getPlaylistSongs(currentSelectedPlaylist.value); // Refresh
+        await pi_getPlaylistSongs(currentSelectedPlaylist.value);
         editModeForPlaylist.value = false;
     } catch (error) {
         errorMessage.value = error.message;
@@ -587,7 +724,7 @@ const pi_clearPlaylist = async () => {
     try {
         const response = await fetch(`${apiBase}/pi_playlist_clearsongs/${encodeURIComponent(currentSelectedPlaylist.value)}`, { method: 'DELETE' });
         if (!response.ok) throw new Error('Failed to clear playlist');
-        await pi_getPlaylistSongs(currentSelectedPlaylist.value); // Refresh
+        await pi_getPlaylistSongs(currentSelectedPlaylist.value);
     } catch (error) {
         errorMessage.value = error.message;
     } finally {
@@ -630,8 +767,8 @@ const pi_saveSelectedSongsToNewPlaylist = async () => {
 
     alert(`Playlist "${newPlaylistFromSelectionName.value}" created successfully!`);
     showSaveSelectionDialog.value = false;
-    await pi_getPlaylistsList(); // Refresh playlists
-    editModeForPlaylist.value = false; // Exit edit mode
+    await pi_getPlaylistsList();
+    editModeForPlaylist.value = false;
   } catch (error) {
     errorMessage.value = error.message;
   } finally {
@@ -641,31 +778,29 @@ const pi_saveSelectedSongsToNewPlaylist = async () => {
 
 onMounted(() => {
   pi_getPlaylistsList();
-  fetchMpdStatus(); // Fetch initial status
-  pollInterval = setInterval(fetchMpdStatus, 3000); // Poll every 3 seconds
+  fetchMpdStatus();
+  pollInterval = setInterval(fetchMpdStatus, 3000);
 });
 
 onBeforeUnmount(() => {
-  clearInterval(pollInterval); // Clear interval on component unmount
+  clearInterval(pollInterval);
 });
 
 const autoSavePiPlaylist = async (folder) => {
   isLoading.value = true;
   errorMessage.value = '';
   try {
-    // --- Start of new logic to determine playlistName ---
     let playlistName = folder;
-    const lastSlashIndex = folder.lastIndexOf('/');
-    
-    if (lastSlashIndex !== -1) {
-        // If a slash is found, take the substring after the last slash.
-        playlistName = folder.substring(lastSlashIndex + 1);
+    if (folder === 'ALL_FILES') {
+      playlistName = '全部';
+    } else {
+      const lastSlashIndex = folder.lastIndexOf('/');
+      if (lastSlashIndex !== -1) {
+          playlistName = folder.substring(lastSlashIndex + 1);
+      }
     }
-    // --- End of new logic ---
 
-    const folderPath = folder;
-
-    const response = await fetch(`${apiBase}/pi_playlist_add_folder/${encodeURIComponent(playlistName)}/${encodeURIComponent(folderPath)}`, { 
+    const response = await fetch(`${apiBase}/pi_playlist_add_folder/${encodeURIComponent(playlistName)}/${encodeURIComponent(folder)}`, { 
       method: 'POST' 
     });
 
@@ -675,7 +810,7 @@ const autoSavePiPlaylist = async (folder) => {
     }
 
     alert(`Playlist "${playlistName}" created/updated successfully!`);
-    await pi_getPlaylistsList(); // Refresh the playlist list
+    await pi_getPlaylistsList();
 
   } catch (error) {
     console.error(`Failed to auto save playlist for folder ${folder}:`, error);
@@ -719,7 +854,6 @@ const autoDownloadPodcast = async () => {
     isLoading.value = false;
   }
 };
-
 
 </script>
 

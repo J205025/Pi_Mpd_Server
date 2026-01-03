@@ -239,7 +239,7 @@
             <button @click="deleteCronJob" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">刪除定期播放</button>
           </div>
         </div>
-        <p class="text-sm text-gray-500 mt-2">"定期播放" 歌單會被自動載入及播放. 如果 "定期播放" 歌單不存在, 將會已 "Cron_Folder" folder 內的歌曲自動建立.</p>
+        <p class="text-sm text-gray-500 mt-2">"定期播放" 歌單會被自動載入及播放. 如果 "定期播放" 歌單不存在, 將會已伺服器內"定期播放"資料夾內的歌曲自動建立.</p>
       </div>
 
       <pi_radiocard />

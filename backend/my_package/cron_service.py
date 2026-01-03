@@ -44,7 +44,7 @@ def add_cron_job(hour: int, minute: int, day_of_week: Optional[List[int]] = None
     mpd_controller = MPDClientController()
     mpd_controller.connect()
     if mpd_controller.is_connected:
-        mpd_controller.create_playlist_if_not_exists("定期播放", "Cron_Folder")
+        mpd_controller.create_playlist_if_not_exists("定期播放", "定期播放")
         mpd_controller.disconnect()
     else:
         raise Exception("MPD is not connected.")
