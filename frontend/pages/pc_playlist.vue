@@ -26,7 +26,7 @@
         </div>
         
         <div v-if="fileList.length > 0" class="mt-6">
-          <h3 class="text-xl font-semibold text-gray-800 mb-3">Generated Files:</h3>
+          <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-3">Generated Files:</h3>
           <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
             <li v-for="(file, index) in fileList" :key="index" 
                 class="text-gray-700 p-1 truncate cursor-pointer"
@@ -35,23 +35,23 @@
               {{ file }}
             </li>
           </ul>
-          <div class="mt-4 flex gap-4">
+          <div class="mt-4 flex flex-wrap justify-center gap-2 sm:gap-4">
             <button 
               @click="selectAllFolderFiles"
-              class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition duration-300"
+              class="bg-yellow-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 text-sm sm:text-base rounded-lg hover:bg-yellow-700 transition duration-300"
             >
               Select All
             </button>
             <button 
               @click="deselectAllFolderFiles"
-              class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition duration-300"
+              class="bg-yellow-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 text-sm sm:text-base rounded-lg hover:bg-yellow-700 transition duration-300"
             >
               Deselect All
             </button>
             <button 
               @click="promptForPlaylistName"
               :disabled="filesToSaveFromFolder.length === 0"
-              class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition duration-300"
+              class="bg-green-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 text-sm sm:text-base rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition duration-300"
             >
               存入歌單
             </button>

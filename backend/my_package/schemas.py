@@ -7,6 +7,7 @@ class Settings(BaseModel):
     sleeping_time: int
     spare_setting1: bool
     spare_setting2: bool
+    id3tagDisplaytype: bool = False
 
 class UserCreate(BaseModel):
     username: str

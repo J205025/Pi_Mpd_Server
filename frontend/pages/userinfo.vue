@@ -43,11 +43,11 @@
           </div>
           <div class="flex items-center">
             <input type="checkbox" id="spareSetting2" v-model="settings.spare_setting2" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-            <label for="spareSetting2" class="ml-2 block text-sm text-gray-900">顯示數字按鍵</label>
+            <label for="spareSetting1" class="ml-2 block text-sm text-gray-900">Spare Setting 1</label>
           </div>
           <div class="flex items-center">
             <input type="checkbox" id="spareSetting1" v-model="settings.spare_setting1" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-            <label for="spareSetting1" class="ml-2 block text-sm text-gray-900">Spare Setting 1</label>
+            <label for="spareSetting2" class="ml-2 block text-sm text-gray-900">Spare Setting 2</label>
           </div>
             <div class="flex items-center">
             <label for="sleepingTime" class="block text-sm text-gray-890">-- Default Sleeping Time(Min): </label>

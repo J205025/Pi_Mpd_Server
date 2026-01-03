@@ -666,7 +666,8 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
         "show_radio_card": True,
         "sleeping_time": 20,
         "spare_setting1": True,
-        "spare_setting2": True
+        "spare_setting2": True,
+        "id3tagDisplaytype": False
     }
     db_user = User(
         username=username_capitalized,

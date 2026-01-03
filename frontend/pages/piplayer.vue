@@ -28,10 +28,13 @@
 
       <div class="bg-white p-6 rounded-lg shadow-xl mt-4">
         <div class="text-center mb-4">
-          <p v-if="isLiveStream" class="text-gray-600 font-bold">{{ channelName || currentSong.title || 'Live Radio' }}</p>
-          <p v-else class="text-gray-600 font-bold">{{ currentSong.title || 'No song playing' }}</p>
+          <p v-if="isLiveStream" class="text-gray-600 font-bold">{{ channelName || displayTitle || 'Live Radio' }}</p>
+          <p v-else class="text-gray-600 font-bold">{{ displayTitle }}</p>
           <p v-if="isLiveStream" class="text-gray-500 text-sm mt-1">Live Radio</p>
-          <p v-else class="text-gray-500 text-sm mt-1">{{ currentSong.artist || '' }}</p>
+          <div v-else>
+            <p class="text-gray-500 text-sm mt-1">{{ displayArtist }}</p>
+            <p class="text-gray-500 text-sm mt-1">{{ displayAlbum }}</p>
+          </div>
         </div>
 
         <div class="mb-6">
@@ -100,7 +103,7 @@
           
           <!-- Favorite Button -->
           <button @click="toggleFavorite" :disabled="!currentSong.file || isLiveStream" class="p-2 sm:p-3 rounded-full transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-            <svg v-if="isCurrentSongFavorite" class="w-5 h-5 sm:w-6 sm:h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+            <svg v-if="isCurrentSongFavorite" class="w-5 h-5 sm:w-6 sm:w-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
             </svg>
             <svg v-else class="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 20 20">
@@ -272,6 +275,9 @@ const cronDayOfWeek = ref([]); // 0=Sunday, 1=Monday, ..., 6=Saturday
 const daysOfWeek = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
 const favoritePlaylistSongs = ref([]);
 const regularPlaylistSongs = ref([]);
+const userSettings = ref({
+  id3tagDisplaytype: true,
+});
 
 const sleepDurations = [5, 10, 15, 20, 25, 30, 35, 40, 50, 60];
 const activeSleepDuration = ref(null);
@@ -324,6 +330,62 @@ const isLiveStream = computed(() => {
 const progressPercentage = computed(() => {
   return duration.value > 0 ? (elapsed.value / duration.value) * 100 : 0;
 });
+
+const displayTitle = computed(() => {
+  if (!currentSong.value || !currentSong.value.file) return 'No song playing';
+  if (userSettings.value.id3tagDisplaytype) {
+    return currentSong.value.title || 'No song playing';
+  }
+  const parts = currentSong.value.file.split('/');
+  if (parts.length > 0) {
+    const fileName = parts[parts.length - 1];
+    // Remove file extension
+    return fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+  }
+  return 'No song playing';
+});
+
+const displayArtist = computed(() => {
+  if (!currentSong.value || !currentSong.value.file) return '';
+  if (userSettings.value.id3tagDisplaytype) {
+    return currentSong.value.artist || '';
+  }
+  const parts = currentSong.value.file.split('/');
+  if (parts.length >= 3) {
+    return parts[parts.length - 3];
+  }
+  return '';
+});
+
+const displayAlbum = computed(() => {
+  if (!currentSong.value || !currentSong.value.file) return '';
+  if (userSettings.value.id3tagDisplaytype) {
+    return currentSong.value.album || '';
+  }
+  const parts = currentSong.value.file.split('/');
+  if (parts.length >= 2) {
+    return parts[parts.length - 2];
+  }
+  return '';
+});
+
+const fetchUserSettings = async () => {
+  const token = localStorage.getItem('authToken');
+  if (!token) return;
+
+  try {
+    const response = await $fetch(`${apiBase}/users/me/`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (response.settings) {
+      userSettings.value = response.settings;
+    }
+  } catch (error) {
+    console.error('Error fetching user settings:', error);
+  }
+};
 
 const fetchMpdStatus = async () => {
   try {
@@ -727,6 +789,7 @@ onMounted(async () => {
     fetchQueue();
     fetchStoredPlaylists();
     fetchCronJobs();
+    fetchUserSettings();
     favoritePlaylistSongs.value = await fetchPlaylistSongs('我的最愛'); // Fetch favorite songs on mount
     regularPlaylistSongs.value = await fetchPlaylistSongs('定期播放');
     pollInterval = setInterval(() => {

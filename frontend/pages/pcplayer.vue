@@ -5,7 +5,7 @@
 
     <main class="container mx-auto mt-4 mb-4 p-2 sm:p-4 md:p-6 min-h-screen">
       <div class="bg-white p-2 rounded-lg shadow-xl text-center">
-        <h1 class="text-5xl font-extrabold text-gray-900 mb-4">電腦播放(Pc Player)</h1>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900">電腦播放(Pc Player)</h1>
       </div>
 
       <div  class="bg-white p-6 rounded-lg shadow-xl mt-4">

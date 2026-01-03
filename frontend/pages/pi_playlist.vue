@@ -52,7 +52,7 @@
         </div>
 
         <div v-if="generatedFiles.length > 0" class="mt-6">
-          <h3 class="text-xl font-semibold text-gray-800 mb-3">選的歌曲:</h3>
+          <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-3">選的歌曲:</h3>
           <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
             <li v-for="(file, index) in generatedFiles" :key="index" 
                 class="text-gray-700 p-1 truncate cursor-pointer"
@@ -61,23 +61,23 @@
               {{ file }}
             </li>
           </ul>
-          <div class="mt-4 flex gap-4">
+          <div class="mt-4 flex flex-wrap justify-center gap-2 sm:gap-4">
             <button 
               @click="selectAllGeneratedFiles"
-              class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition duration-300"
+              class="bg-yellow-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 text-sm sm:text-base rounded-lg hover:bg-yellow-700 transition duration-300"
             >
               Select All
             </button>
             <button 
               @click="deselectAllGeneratedFiles"
-              class="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition duration-300"
+              class="bg-yellow-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 text-sm sm:text-base rounded-lg hover:bg-yellow-700 transition duration-300"
             >
               Deselect All
             </button>
             <button 
               @click="promptToSaveGeneratedFiles"
               :disabled="filesToSave.length === 0"
-              class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition duration-300"
+              class="bg-green-600 text-white font-bold py-2 px-4 sm:py-3 sm:px-6 text-sm sm:text-base rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition duration-300"
             >
               存入歌單
             </button>
@@ -88,9 +88,9 @@
       <!-- Playlist List Section -->
       <div class="bg-white p-6 rounded-lg shadow-xl mt-6">
         <h2 class="text-2xl font-bold mb-4 text-gray-800">你的歌單:(點歌單名字可編輯曲目)</h2>
-        <button @click="promptForNewPlaylist" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-300 mb-4">
+        <!--button @click="promptForNewPlaylist" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-300 mb-4">
           新增歌單
-        </button>
+        </button-->
         <div v-if="playlistsList.length > 0">
           <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
             <li v-for="playlist in sortedPlaylists" :key="playlist.playlist"
@@ -494,17 +494,26 @@ const goUpDirectory = () => {
 };
 
 const getFilesInDirectory = async (directoryPath) => {
+  let files = [];
   try {
     const response = await fetch(`${apiBase}/pi_mpd_browse/${encodeURIComponent(directoryPath)}`);
     if (!response.ok) throw new Error(`Failed to browse directory ${directoryPath}`);
     const items = await response.json();
-    // Assuming 'file' type indicates a song file
-    return items.filter(item => item.type === 'file').map(item => item.path);
+
+    for (const item of items) {
+      if (item.type === 'file') {
+        files.push(item.path);
+      } else if (item.type === 'directory') {
+        const subDirFiles = await getFilesInDirectory(item.path);
+        files.push(...subDirFiles);
+      }
+    }
   } catch (error) {
     console.error(`Error getting files from directory ${directoryPath}:`, error);
     errorMessage.value = error.message;
     return [];
   }
+  return files;
 };
 
 const addSelectedFilesToGeneratedList = async () => {
