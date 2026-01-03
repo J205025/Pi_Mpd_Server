@@ -11,19 +11,12 @@
       <div class="bg-white p-6 rounded-lg shadow-xl mt-12">
         <h2 class="text-2xl font-bold text-gray-800">建立歌單:</h2>
         <div class="flex flex-col sm:flex-row gap-4">
-          <input 
-            type="text"
-            v-model="folderName"
-            placeholder="Enter folder name (e.g., 國語)"
-            class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button 
-            @click="pc_getFiles"
+          <button
+            @click="openFileBrowser"
             :disabled="isLoading"
-            class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition duration-300"
+            class="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 disabled:bg-gray-400 transition duration-300"
           >
-            <span v-if="isLoading">Loading...</span>
-            <span v-else>加入資料夾</span>
+            瀏覽伺服器檔案
           </button>
         </div>
 
@@ -168,6 +161,42 @@
         </div>
       </div>
 
+      <!-- File Browser Dialog -->
+      <div v-if="showFileBrowser" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 md:w-2/3 lg:w-1/2 max-h-[80vh] flex flex-col">
+            <h3 class="text-xl font-bold mb-4">Browse Server Files</h3>
+            <div class="mb-2 p-2 bg-gray-100 rounded-md text-sm text-gray-700 break-words">
+                Current Path: /{{ currentPath }}
+            </div>
+            <div class="flex-grow overflow-y-auto border border-gray-200 rounded-lg p-4">
+                <button @click="goUpDirectory" :disabled="!currentPath"
+                    class="mb-4 bg-gray-200 text-gray-700 py-1 px-3 rounded-lg hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400">
+                    ../
+                </button>
+                <p v-if="isLoading" class="text-gray-500">Loading files...</p>
+                <ul v-else-if="fileBrowserItems.length > 0">
+                    <li v-for="item in fileBrowserItems" :key="item.path"
+                        class="flex items-center p-1 rounded-md"
+                        :class="{ 'hover:bg-gray-200': true, 'bg-blue-200': selectedFileBrowserItems.some(it => it.path === item.path) }">
+                        <input type="checkbox" v-model="selectedFileBrowserItems" :value="item" class="mr-3" @click.stop>
+                        <span @click="item.type === 'directory' ? browseDirectory(item.path) : null"
+                            class="flex-grow cursor-pointer">
+                            <span class="mr-2">{{ item.type === 'directory' ? '📁' : '🎵' }}</span>
+                            {{ item.name }}
+                        </span>
+                    </li>
+                </ul>
+                <p v-else class="text-gray-500">No files found or directory is empty.</p>
+            </div>
+            <div class="flex justify-end gap-4 mt-4">
+                <button @click="showFileBrowser = false"
+                    class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancel</button>
+                <button @click="addSelectedFilesToGeneratedList"
+                    class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Add Selected</button>
+            </div>
+        </div>
+      </div>
+
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
 
     <div class="bg-white p-6 rounded-lg shadow-lg">
@@ -282,6 +311,13 @@ const selectedPlaylistFiles = ref([]);
 const currentSelectedPlaylist = ref('');
 const selectedFilesInEditMode = ref([]); // To track files selected for deletion from an opened playlist
 const editModeForPlaylist = ref(false); // To enable/disable editing mode for playlist files
+
+// File Browser state
+const showFileBrowser = ref(false);
+const fileBrowserItems = ref([]);
+const selectedFileBrowserItems = ref([]);
+const currentPath = ref('');
+
 
 const sortedPlaylists = computed(() => {
   const playlists = [...playlistsList.value];
@@ -827,6 +863,95 @@ const autoDownloadPodcast = async () => {
   } finally {
     isLoading.value = false;
   }
+};
+
+const openFileBrowser = () => {
+    showFileBrowser.value = true;
+    browseDirectory('');
+};
+
+const browseDirectory = async (path) => {
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          throw new Error("Authentication token is not available. Please log in.");
+        }
+        const response = await fetch(`${apiBase}/pc_browse/${encodeURIComponent(path)}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to browse files');
+        fileBrowserItems.value = await response.json();
+        currentPath.value = path;
+    } catch (error) {
+        errorMessage.value = error.message;
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+const goUpDirectory = () => {
+    if (!currentPath.value) return;
+    const parentPath = currentPath.value.substring(0, currentPath.value.lastIndexOf('/'));
+    browseDirectory(parentPath);
+};
+
+const getFilesInDirectory = async (directoryPath) => {
+  try {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error("Authentication token is not available. Please log in.");
+    }
+    const response = await fetch(`${apiBase}/pc_browse/${encodeURIComponent(directoryPath)}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error(`Failed to browse directory ${directoryPath}`);
+    const items = await response.json();
+    
+    let files = [];
+    for (const item of items) {
+        if (item.type === 'file') {
+            files.push(item.path);
+        } else if (item.type === 'directory') {
+            // Recursively get files from subdirectory
+            const subDirFiles = await getFilesInDirectory(item.path);
+            files = files.concat(subDirFiles);
+        }
+    }
+    return files;
+  } catch (error) {
+    console.error(`Error getting files from directory ${directoryPath}:`, error);
+    errorMessage.value = error.message;
+    return [];
+  }
+};
+
+const addSelectedFilesToGeneratedList = async () => {
+    if (selectedFileBrowserItems.value.length === 0) {
+        alert('No files selected.');
+        return;
+    }
+    isLoading.value = true;
+    const newFilesToAdd = [];
+    for (const item of selectedFileBrowserItems.value) {
+        if (item.type === 'file') {
+            newFilesToAdd.push(item.path);
+        } else if (item.type === 'directory') {
+            const filesInDir = await getFilesInDirectory(item.path);
+            newFilesToAdd.push(...filesInDir);
+        }
+    }
+    // Add to fileList, avoiding duplicates
+    newFilesToAdd.forEach(file => {
+      if (!fileList.value.includes(file)) {
+        fileList.value.push(file);
+      }
+    });
+
+    showFileBrowser.value = false;
+    selectedFileBrowserItems.value = [];
+    isLoading.value = false;
 };
 
 </script>

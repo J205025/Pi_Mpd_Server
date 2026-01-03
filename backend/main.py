@@ -594,6 +594,46 @@ async def pc_playlist_rmpl(
     db.commit()
     return {"message": f"Playlist '{pc_plname}' deleted successfully"}
 
+@app.get("/pc_browse/")
+@app.get("/pc_browse/{path:path}")
+async def pc_browse(
+    path: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Browses the PC music directory."""
+    base_path = Path(music_Basefolder).resolve()
+    browse_path = base_path
+
+    if path:
+        browse_path = (base_path / path).resolve()
+
+    # Security check: Ensure the resolved path is within the base music folder.
+    # This prevents directory traversal attacks (e.g., path = "../..")
+    try:
+        if not browse_path.is_relative_to(base_path):
+            raise HTTPException(status_code=400, detail="Invalid path")
+    except ValueError:
+        # This can happen if the paths are on different drives in Windows,
+        # or other complex scenarios. For our case, it's an invalid path.
+        raise HTTPException(status_code=400, detail="Invalid path")
+
+    if not browse_path.exists() or not browse_path.is_dir():
+        raise HTTPException(status_code=404, detail="Directory not found")
+
+    items = []
+    for item in sorted(browse_path.iterdir()):
+        try:
+            item_path_str = str(item.relative_to(base_path))
+        except ValueError:
+            continue
+            
+        if item.is_dir():
+            items.append({"type": "directory", "path": item_path_str, "name": item.name})
+        else:
+            if item.suffix.lower() in ['.mp3', '.flac', '.wav', '.ogg', '.m4a', '.aac']:
+                items.append({"type": "file", "path": item_path_str, "name": item.name})
+    return items
+
 @app.get("/pc_gen_fileslist/{foldername}")
 async def pc_gen_fileslist(
     foldername :str,
