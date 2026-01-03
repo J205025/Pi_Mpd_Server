@@ -38,6 +38,10 @@
             <label for="showRadioCard" class="ml-2 block text-sm text-gray-900">顯示廣播頻道</label>
           </div>
           <div class="flex items-center">
+            <input type="checkbox" id="id3tagDisplaytype" v-model="settings.id3tagDisplaytype" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+            <label for="id3tagDisplaytype" class="ml-2 block text-sm text-gray-900">切換ID3tags資訊</label>
+          </div>
+          <div class="flex items-center">
             <input type="checkbox" id="spareSetting2" v-model="settings.spare_setting2" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
             <label for="spareSetting2" class="ml-2 block text-sm text-gray-900">顯示數字按鍵</label>
           </div>
