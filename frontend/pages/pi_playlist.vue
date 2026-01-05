@@ -37,13 +37,13 @@
                   >
                     瀏覽伺服器檔案
                   </button>
-          <button 
+          <!--button 
             @click="addYoutubeUrlToGeneratedFiles"
             :disabled="isLoading"
             class="bg-red-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-600 disabled:bg-gray-400 transition duration-300"
           >
             加入YouTube網址
-          </button>
+          </button-->
           <button @click="autoDownloadPodcast()" class="bg-purple-600 text-white font-bold py-3 px-6 rounded-lg text-m hover:bg-purple-700 transition duration-300">下載播客</button>
         </div>
 

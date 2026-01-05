@@ -55,3 +55,6 @@ https://www.gequbao.com/
 
 Find podcast rss
 https://rss.com/tools/find-my-feed/
+
+
+sudo apt install cockpit  default port: 9090
