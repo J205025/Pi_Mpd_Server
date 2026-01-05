@@ -26,7 +26,7 @@
         </div>
         
         <div v-if="fileList.length > 0" class="mt-6">
-          <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-3">Generated Files:</h3>
+          <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-3">選的歌曲:</h3>
           <ul class="list-disc list-inside bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
             <li v-for="(file, index) in fileList" :key="index" 
                 class="text-gray-700 p-1 truncate cursor-pointer"
@@ -177,11 +177,11 @@
                 <p v-if="isLoading" class="text-gray-500">Loading files...</p>
                 <ul v-else-if="fileBrowserItems.length > 0">
                     <li v-for="item in fileBrowserItems" :key="item.path"
-                        class="flex items-center p-1 rounded-md"
-                        :class="{ 'hover:bg-gray-200': true, 'bg-blue-200': selectedFileBrowserItems.some(it => it.path === item.path) }">
-                        <input type="checkbox" v-model="selectedFileBrowserItems" :value="item" class="mr-3" @click.stop>
-                        <span @click="item.type === 'directory' ? browseDirectory(item.path) : null"
-                            class="flex-grow cursor-pointer">
+                        class="flex items-center p-1 rounded-md cursor-pointer"
+                        :class="{ 'hover:bg-gray-200': true, 'bg-blue-200': selectedFileBrowserItems.some(it => it.path === item.path) }"
+                        @click="handleFileBrowserItemClick(item)"
+                        @dblclick="handleFileBrowserItemDblClick(item)">
+                        <span class="flex-grow">
                             <span class="mr-2">{{ item.type === 'directory' ? '📁' : '🎵' }}</span>
                             {{ item.name }}
                         </span>
@@ -193,7 +193,8 @@
                 <button @click="showFileBrowser = false"
                     class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancel</button>
                 <button @click="addSelectedFilesToGeneratedList"
-                    class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Add Selected</button>
+                    :disabled="selectedFileBrowserItems.length === 0"
+                    class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg disabled:bg-gray-400">Add Selected</button>
             </div>
         </div>
       </div>
@@ -713,6 +714,47 @@ const autoDownloadPodcast = async () => {
   }
 };
 
+const handleFileBrowserItemClick = async (item) => {
+  if (item.type === 'directory') {
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+      const filesInDir = await getFilesInDirectory(item.path);
+      filesInDir.forEach(file => {
+        if (!fileList.value.includes(file)) {
+          fileList.value.push(file);
+        }
+        if (!filesToSaveFromFolder.value.includes(file)) {
+          filesToSaveFromFolder.value.push(file);
+        }
+      });
+    } catch (error) {
+      console.error('Error adding files from directory:', error);
+      errorMessage.value = error.message;
+    } finally {
+      isLoading.value = false;
+    }
+  } else { // file
+    toggleFileSelectionInBrowser(item);
+  }
+};
+
+const handleFileBrowserItemDblClick = (item) => {
+  if (item.type === 'directory') {
+    browseDirectory(item.path);
+    selectedFileBrowserItems.value = []; // Clear selections when navigating
+  }
+};
+
+const toggleFileSelectionInBrowser = (item) => {
+  const index = selectedFileBrowserItems.value.findIndex(it => it.path === item.path);
+  if (index > -1) {
+    selectedFileBrowserItems.value.splice(index, 1);
+  } else {
+    selectedFileBrowserItems.value.push(item);
+  }
+};
+
 const openFileBrowser = () => {
     showFileBrowser.value = true;
     browseDirectory('');
@@ -781,25 +823,25 @@ const addSelectedFilesToGeneratedList = async () => {
         return;
     }
     isLoading.value = true;
-    const newFilesToAdd = [];
-    for (const item of selectedFileBrowserItems.value) {
-        if (item.type === 'file') {
-            newFilesToAdd.push(item.path);
-        } else if (item.type === 'directory') {
-            const filesInDir = await getFilesInDirectory(item.path);
-            newFilesToAdd.push(...filesInDir);
-        }
+    try {
+      selectedFileBrowserItems.value.forEach(item => {
+          if (item.type === 'file') { // Only add files from selections
+              if (!fileList.value.includes(item.path)) {
+                  fileList.value.push(item.path);
+              }
+              if (!filesToSaveFromFolder.value.includes(item.path)) {
+                  filesToSaveFromFolder.value.push(item.path);
+              }
+          }
+      });
+      showFileBrowser.value = false;
+      selectedFileBrowserItems.value = []; // Clear selections after adding
+    } catch (error) {
+      console.error('Error adding selected files:', error);
+      errorMessage.value = error.message;
+    } finally {
+      isLoading.value = false;
     }
-    // Add to fileList, avoiding duplicates
-    newFilesToAdd.forEach(file => {
-      if (!fileList.value.includes(file)) {
-        fileList.value.push(file);
-      }
-    });
-
-    showFileBrowser.value = false;
-    selectedFileBrowserItems.value = [];
-    isLoading.value = false;
 };
 
 </script>
